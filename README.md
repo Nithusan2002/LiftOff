@@ -4,3 +4,4 @@ Første commits:
 * Leander
 * Nithusan
 * Johanna
+* Christine
