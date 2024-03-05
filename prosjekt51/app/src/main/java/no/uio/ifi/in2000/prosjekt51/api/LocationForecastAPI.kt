@@ -1,22 +1,20 @@
 package no.uio.ifi.in2000.prosjekt51.api
 
-import android.content.res.Resources
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders
-import io.ktor.http.headers
 import kotlinx.serialization.json.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.coroutineScope
-import no.uio.ifi.in2000.blparton.oblig2.R
+import kotlin.math.abs
 
 
 class LocationForecastAPI {
@@ -36,40 +34,38 @@ class LocationForecastAPI {
     }
 
 
-    // TODO: Gi tid og sted som argument
-        // TODO: Bygg opp url fra dette
+    // TODO: Gi tid og sted som argument VV
+        // TODO: Bygg opp url fra dette VV
+        // TODO: Litt feilmeldinger
     // TODO: Returner all info
     // TODO: Data class for mulige variabler (air_temperature, wind_speed et.c.)
 
 
-    suspend fun fetchTemperatureFromAPI(): Double = coroutineScope {
+    // Check api-level
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun fetchTemperatureFromLocAndAlt(lat: Double, lon:Double, alt:Int): JsonArray? = coroutineScope {
+        if (abs(lat) > 90) {
+            Log.d("Invalid latitude", "Got latitude $lat")
+        }
+
+        if (abs(lon) > 180) {
+            Log.d("Invalid longitude", "Got longitude $lon")
+        }
+
 
         val url =
-            "https://gw-uio.intark.uh-it.no/in2000/weatherapi/locationforecast/2.0/complete?lat=59.93&lon=10.72&altitude=90"
+            "https://gw-uio.intark.uh-it.no/in2000/weatherapi/locationforecast/2.0/complete?lat=$lat&lon=$lon&altitude=$alt"
         val response: HttpResponse = client.get(url)
-
         val jsonString = response.bodyAsText()
         val jsonElement = Json.parseToJsonElement(jsonString)
 
-        val timeseries =
-            jsonElement.jsonObject["properties"]?.jsonObject?.get("timeseries")?.jsonArray
-        var temperature = 0.0
-        timeseries?.forEach { element ->
-            val time = element.jsonObject["time"]?.jsonPrimitive?.content
-            if (time == "2024-03-05T12:00:00Z") {
-                val details =
-                    element.jsonObject["data"]?.jsonObject?.get("instant")?.jsonObject?.get("details")?.jsonObject
-                temperature = details?.get("air_temperature")?.jsonPrimitive?.double ?: 0.0
-                return@coroutineScope temperature
-            }
-        }
-        return@coroutineScope 0.0
+        return@coroutineScope jsonElement.jsonObject["properties"]?.jsonObject?.get("timeseries")?.jsonArray
     }
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 suspend fun main() {
-    val lfa = LocationForecastAPI()
-    val temp = lfa.fetchTemperatureFromAPI()
-    println("Temperature is $temp")
+    val lfa = LocationForecastAPI().fetchTemperatureFromLocAndAlt(59.6,10.4,300)
+    println(lfa!!.size)
 }
