@@ -4,12 +4,12 @@ import com.typesafe.config.ConfigException
 import kotlinx.serialization.Serializable
 
 data class InformationScreenUiState(
-    val locationForecastData: List<timeAndData>? = null
+    val locationForecastData: List<timeAndData>? = null // TODO: Er det beste praksis å initialisere til null?
 )
 
 
 
-
+// The following three data classes match the json-structure, and therefore are used in deserialization.
 @Serializable
 data class TimeseriesEntry(
     val time: String,
@@ -27,6 +27,7 @@ data class InstantDetails(
 )
 
 
+// The following two data classes are the classes we actually want to store in the uistate. // TODO: Sikkert mye bedre/mer effektive måter å gjøre dette på.
 @Serializable
 data class locationForecastWeatherData(
     val air_pressure_at_sea_level: Double,

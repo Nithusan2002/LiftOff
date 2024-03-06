@@ -34,40 +34,38 @@ class LocationForecastAPI {
     }
 
 
-    // TODO: Fiks navn, fiks feilmelding, beatuify, kommentarer, docstrings
-    // TODO: Utvide funksjonalitet i repository
-        // TODO: Lagring av data
-        // TODO: Funksjoner for å hente data fra spesifikt tidspunkt
-    // TODO: GRIB-API implementasjon på samme vis (forhåpentligvis)
-    // TODO: Utforsk andre API-er
-
 
 
     // Check api-level
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun fetchTemperatureFromLocAndAlt(lat: Double, lon:Double, alt:Int): JsonArray? = coroutineScope {
-        if (abs(lat) > 90) {
-            Log.d("Invalid latitude", "Got latitude $lat")
+    suspend fun fetchLocationForecast(lat: Double, lon:Double, alt:Int): JsonArray? = coroutineScope {
+        /*
+        fetches data from locationforecast API
+
+        arguments:
+            lat: latitude between -90 and 90 as a double
+            lon: longitude between -180 and 180 as a double
+            alt: altitude as an integer
+
+        returns:
+            jsonArray of timeseries
+         */
+
+        //Check for invalid coordinates
+        if (abs(lat) > 90 || abs(lon) > 180) {
+            Log.d("Invalid coordinates", "Got latitude $lat, and longitude $lon")  // TODO: Burde kanskje bryte funksjonsflyten her, i tillegg til feilmelding?
         }
 
-        if (abs(lon) > 180) {
-            Log.d("Invalid longitude", "Got longitude $lon")
-        }
-
-
+        //Build url
         val url =
             "https://gw-uio.intark.uh-it.no/in2000/weatherapi/locationforecast/2.0/complete?lat=$lat&lon=$lon&altitude=$alt"
+        //Fetch data and parse to jsonElement
         val response: HttpResponse = client.get(url)
         val jsonString = response.bodyAsText()
         val jsonElement = Json.parseToJsonElement(jsonString)
 
-        return@coroutineScope jsonElement.jsonObject["properties"]?.jsonObject?.get("timeseries")?.jsonArray
+        //Return jsonArray of timeseries
+        return@coroutineScope jsonElement.jsonObject["properties"]?.jsonObject?.get("timeseries")?.jsonArray  // TODO: Burde returnere en tuppel av suksess-status og
+                                                                                                              // TODO: eventuell data. Typ sealed class Result<out R> {...}. Noe herk.
     }
-}
-
-
-@RequiresApi(Build.VERSION_CODES.O)
-suspend fun main() {
-    val lfa = LocationForecastAPI().fetchTemperatureFromLocAndAlt(59.6,10.4,300)
-    println(lfa!!.size)
 }

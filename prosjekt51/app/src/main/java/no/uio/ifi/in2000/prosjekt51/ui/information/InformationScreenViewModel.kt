@@ -18,15 +18,25 @@ class InformationScreenViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(InformationScreenUiState())
     val uiState: StateFlow<InformationScreenUiState> = _uiState.asStateFlow()
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O)  // TODO: Er dette requiresapi-greiene uunngåelig?
     fun fetchLocationForecast(lat: Double, lon: Double, alt: Int) {
+        /*
+        Fetch LocationForecast-data through repository, and update uistate accordingly.
+
+        arguments:
+            lat: latitude between -90 and 90 as a double
+            lon: longitude between -180 and 180 as a double
+            alt: altitude as an integer
+        */
+
         viewModelScope.launch {
             _uiState.value = InformationScreenUiState(locationForecastRepository.fetchDataFromLocationForecastAPI(lat, lon, alt))
         }
     }
 
     fun logvalue(){
-            Log.d("APITESTING", uiState.value.toString())
+        /* Brukes bare til testing. Bør fjernes etter hvert, og erstattes av unit tests. */
+        Log.d("APITESTING", uiState.value.toString())
     }
 }
 

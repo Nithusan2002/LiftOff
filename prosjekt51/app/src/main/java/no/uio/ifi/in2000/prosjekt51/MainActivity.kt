@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.O)  // TODO: Hele denne funksjonen skal vekk. Er her kun for testing per nå, kan erstattes med unittests senere.
 @Composable
 fun InformationScreen(
     informationScreenViewModel: InformationScreenViewModel = viewModel(),
