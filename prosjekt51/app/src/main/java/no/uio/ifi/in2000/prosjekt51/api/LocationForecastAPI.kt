@@ -34,11 +34,13 @@ class LocationForecastAPI {
     }
 
 
-    // TODO: Gi tid og sted som argument VV
-        // TODO: Bygg opp url fra dette VV
-        // TODO: Litt feilmeldinger
-    // TODO: Returner all info
-    // TODO: Data class for mulige variabler (air_temperature, wind_speed et.c.)
+    // TODO: Fiks navn, fiks feilmelding, beatuify, kommentarer, docstrings
+    // TODO: Utvide funksjonalitet i repository
+        // TODO: Lagring av data
+        // TODO: Funksjoner for å hente data fra spesifikt tidspunkt
+    // TODO: GRIB-API implementasjon på samme vis (forhåpentligvis)
+    // TODO: Utforsk andre API-er
+
 
 
     // Check api-level

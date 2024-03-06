@@ -6,7 +6,7 @@ plugins {
 
 
 android {
-    namespace = "no.uio.ifi.in2000.blparton.oblig2"
+    namespace = "no.uio.ifi.in2000.prosjekt51"
     compileSdk = 34
 
     packagingOptions {
@@ -14,7 +14,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "no.uio.ifi.in2000.blparton.oblig2"
+        applicationId = "no.uio.ifi.in2000.prosjekt51"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
