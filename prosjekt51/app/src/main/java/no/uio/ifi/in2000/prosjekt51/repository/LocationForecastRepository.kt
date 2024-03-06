@@ -10,7 +10,7 @@ class LocationForecastRepository(
 ) {
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun fetchDataFromLocationForecastAPI(lat: Double, lon: Double, alt: Int): JsonArray? {
-        return locationForecastAPI.fetchTemperatureFromLocAndAlt(lat, lon, alt)
+        return locationForecastAPI.fetchLocationForecast(lat, lon, alt)
     }
 }
 

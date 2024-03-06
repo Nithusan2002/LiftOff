@@ -43,22 +43,33 @@ class LocationForecastAPI {
 
     // Check api-level
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun fetchTemperatureFromLocAndAlt(lat: Double, lon:Double, alt:Int): JsonArray? = coroutineScope {
-        if (abs(lat) > 90) {
-            Log.d("Invalid latitude", "Got latitude $lat")
+    suspend fun fetchLocationForecast(lat: Double, lon:Double, alt:Int): JsonArray? = coroutineScope {
+        /*
+        fetches data from locationforecast API
+
+        arguments:
+        lat: latitude between -90 and 90 as a double
+        lon: longitude between -180 and 180 as a double
+        alt: altidude as an integer
+
+        return:
+        jsonArray of timeseries
+         */
+
+        //Check for invalid coordinates
+        if (abs(lat) > 90 || abs(lon > 180)) {
+            Log.d("Invalid coordinates", "Got latitude $lat, and longitude $lon")
         }
 
-        if (abs(lon) > 180) {
-            Log.d("Invalid longitude", "Got longitude $lon")
-        }
-
-
+        //Build url
         val url =
             "https://gw-uio.intark.uh-it.no/in2000/weatherapi/locationforecast/2.0/complete?lat=$lat&lon=$lon&altitude=$alt"
+        //Fetch data and parse to jsonElement
         val response: HttpResponse = client.get(url)
         val jsonString = response.bodyAsText()
         val jsonElement = Json.parseToJsonElement(jsonString)
 
+        //Return jsonArray of timeseries
         return@coroutineScope jsonElement.jsonObject["properties"]?.jsonObject?.get("timeseries")?.jsonArray
     }
 }
