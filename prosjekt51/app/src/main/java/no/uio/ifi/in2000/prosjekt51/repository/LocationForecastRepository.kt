@@ -19,7 +19,7 @@ class LocationForecastRepository(
     suspend fun parseTimeseriesJsonArray(jsonArray: JsonArray?): List<timeAndData> {
         /*
         Parses a jsonArray with Timeseries (from MET API) and serializes it
-        to a list of timeAndData-instances from InformationScreenUiState.kt // TODO: timeAndData bør kanskje få sin egen fil?
+        to a list of timeAndData-instances from ResultScreenUiState.kt // TODO: timeAndData bør kanskje få sin egen fil?
 
         arguments:
             jsonArray (JsonArray?): A json-array consisting of data from LocationForecast MET-API;

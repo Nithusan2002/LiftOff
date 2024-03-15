@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.api.LocationForecastAPI
 import no.uio.ifi.in2000.prosjekt51.repository.LocationForecastRepository
 
-class InformationScreenViewModel: ViewModel() {
+class ResultScreenViewModel: ViewModel() {
     private val locationForecastRepository = LocationForecastRepository(LocationForecastAPI())
 
     private val _uiState = MutableStateFlow(InformationScreenUiState())
