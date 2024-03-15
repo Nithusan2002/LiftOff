@@ -14,6 +14,7 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.coroutineScope
+import java.lang.Exception
 import kotlin.math.abs
 
 
@@ -38,7 +39,7 @@ class LocationForecastAPI {
 
     // Check api-level
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun fetchLocationForecast(lat: Double, lon:Double, alt:Int): JsonArray? = coroutineScope {
+    suspend fun fetchLocationForecast(lat: Double, lon:Double, alt:Int): ConnectionResult<JsonArray?> = coroutineScope {
         /*
         fetches data from locationforecast API
 
@@ -53,19 +54,32 @@ class LocationForecastAPI {
 
         //Check for invalid coordinates
         if (abs(lat) > 90 || abs(lon) > 180) {
-            Log.d("Invalid coordinates", "Got latitude $lat, and longitude $lon")  // TODO: Burde kanskje bryte funksjonsflyten her, i tillegg til feilmelding?
+            Log.e("Invalid coordinates", "Got latitude $lat, and longitude $lon")  // TODO: Burde kanskje bryte funksjonsflyten her, i tillegg til feilmelding?
+            return@coroutineScope ConnectionResult.InputError(Exception())
         }
+
 
         //Build url
         val url =
             "https://gw-uio.intark.uh-it.no/in2000/weatherapi/locationforecast/2.0/complete?lat=$lat&lon=$lon&altitude=$alt"
         //Fetch data and parse to jsonElement
-        val response: HttpResponse = client.get(url)
-        val jsonString = response.bodyAsText()
-        val jsonElement = Json.parseToJsonElement(jsonString)
-
-        //Return jsonArray of timeseries
-        return@coroutineScope jsonElement.jsonObject["properties"]?.jsonObject?.get("timeseries")?.jsonArray  // TODO: Burde returnere en tuppel av suksess-status og
-                                                                                                              // TODO: eventuell data. Typ sealed class Result<out R> {...}. Noe herk.
+        try {
+            val response: HttpResponse = client.get(url)
+            val jsonString = response.bodyAsText()
+            val jsonElement = Json.parseToJsonElement(jsonString)
+            //Return jsonArray of timeseries
+            val data = jsonElement.jsonObject["properties"]?.jsonObject?.get("timeseries")?.jsonArray
+            return@coroutineScope ConnectionResult.Success(data)
+        } catch (e: Exception) {
+            Log.e("ConnectionTimeout", "Couldn't connect to $url; exception $e")
+            return@coroutineScope ConnectionResult.TimeoutError(e)
+        }
     }
+}
+
+
+sealed class ConnectionResult<out R> {
+    data class Success<out T>(val data: T) : ConnectionResult<T>()
+    data class InputError(val exception: Exception) : ConnectionResult<Nothing>()
+    data class TimeoutError(val exception: Exception) : ConnectionResult<Nothing>()
 }

@@ -6,11 +6,13 @@ import androidx.annotation.RequiresApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.decodeFromJsonElement
+import no.uio.ifi.in2000.prosjekt51.api.ConnectionResult
 import no.uio.ifi.in2000.prosjekt51.api.IsobaricGribAPI
 import no.uio.ifi.in2000.prosjekt51.api.LocationForecastAPI
 import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribJson
 import no.uio.ifi.in2000.prosjekt51.ui.information.data.timeAndData
 import no.uio.ifi.in2000.prosjekt51.ui.information.data.TimeseriesEntry
+import java.lang.Exception
 
 class WeatherDataRepository(
     private val locationForecastAPI: LocationForecastAPI = LocationForecastAPI(),
@@ -23,7 +25,7 @@ class WeatherDataRepository(
     suspend fun parseTimeseriesJsonArray(jsonArray: JsonArray?): List<timeAndData> {
         /*
         Parses a jsonArray with Timeseries (from MET API) and serializes it
-        to a list of timeAndData-instances from InformationScreenUiState.kt // TODO: timeAndData bør kanskje få sin egen fil?
+        to a list of timeAndData-instances from InformationScreenUiState.kt //
 
         arguments:
             jsonArray (JsonArray?): A json-array consisting of data from LocationForecast MET-API;
@@ -58,26 +60,25 @@ class WeatherDataRepository(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun fetchDataFromLocationForecastAPI(lat: Double, lon: Double, alt: Int): List<timeAndData> {
+    suspend fun fetchDataFromLocationForecastAPI(lat: Double, lon: Double, alt: Int): ConnectionResult<List<timeAndData>> {
         /* Fetches and deserializes data. Returns List<timeAndData> */
         val jsonarr = locationForecastAPI.fetchLocationForecast(lat, lon, alt)
-        return parseTimeseriesJsonArray(jsonarr)
+        return when(jsonarr){
+            is ConnectionResult.Success -> ConnectionResult.Success(parseTimeseriesJsonArray(jsonarr.data))
+            is ConnectionResult.InputError -> ConnectionResult.InputError(jsonarr.exception)
+            is ConnectionResult.TimeoutError -> ConnectionResult.TimeoutError(jsonarr.exception)
+        }
     }
 
 
-    suspend fun fetchDataFromIsobaricGribAPI(time: String): List<GribJson> {
+    suspend fun fetchDataFromIsobaricGribAPI(time: String): ConnectionResult<List<GribJson>> {
         val jsonstring = isobaricGribAPI.getJsonDataForTime(time)
-        return parseGribJsonString(jsonstring)
+        return when(jsonstring){
+            is ConnectionResult.Success -> ConnectionResult.Success(parseGribJsonString(jsonstring.data))
+            is ConnectionResult.InputError -> ConnectionResult.InputError(jsonstring.exception)
+            is ConnectionResult.TimeoutError -> ConnectionResult.TimeoutError(jsonstring.exception)
+        }
     }
 }
 
 
-suspend fun main(){
-    val time = "2024-03-13T18:00:00Z"
-    val gribJsonList = WeatherDataRepository().fetchDataFromIsobaricGribAPI(time)
-
-    gribJsonList.forEach { gribJson ->
-        println(gribJson.header)
-    }
-
-}

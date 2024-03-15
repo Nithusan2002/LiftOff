@@ -1,17 +1,13 @@
 package no.uio.ifi.in2000.prosjekt51.api
 
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
-
-interface ApiService {
-    @GET("/convert")
-    suspend fun convertGribFile(@Query("time") time: String): String
-}
 
 class IsobaricGribAPI {
 
@@ -22,11 +18,21 @@ class IsobaricGribAPI {
 
     private val apiService = retrofit.create(ApiService::class.java)
 
-    suspend fun getJsonDataForTime(time: String): String {
+    suspend fun getJsonDataForTime(time: String): ConnectionResult<String> {
         // Network call on IO Dispatcher
-        return withContext(Dispatchers.IO) {
-            apiService.convertGribFile(time)
+        return try {
+            val data = withContext(Dispatchers.IO) {
+                apiService.convertGribFile(time)
+            }
+            ConnectionResult.Success(data)
+        } catch (e: Exception){
+            Log.e("ConnectionTimeout", "Couldn't access backend server for grib parsing")
+            ConnectionResult.TimeoutError(e)
         }
     }
 }
 
+interface ApiService {
+    @GET("/convert")
+    suspend fun convertGribFile(@Query("time") time: String): String
+}
