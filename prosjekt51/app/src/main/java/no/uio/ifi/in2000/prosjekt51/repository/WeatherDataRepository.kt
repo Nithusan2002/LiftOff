@@ -1,16 +1,20 @@
 package no.uio.ifi.in2000.prosjekt51.repository
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.decodeFromJsonElement
+import no.uio.ifi.in2000.prosjekt51.api.IsobaricGribAPI
 import no.uio.ifi.in2000.prosjekt51.api.LocationForecastAPI
-import no.uio.ifi.in2000.prosjekt51.ui.information.TimeseriesEntry
-import no.uio.ifi.in2000.prosjekt51.ui.information.timeAndData
+import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribJson
+import no.uio.ifi.in2000.prosjekt51.ui.information.data.timeAndData
+import no.uio.ifi.in2000.prosjekt51.ui.information.data.TimeseriesEntry
 
-class LocationForecastRepository(
-    private val locationForecastAPI: LocationForecastAPI = LocationForecastAPI()
+class WeatherDataRepository(
+    private val locationForecastAPI: LocationForecastAPI = LocationForecastAPI(),
+    private val isobaricGribAPI: IsobaricGribAPI = IsobaricGribAPI()
 ) {
 
     // TODO: Unit tests. Også for andre filer.
@@ -48,11 +52,32 @@ class LocationForecastRepository(
         }
     }
 
+    suspend fun parseGribJsonString(jsonString: String): List<GribJson> {
+        val json = Json { ignoreUnknownKeys = true } // Configure as needed
+        return json.decodeFromString(jsonString)
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun fetchDataFromLocationForecastAPI(lat: Double, lon: Double, alt: Int): List<timeAndData> {
         /* Fetches and deserializes data. Returns List<timeAndData> */
         val jsonarr = locationForecastAPI.fetchLocationForecast(lat, lon, alt)
         return parseTimeseriesJsonArray(jsonarr)
-
     }
+
+
+    suspend fun fetchDataFromIsobaricGribAPI(time: String): List<GribJson> {
+        val jsonstring = isobaricGribAPI.getJsonDataForTime(time)
+        return parseGribJsonString(jsonstring)
+    }
+}
+
+
+suspend fun main(){
+    val time = "2024-03-13T18:00:00Z"
+    val gribJsonList = WeatherDataRepository().fetchDataFromIsobaricGribAPI(time)
+
+    gribJsonList.forEach { gribJson ->
+        println(gribJson.header)
+    }
+
 }

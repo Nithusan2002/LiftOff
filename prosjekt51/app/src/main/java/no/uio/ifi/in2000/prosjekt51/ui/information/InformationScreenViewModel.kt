@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.api.LocationForecastAPI
-import no.uio.ifi.in2000.prosjekt51.repository.LocationForecastRepository
+import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
 
 class InformationScreenViewModel: ViewModel() {
-    private val locationForecastRepository = LocationForecastRepository(LocationForecastAPI())
+    private val locationForecastRepository = WeatherDataRepository(LocationForecastAPI())
 
     private val _uiState = MutableStateFlow(InformationScreenUiState())
     val uiState: StateFlow<InformationScreenUiState> = _uiState.asStateFlow()
