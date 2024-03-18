@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.prosjekt51.api.ConnectionResult
 import no.uio.ifi.in2000.prosjekt51.api.LocationForecastAPI
 import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
 
@@ -30,7 +31,12 @@ class InformationScreenViewModel: ViewModel() {
         */
 
         viewModelScope.launch {
-            _uiState.value = InformationScreenUiState(locationForecastRepository.fetchDataFromLocationForecastAPI(lat, lon, alt))
+            val (result, repositoryData) = locationForecastRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
+            if (result == true) {
+                _uiState.value = InformationScreenUiState(repositoryData)
+            } else {
+                return@launch // TODO: Update with snackbar or similar
+            }
         }
     }
 

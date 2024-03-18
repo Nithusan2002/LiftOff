@@ -60,18 +60,19 @@ class WeatherDataRepository(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun fetchDataFromLocationForecastAPI(lat: Double, lon: Double, alt: Int): ConnectionResult<List<timeAndData>> {
-        /* Fetches and deserializes data. Returns List<timeAndData> */
+    suspend fun fetchDataFromLocationForecastAPI(lat: Double, lon: Double, alt: Int): Pair<Boolean, List<timeAndData>> {
+        /* Fetches and deserializes data. Attempting to return (Boolean, List<timeAndData>) */
         val jsonarr = locationForecastAPI.fetchLocationForecast(lat, lon, alt)
         return when(jsonarr){
-            is ConnectionResult.Success -> ConnectionResult.Success(parseTimeseriesJsonArray(jsonarr.data))
-            is ConnectionResult.InputError -> ConnectionResult.InputError(jsonarr.exception)
-            is ConnectionResult.TimeoutError -> ConnectionResult.TimeoutError(jsonarr.exception)
+            is ConnectionResult.Success -> Pair(true, parseTimeseriesJsonArray(jsonarr.data))
+            is ConnectionResult.InputError -> Pair(false, emptyList())
+            is ConnectionResult.TimeoutError -> Pair(false, emptyList())
         }
     }
 
 
-    suspend fun fetchDataFromIsobaricGribAPI(time: String): ConnectionResult<List<GribJson>> {
+
+    suspend fun fetchDataFromIsobaricGribAPI(time: String): ConnectionResult<List<GribJson>> { // TODO: Change like with locationforecast
         val jsonstring = isobaricGribAPI.getJsonDataForTime(time)
         return when(jsonstring){
             is ConnectionResult.Success -> ConnectionResult.Success(parseGribJsonString(jsonstring.data))
@@ -82,3 +83,13 @@ class WeatherDataRepository(
 }
 
 
+suspend fun main(){
+    val wdr = WeatherDataRepository(LocationForecastAPI(), IsobaricGribAPI())
+    val time = "2024-03-15T18:00:00Z"
+    val gribdata = wdr.fetchDataFromIsobaricGribAPI(time)
+    if (gribdata is ConnectionResult.Success){
+        gribdata.data.forEach { gribJson ->
+            println(gribJson.header)
+        }
+    }
+}
