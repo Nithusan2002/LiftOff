@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.prosjekt51.ui.information
 
-import com.typesafe.config.ConfigException
 import kotlinx.serialization.Serializable
 import no.uio.ifi.in2000.prosjekt51.ui.information.data.timeAndData
 

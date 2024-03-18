@@ -4,7 +4,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
 
-
 android {
     namespace = "no.uio.ifi.in2000.prosjekt51"
     compileSdk = 34
@@ -64,9 +63,9 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
     implementation("io.ktor:ktor-server-core:2.3.8")
     implementation("io.ktor:ktor-server-netty:2.3.8")
+    implementation("androidx.compose.material3:material3-android:1.2.1")
     val ktorVersion = "2.3.8"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")

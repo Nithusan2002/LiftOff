@@ -33,6 +33,7 @@ data class locationForecastWeatherData(
     val cloud_area_fraction_medium: Double? = null,
     val dew_point_temperature: Double,
     val fog_area_fraction: Double? = null,
+    val precipitation_amount: Double? = null,
     val relative_humidity: Double,
     val ultraviolet_index_clear_sky: Double? = null,
     val wind_from_direction: Double,
