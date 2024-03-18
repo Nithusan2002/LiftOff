@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.api.LocationForecastAPI
-import no.uio.ifi.in2000.prosjekt51.repository.LocationForecastRepository
+import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
 import java.time.Instant
 
 class ResultScreenViewModel: ViewModel() {
-    private val locationForecastRepository = LocationForecastRepository(LocationForecastAPI())
+    private val weatherDataRepository = WeatherDataRepository(LocationForecastAPI())
 
     private val _uiState = MutableStateFlow(InformationScreenUiState())
     val uiState: StateFlow<InformationScreenUiState> = _uiState.asStateFlow()
@@ -23,7 +23,6 @@ class ResultScreenViewModel: ViewModel() {
     fun fetchLocationForecast(lat: Double, lon: Double, alt: Int) {
         /*
         Fetch LocationForecast-data through repository, and update uistate accordingly.
-
         arguments:
             lat: latitude between -90 and 90 as a double
             lon: longitude between -180 and 180 as a double
@@ -31,7 +30,12 @@ class ResultScreenViewModel: ViewModel() {
         */
 
         viewModelScope.launch {
-            _uiState.value = InformationScreenUiState(locationForecastRepository.fetchDataFromLocationForecastAPI(lat, lon, alt))
+            val (result, repositoryData) = weatherDataRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
+            if (result == true) {
+                _uiState.value = InformationScreenUiState(repositoryData)
+            } else {
+                return@launch // TODO: Update with snackbar or similar
+            }
         }
     }
 

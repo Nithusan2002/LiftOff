@@ -26,7 +26,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun HomeScreen(
     onNavigateToResultScreen: (String, String, Long, Int) -> Unit,
-    homeScreenViewModel: HomeScreenViewModel = viewModel()
 ) {
     var latitude by remember { mutableStateOf("") }
     var longitude by remember { mutableStateOf("") }
@@ -55,9 +54,6 @@ fun HomeScreen(
 
         DatePicker(
             state = datePickerState,
-            dateFormatter = remember {
-                DatePickerDefaults.dateFormatter()
-            },
             modifier = Modifier
                 .padding(16.dp)
         )
