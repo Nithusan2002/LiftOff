@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.prosjekt51.repository
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -72,12 +73,17 @@ class WeatherDataRepository(
 
 
 
-    suspend fun fetchDataFromIsobaricGribAPI(time: String): ConnectionResult<List<GribJson>> { // TODO: Change like with locationforecast
+    suspend fun fetchDataFromIsobaricGribAPI(time: String): Pair<Boolean, List<GribJson>> {
         val jsonstring = isobaricGribAPI.getJsonDataForTime(time)
+        if (jsonstring is ConnectionResult.Success) {
+            Log.d("GribTesting", "Successfully fetched jsondata from api: ${parseGribJsonString(jsonstring.data)}")
+        } else {
+            Log.d("GribTesting", "Fetching failed: $jsonstring")
+        }
         return when(jsonstring){
-            is ConnectionResult.Success -> ConnectionResult.Success(parseGribJsonString(jsonstring.data))
-            is ConnectionResult.InputError -> ConnectionResult.InputError(jsonstring.exception)
-            is ConnectionResult.TimeoutError -> ConnectionResult.TimeoutError(jsonstring.exception)
+            is ConnectionResult.Success -> Pair(true, parseGribJsonString(jsonstring.data))
+            is ConnectionResult.InputError -> Pair(false, emptyList())
+            is ConnectionResult.TimeoutError -> Pair(false, emptyList())
         }
     }
 }
@@ -86,10 +92,9 @@ class WeatherDataRepository(
 suspend fun main(){
     val wdr = WeatherDataRepository(LocationForecastAPI(), IsobaricGribAPI())
     val time = "2024-03-15T18:00:00Z"
-    val gribdata = wdr.fetchDataFromIsobaricGribAPI(time)
-    if (gribdata is ConnectionResult.Success){
-        gribdata.data.forEach { gribJson ->
-            println(gribJson.header)
-        }
+    val (result, gribdata) = wdr.fetchDataFromIsobaricGribAPI(time)
+
+    gribdata.forEach { gribJson ->
+        println(gribJson.header)
     }
 }

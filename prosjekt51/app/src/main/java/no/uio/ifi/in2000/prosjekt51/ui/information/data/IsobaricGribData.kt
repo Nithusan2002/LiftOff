@@ -1,6 +1,18 @@
 package no.uio.ifi.in2000.prosjekt51.ui.information.data
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
+import no.uio.ifi.in2000.prosjekt51.ui.information.ResultScreenViewModel
+import java.time.Clock
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 @Serializable
@@ -22,4 +34,27 @@ data class GribHeader(
     val dx: Double,
     val dy: Double
 )
+
+
+data class GribPoint(
+    val parameterName: String,
+    val height: Double,
+    val value: Double
+)
+
+
+object GribDataCache {
+    var gribDataCache: Map<String, List<GribJson>> = emptyMap()
+
+    fun storeData(timeKey: String, data: List<GribJson>) {
+        gribDataCache = gribDataCache.plus(timeKey to data)
+    }
+
+    fun getData(timeKey: String): List<GribJson>? = gribDataCache[timeKey]
+
+    fun isDataStoredForTime(timeKey: String): Boolean {
+        return gribDataCache.containsKey(timeKey)
+    }
+}
+
 

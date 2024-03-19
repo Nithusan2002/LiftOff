@@ -28,8 +28,6 @@ class LocationForecastAPI {
             })
         }
         defaultRequest {
-            // Replace "Header-Name" with the actual name of the header and
-            // "YourApiKey" with your actual API key.
             header("X-Gravitee-Api-Key", "50ef5733-05b0-47ed-8976-f90a15527894")
         }
     }

@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.prosjekt51
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -20,15 +21,27 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
 import no.uio.ifi.in2000.prosjekt51.ui.home.HomeScreen
 import no.uio.ifi.in2000.prosjekt51.ui.information.ResultScreen
 import no.uio.ifi.in2000.prosjekt51.ui.information.ResultScreenViewModel
+import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribDataCache
+import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribJson
 import no.uio.ifi.in2000.prosjekt51.ui.theme.Prosjekt51Theme
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        preloadGribData()
         setContent {
             Prosjekt51Theme {
                 // A surface container using the 'background' color from the theme
@@ -86,29 +99,52 @@ fun App(
     }
 }
 
-/*
-@RequiresApi(Build.VERSION_CODES.O)  // TODO: Hele denne funksjonen skal vekk. Er her kun for testing per nå, kan erstattes med unittests senere.
-@Composable
-fun InformationScreen(
-    informationScreenViewModel: ResultScreenViewModel = viewModel(),
-){
-    val lat = 54.4; val lon = 12.3; val alt = 10
 
-    Column {
-        Button(onClick = {informationScreenViewModel.fetchLocationForecast(lat, lon, alt)}) {
-            Text(text = "Fetch")
+@RequiresApi(Build.VERSION_CODES.O)
+private fun preloadGribData() {
+    val timesToFetch = calculateTimesToFetch()
 
-        }
-        Button(onClick = {informationScreenViewModel.logvalue()}) {
-            Text(text = "Log")
-
+    CoroutineScope(Dispatchers.IO).launch {
+        timesToFetch.forEach { time ->
+            // Check if data for this time is already fetched and stored
+            if (!GribDataCache.isDataStoredForTime(time)) {
+                var success = false
+                var attempts = 0
+                while (!success && attempts < 3) {
+                    Log.d("GribTesting", "Attempting to fetch grib data for time: $time, attempt: ${attempts + 1}")
+                    val (result, gribData) = WeatherDataRepository().fetchDataFromIsobaricGribAPI(time)
+                    if (result) {
+                        GribDataCache.storeData(time, gribData)
+                        success = true
+                    } else {
+                        attempts++
+                    }
+                }
+                if (!success) {
+                    Log.d("GribTesting", "Failed to fetch grib data for time: $time after 3 attempts")
+                }
+            } else {
+                Log.d("GribTesting", "Data for time: $time is already stored. Skipping fetch.")
+            }
         }
     }
-
-
-
-
 }
 
- */
 
+@RequiresApi(Build.VERSION_CODES.O)
+private fun calculateTimesToFetch(): List<String> {
+    val possibleTimes = listOf("00", "03", "06", "09", "12", "15", "18", "21")
+    val currentHour = LocalDateTime.now().hour
+    val closestTimes = possibleTimes.map { it.toInt() }.filter { it >= currentHour }.take(4)
+
+    // If we have less than 4 times, it means we need to take some from the next day
+    val timesNeededFromNextDay = 4 - closestTimes.size
+    val nextDayTimes = if (timesNeededFromNextDay > 0) possibleTimes.take(timesNeededFromNextDay).map { it.toInt() } else listOf()
+
+    val today = LocalDate.now()
+    val tomorrow = today.plusDays(1)
+
+    val todayTimes = closestTimes.map { "${today}T${it.toString().padStart(2, '0')}:00:00Z" }
+    val tomorrowTimes = nextDayTimes.map { "${tomorrow}T${it.toString().padStart(2, '0')}:00:00Z" }
+    return todayTimes + tomorrowTimes
+}
