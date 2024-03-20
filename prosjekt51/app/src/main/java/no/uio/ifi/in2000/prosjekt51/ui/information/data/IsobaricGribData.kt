@@ -37,9 +37,10 @@ data class GribHeader(
 
 
 data class GribPoint(
-    val parameterName: String,
     val height: Double,
-    val value: Double
+    var vComponent: Double,
+    var uComponent: Double,
+    var temperature: Double
 )
 
 

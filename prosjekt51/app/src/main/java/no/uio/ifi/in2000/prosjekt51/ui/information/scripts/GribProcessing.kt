@@ -33,15 +33,27 @@ fun getValueFromGribjson(n: Int, m: Int, gribJson: GribJson): Double{
 }
 
 fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?): MutableList<GribPoint> {
-    if (grib == null){
-        return mutableListOf<GribPoint>()
+    if (grib == null) {
+        return mutableListOf()
     }
     val (n, m) = findCoordinateCell(lat, lon, grib.first())
-    val gribvalues = mutableListOf<GribPoint>()
-    for (g in grib){
-        gribvalues.add(
-            GribPoint(g.header.parameterNumberName, g.header.surface1Value, getValueFromGribjson(n, m, g))
-        )
+
+    // Use a map to collect data by height
+    val dataByHeight = mutableMapOf<Double, GribPoint>()
+
+    for (g in grib) {
+        val height = g.header.surface1Value
+        val value = getValueFromGribjson(n, m, g)
+
+        val gribData = dataByHeight.getOrPut(height) { GribPoint(height, 0.0, 0.0, 0.0) }
+
+        when (g.header.parameterNumberName) {
+            "U-component_of_wind" -> gribData.uComponent = value
+            "V-component_of_wind" -> gribData.vComponent = value
+            "temperature" -> gribData.temperature = value
+        }
     }
-    return gribvalues
+
+    // Convert the map values to a list of GribPoint
+    return dataByHeight.values.map { GribPoint(it.height, it.vComponent, it.uComponent, it.temperature) }.toMutableList()
 }

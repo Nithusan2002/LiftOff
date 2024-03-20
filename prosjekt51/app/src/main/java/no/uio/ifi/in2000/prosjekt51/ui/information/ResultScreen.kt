@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
 import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribPoint
 import no.uio.ifi.in2000.prosjekt51.ui.information.data.timeAndData
+import no.uio.ifi.in2000.prosjekt51.ui.information.scripts.pressureToHeight
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +73,10 @@ fun ResultScreen(
             }
 
             WeatherDataItem(data = resultScreenUiState.value.currentLocationForecastData)
-            GribPointList(resultScreenUiState.value.currentGribData)
+            GribPointList(resultScreenUiState.value.currentGribData,
+                resultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level,
+                resultScreenUiState.value.currentLocationForecastData?.data?.air_temperature
+                )
         }
     }
 }
@@ -93,23 +97,25 @@ fun WeatherDataItem(data: timeAndData?) {
 }
 
 @Composable
-fun GribPointList(gribPoints: List<GribPoint>?) {
+fun GribPointList(gribPoints: List<GribPoint>?, ground_pressure: Double?, ground_temp: Double?) {
     Log.d("GribTesting", "INSIDE GRIBPOINTLIST: gribpoints: $gribPoints")
     // If gribPoints is null, use an empty list instead
     val safeGribPoints = gribPoints ?: emptyList()
 
     LazyColumn {
         items(safeGribPoints) { gribPoint ->
-            GribPointItem(gribPoint)
+            GribPointItem(gribPoint, ground_pressure, ground_temp)
         }
     }
 }
 
 @Composable
-fun GribPointItem(gribPoint: GribPoint) {
+fun GribPointItem(gribPoint: GribPoint, ground_pressure: Double?, ground_temp: Double?) {
     Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Parameter: ${gribPoint.parameterName}")
-        Text(text = "Height: ${gribPoint.height}")
-        Text(text = "Value: ${gribPoint.value}")
+        Text(text = "Height: ${pressureToHeight(gribPoint.height, gribPoint.temperature, ground_pressure, ground_temp)}")
+        Text(text = "U-component of wind: ${gribPoint.uComponent}")
+        Text(text = "V-component of wind: ${gribPoint.vComponent}")
+        Text(text = "Temperature: ${gribPoint.temperature}")
+
     }
 }
