@@ -26,7 +26,7 @@ class IsobaricGribAPI {
             }
             ConnectionResult.Success(data)
         } catch (e: Exception){
-            Log.e("ConnectionTimeout", "Couldn't access backend server for grib parsing")
+            Log.e("ConnectionTimeout", "Couldn't access backend server for grib parsing with time $time, exception $e")
             ConnectionResult.TimeoutError(e)
         }
     }
