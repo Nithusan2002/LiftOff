@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.prosjekt51.ui.information
+package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
 import android.util.Log
@@ -20,12 +20,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribPoint
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.timeAndData
-import no.uio.ifi.in2000.prosjekt51.ui.information.scripts.pressureToHeight
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
+import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
+import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +80,7 @@ fun ResultScreen(
 }
 
 @Composable
-fun WeatherDataItem(data: timeAndData?) {
+fun WeatherDataItem(data: TimeAndData?) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Time: ${data?.time}")
         Text("Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s")

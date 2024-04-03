@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.prosjekt51.api
+package no.uio.ifi.in2000.prosjekt51.data.locationForecast
 
 import android.os.Build
 import android.util.Log
@@ -11,10 +11,12 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
-import kotlinx.serialization.json.*
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.coroutineScope
-import java.lang.Exception
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import kotlin.math.abs
 
 

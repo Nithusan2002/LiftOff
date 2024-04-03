@@ -1,18 +1,7 @@
-package no.uio.ifi.in2000.prosjekt51.ui.information.data
+package no.uio.ifi.in2000.prosjekt51.model.isobaricGrib
 
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
-import no.uio.ifi.in2000.prosjekt51.ui.information.ResultScreenViewModel
-import java.time.Clock
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+
 
 
 @Serializable
