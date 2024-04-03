@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.prosjekt51.ui.information.scripts
+package no.uio.ifi.in2000.prosjekt51.ui.result.scripts
 
 import android.util.Log
 import kotlin.math.pow

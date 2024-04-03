@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.prosjekt51.ui.information.data
+package no.uio.ifi.in2000.prosjekt51.model.locationForecast
 
 import kotlinx.serialization.Serializable
 
@@ -16,13 +16,13 @@ data class InstantDataContainer(
 
 @Serializable
 data class InstantDetails(
-    val details: locationForecastWeatherData
+    val details: LocationForecastWeatherData
 )
 
 
 // The following two data classes are the classes we actually want to store in the uistate. // TODO: Sikkert mye bedre/mer effektive måter å gjøre dette på.
 @Serializable
-data class locationForecastWeatherData(
+data class LocationForecastWeatherData(
     val air_pressure_at_sea_level: Double,
     val air_temperature: Double,
     val air_temperature_percentile_10: Double? = null,
@@ -43,7 +43,7 @@ data class locationForecastWeatherData(
     val wind_speed_percentile_90: Double? = null
 )
 
-data class timeAndData(
+data class TimeAndData(
     val time: String,
-    val data: locationForecastWeatherData
+    val data: LocationForecastWeatherData
 )

@@ -1,22 +1,29 @@
-package no.uio.ifi.in2000.prosjekt51.ui.information
+package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.prosjekt51.api.LocationForecastAPI
-import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribDataCache
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribJson
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribPoint
-import no.uio.ifi.in2000.prosjekt51.ui.information.scripts.getGribDataFromCoordinates
+import no.uio.ifi.in2000.prosjekt51.data.locationForecast.LocationForecastAPI
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
+import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
+import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
+import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
 import java.time.Instant
+
+data class ResultScreenUiState(
+    val locationForecastData: List<TimeAndData>? = null, // TODO: Er det beste praksis å initialisere til null?
+    val currentLocationForecastData: TimeAndData? = null,
+    val isobaricGribData: List<GribJson>? = null,
+    val currentGribData: List<GribPoint>? = null
+)
 
 class ResultScreenViewModel: ViewModel() {
     private val weatherDataRepository = WeatherDataRepository(LocationForecastAPI())

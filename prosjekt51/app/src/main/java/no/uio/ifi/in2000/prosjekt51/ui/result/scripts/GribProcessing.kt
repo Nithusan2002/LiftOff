@@ -1,8 +1,8 @@
-package no.uio.ifi.in2000.prosjekt51.ui.information.scripts
+package no.uio.ifi.in2000.prosjekt51.ui.result.scripts
 
 import android.util.Log
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribJson
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribPoint
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 
 
 fun findCoordinateCell(lat: Double, lon: Double, gribJson: GribJson): Pair<Int, Int> {

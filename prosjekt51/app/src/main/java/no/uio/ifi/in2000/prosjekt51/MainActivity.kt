@@ -6,15 +6,11 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -23,19 +19,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.prosjekt51.repository.WeatherDataRepository
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
+import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
 import no.uio.ifi.in2000.prosjekt51.ui.home.HomeScreen
-import no.uio.ifi.in2000.prosjekt51.ui.information.ResultScreen
-import no.uio.ifi.in2000.prosjekt51.ui.information.ResultScreenViewModel
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribDataCache
-import no.uio.ifi.in2000.prosjekt51.ui.information.data.GribJson
+import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreen
+import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.theme.Prosjekt51Theme
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)

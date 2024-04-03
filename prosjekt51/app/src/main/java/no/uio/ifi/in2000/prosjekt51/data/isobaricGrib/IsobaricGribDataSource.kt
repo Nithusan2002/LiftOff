@@ -1,9 +1,10 @@
-package no.uio.ifi.in2000.prosjekt51.api
+package no.uio.ifi.in2000.prosjekt51.data.isobaricGrib
 
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.uio.ifi.in2000.prosjekt51.data.locationForecast.ConnectionResult
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
