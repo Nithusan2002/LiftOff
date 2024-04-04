@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.LocationForecastAPI
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
@@ -43,22 +44,22 @@ class ResultScreenViewModel: ViewModel() {
         */
 
         viewModelScope.launch {
-            val (result, lfData) = weatherDataRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
-            if (result == true) {
-                var first = lfData.first()
-                for (element in lfData) {
-                    if (element.time == time) {
-                        first = element
+            _uiState.update {currentUiState ->
+                val (result, lfData) = weatherDataRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
+
+                if (result == true) {
+                    var first = lfData.first()
+                    for (element in lfData) {
+                        if (element.time == time) {
+                            first = element
+                        }
                     }
+
+                    currentUiState.copy(currentLocationForecastData = first)
+                } else {
+                    Log.d("MVPTesting", "Failed to fetch location forecast data")
+                    return@launch // TODO: Update with snackbar or similar
                 }
-                Log.d("MVPTesting", "LFdata is now $lfData")
-                val lfdata = _uiState.value.locationForecastData  // TODO: Fiks denne uhåndterbare måten å opprettholde uistate på
-                val gribdata = _uiState.value.isobaricGribData
-                val curgrib = _uiState.value.currentGribData
-                _uiState.value = ResultScreenUiState(lfdata, first, gribdata, curgrib)
-            } else {
-                Log.d("MVPTesting", "Failed to fetch location forecast data")
-                return@launch // TODO: Update with snackbar or similar
             }
         }
     }
@@ -73,10 +74,9 @@ class ResultScreenViewModel: ViewModel() {
         */
 
         viewModelScope.launch {
-            val lfdata = _uiState.value.locationForecastData
-            val curlfdata = _uiState.value.currentLocationForecastData
-            val curgrib = _uiState.value.currentGribData
-            _uiState.value = ResultScreenUiState(lfdata, curlfdata, getGribData(time), curgrib)
+            _uiState.update { currentUiState ->
+                currentUiState.copy(isobaricGribData = getGribData(time))
+            }
         }
     }
 
@@ -85,11 +85,10 @@ class ResultScreenViewModel: ViewModel() {
     }
 
     fun getCurrentGribData(lat: Double, lon: Double, time: String){
-        val gribPoints = getGribDataFromCoordinates(lat, lon, getGribData(time))
-        val lfdata = _uiState.value.locationForecastData
-        val curlfdata = _uiState.value.currentLocationForecastData
-        Log.d("GribTesting", "gribPoints: $gribPoints")
-        _uiState.value = ResultScreenUiState(lfdata, curlfdata, getGribData(time), gribPoints)
+        _uiState.update { currentUiState ->
+            val gribPoints = getGribDataFromCoordinates(lat, lon, getGribData(time))
+            currentUiState.copy(isobaricGribData = getGribData(time), currentGribData = gribPoints)
+        }
     }
 
     fun fetchIsobaricGrib(time: String) {
@@ -102,19 +101,16 @@ class ResultScreenViewModel: ViewModel() {
         */
 
         viewModelScope.launch {
-            val (result, gribdata) = weatherDataRepository.fetchDataFromIsobaricGribAPI(time)
+            _uiState.update { currentUiState ->
+                val (result, gribdata) = weatherDataRepository.fetchDataFromIsobaricGribAPI(time)
 
-            if (result == true) {
-                val lfdata = _uiState.value.locationForecastData
-                val curlfdata = _uiState.value.currentLocationForecastData
-                val curgrib = _uiState.value.currentGribData
-                _uiState.value = ResultScreenUiState(lfdata, curlfdata, gribdata, curgrib)
-                Log.d("GribTesting", "gribdata is now $gribdata")
-            } else {
-                Log.d("GribTesting", "Failed to fetch gribdata in viewmodel")
-                return@launch // TODO: Update with snackbar or similar
+                if (result == true) {
+                    currentUiState.copy(isobaricGribData = gribdata)
+                } else {
+                    Log.d("GribTesting", "Failed to fetch gribdata in viewmodel")
+                    return@launch // TODO: Update with snackbar or similar
+                }
             }
-
         }
     }
 
