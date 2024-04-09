@@ -45,11 +45,11 @@ class ResultScreenViewModel: ViewModel() {
 
         viewModelScope.launch {
             _uiState.update {currentUiState ->
-                val (result, lfData) = weatherDataRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
+                val result = weatherDataRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
 
-                if (result == true) {
-                    var first = lfData.first()
-                    for (element in lfData) {
+                if (result.successfulConnection) {
+                    var first = result.parsedLocationForecastData.first()
+                    for (element in result.parsedLocationForecastData) {
                         if (element.time == time) {
                             first = element
                         }
@@ -102,10 +102,10 @@ class ResultScreenViewModel: ViewModel() {
 
         viewModelScope.launch {
             _uiState.update { currentUiState ->
-                val (result, gribdata) = weatherDataRepository.fetchDataFromIsobaricGribAPI(time)
+                val result = weatherDataRepository.fetchDataFromIsobaricGribAPI(time)
 
-                if (result == true) {
-                    currentUiState.copy(isobaricGribData = gribdata)
+                if (result.successfulConnection) {
+                    currentUiState.copy(isobaricGribData = result.parsedGribData)
                 } else {
                     Log.d("GribTesting", "Failed to fetch gribdata in viewmodel")
                     return@launch // TODO: Update with snackbar or similar
