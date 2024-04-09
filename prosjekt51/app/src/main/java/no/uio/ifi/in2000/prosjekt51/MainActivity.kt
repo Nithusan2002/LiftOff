@@ -104,9 +104,9 @@ private fun preloadGribData() {
                 var attempts = 0
                 while (!success && attempts < 3) {
                     Log.d("GribTesting", "Attempting to fetch grib data for time: $time, attempt: ${attempts + 1}")
-                    val (result, gribData) = WeatherDataRepository().fetchDataFromIsobaricGribAPI(time)
-                    if (result) {
-                        GribDataCache.storeData(time, gribData)
+                    val result = WeatherDataRepository().fetchDataFromIsobaricGribAPI(time)
+                    if (result.successfulConnection) {
+                        GribDataCache.storeData(time, result.parsedGribData)
                         success = true
                     } else {
                         attempts++

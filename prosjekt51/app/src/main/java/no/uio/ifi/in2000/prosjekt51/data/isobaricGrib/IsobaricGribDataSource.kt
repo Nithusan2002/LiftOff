@@ -19,16 +19,16 @@ class IsobaricGribAPI {
 
     private val apiService = retrofit.create(ApiService::class.java)
 
-    suspend fun getJsonDataForTime(time: String): ConnectionResult<String> {
+    suspend fun getJsonDataForTime(time: String): ConnectionResult {
         // Network call on IO Dispatcher
         return try {
             val data = withContext(Dispatchers.IO) {
                 apiService.convertGribFile(time)
             }
-            ConnectionResult.Success(data)
+            ConnectionResult(successfulConnection = true, gribString = data)
         } catch (e: Exception){
             Log.e("ConnectionTimeout", "Couldn't access backend server for grib parsing with time $time, exception $e")
-            ConnectionResult.TimeoutError(e)
+            ConnectionResult(successfulConnection = false)
         }
     }
 }
