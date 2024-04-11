@@ -17,6 +17,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
+import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import kotlin.math.abs
 
 
@@ -43,7 +45,7 @@ class LocationForecastAPI {
 
     // Check api-level
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun fetchLocationForecast(lat: Double, lon:Double, alt:Int): ConnectionResult<JsonArray?> = coroutineScope {
+    suspend fun fetchLocationForecast(lat: Double, lon:Double, alt:Int): ConnectionResult = coroutineScope {
         /*
         fetches data from locationforecast API
 
@@ -60,8 +62,9 @@ class LocationForecastAPI {
         //Check for invalid coordinates
         if (abs(lat) > 90 || abs(lon) > 180) {
             Log.e("Invalid coordinates", "Got latitude $lat, and longitude $lon")  // TODO: Burde kanskje bryte funksjonsflyten her, i tillegg til feilmelding?
-            return@coroutineScope ConnectionResult.InputError(Exception())
+            return@coroutineScope ConnectionResult(successfulConnection = false, exception = Exception()) //TODO: Mer beskrivende exception
         }
+
 
         //Build url
         val url =
@@ -73,14 +76,16 @@ class LocationForecastAPI {
             val jsonElement = Json.parseToJsonElement(jsonString)
             //Return jsonArray of timeseries
             val data = jsonElement.jsonObject["properties"]?.jsonObject?.get("timeseries")?.jsonArray
-            return@coroutineScope ConnectionResult.Success(data)
+            return@coroutineScope ConnectionResult(successfulConnection = true, locationForecastData = data)
         } catch (e: Exception) {
             Log.e("ConnectionTimeout", "Couldn't connect to $url; exception $e")
-            return@coroutineScope ConnectionResult.TimeoutError(e)
+            return@coroutineScope ConnectionResult(successfulConnection = false, exception = e)
         }
     }
 }
 
+/*
+sealed class DeprecatedConnectionResult<out R> {
 
 sealed class ConnectionResult<out R> {
     /*A sealed class representing the result of a network operation.
@@ -96,3 +101,14 @@ sealed class ConnectionResult<out R> {
     data class InputError(val exception: Exception) : ConnectionResult<Nothing>()
     data class TimeoutError(val exception: Exception) : ConnectionResult<Nothing>()
 }
+
+ */
+
+data class ConnectionResult (
+    val successfulConnection: Boolean,
+    val locationForecastData: JsonArray? = null,
+    var parsedLocationForecastData: List<TimeAndData> = emptyList(),
+    var gribString: String = "",
+    var parsedGribData: List<GribJson> = emptyList(),
+    val exception: Exception? = null
+)
