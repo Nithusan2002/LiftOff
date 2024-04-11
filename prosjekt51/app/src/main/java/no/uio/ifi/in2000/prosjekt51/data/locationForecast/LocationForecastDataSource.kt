@@ -21,6 +21,10 @@ import kotlin.math.abs
 
 
 class LocationForecastAPI {
+    /*
+      Data source class for fetching data from the LocationForecast API
+      The class uses coroutines for asynchronous execution and KTOR HTTP client for network requests.
+     */
 
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -49,7 +53,8 @@ class LocationForecastAPI {
             alt: altitude as an integer
 
         returns:
-            jsonArray of timeseries
+            ConnectionResult object, either success and the associated data(spesifikt?) is returned,
+            or an exception, either inputError og TimeoutError is returned
          */
 
         //Check for invalid coordinates
@@ -57,7 +62,6 @@ class LocationForecastAPI {
             Log.e("Invalid coordinates", "Got latitude $lat, and longitude $lon")  // TODO: Burde kanskje bryte funksjonsflyten her, i tillegg til feilmelding?
             return@coroutineScope ConnectionResult.InputError(Exception())
         }
-
 
         //Build url
         val url =
@@ -79,6 +83,15 @@ class LocationForecastAPI {
 
 
 sealed class ConnectionResult<out R> {
+    /*A sealed class representing the result of a network operation.
+
+    An instance of this class can be of the three types:
+        * 1. Success: Indicates a successful result with associated data.
+        * 2. InputError: Indicates an error due to invalid input parameters.
+        * 3. TimeoutError: Indicates an error due to a timeout during the network operation.
+
+    The class provides a structured way to handle different outcomes in a type-safe manner.
+     */
     data class Success<out T>(val data: T) : ConnectionResult<T>()
     data class InputError(val exception: Exception) : ConnectionResult<Nothing>()
     data class TimeoutError(val exception: Exception) : ConnectionResult<Nothing>()
