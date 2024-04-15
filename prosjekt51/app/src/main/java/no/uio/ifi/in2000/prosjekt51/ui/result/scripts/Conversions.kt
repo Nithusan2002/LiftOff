@@ -4,6 +4,9 @@ import android.util.Log
 import kotlin.math.pow
 
 fun pressureToHeight(P: Double, t: Double, P_b: Double?, t_b: Double?): Double{
+    /*
+    Computes the atmospheric pressure as a function of altitude.
+     */
     val l = (6.5/1000)
     val M = 0.028964425278793993
     val g0 = 9.80665

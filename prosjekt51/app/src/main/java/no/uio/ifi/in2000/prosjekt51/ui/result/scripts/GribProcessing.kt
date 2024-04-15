@@ -6,6 +6,15 @@ import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 
 
 fun findCoordinateCell(lat: Double, lon: Double, gribJson: GribJson): Pair<Int, Int> {
+    /*Determines the indices (`n`, `m`) of the closest data cell in the GribJson data grid for a given latitude and longitude.
+     If the given coordinates are out of bounds based on the GribJson header information, logs an error and returns (0, 0).
+
+     Arguments:
+        lat (Double): The latitude coordinate to find the data cell for.
+        lon (Double): The longitude coordinate to find the data cell for.
+        gribJson (Double): The GribJson object containing header and data which defines the grid spacing and bounds.
+        A Pair of Integers indicating the indices (`n`, `m`) in the data grid corresponding to the coordinates.
+     */
     if (lat > gribJson.header.la1 || lat < gribJson.header.la2) {
         Log.d("CoordinateError", "Latitude coordinate out of bounds")
         return Pair(0, 0)

@@ -5,17 +5,35 @@ import kotlinx.serialization.Serializable
 // The following three data classes match the json-structure, and therefore are used in deserialization.
 @Serializable
 data class TimeseriesEntry(
+    /*
+     A serializable data class which represents an entry of Timeseries data from LocationForecast API.
+     It contains a time string and an instance of InstantDataContainer.
+
+     properties:
+        time: A String indicating the specific timestamp of the Timeseries data.
+        data: An Instance of InstantDataContainer representing the weather conditions at the given time.
+     */
     val time: String,
     val data: InstantDataContainer
 )
 
 @Serializable
 data class InstantDataContainer(
+    /*A serializable data class which acts as a container for instant weather details fetched from LocationForecast API.
+
+     properties:
+        instant: An instance of InstantDetails representing the detailed weather conditions at a specific time.
+     */
     val instant: InstantDetails
 )
 
 @Serializable
 data class InstantDetails(
+    /*A serializable data class which holds the minutiae of weather conditions at a specific time.
+
+     properties:
+        details: An Instance of LocationForecastWeatherData representing the exact weather conditions/details.
+     */
     val details: LocationForecastWeatherData
 )
 
@@ -23,6 +41,10 @@ data class InstantDetails(
 // The following two data classes are the classes we actually want to store in the uistate. // TODO: Sikkert mye bedre/mer effektive måter å gjøre dette på.
 @Serializable
 data class LocationForecastWeatherData(
+    /* A serializable data class representing the detailed weather condition data at a specific time.
+     It contains information about air pressure, temperature, cloud area fraction, relative humidity,
+     direction and speed of wind, dew point temperature, etc.
+     */
     val air_pressure_at_sea_level: Double,
     val air_temperature: Double,
     val air_temperature_percentile_10: Double? = null,
@@ -44,6 +66,13 @@ data class LocationForecastWeatherData(
 )
 
 data class TimeAndData(
+    /*
+     Represents a timestamp and its corresponding weather data.
+
+     properties:
+     time: A String indicating the specific timestamp of the weather data.
+     data: An Instance of LocationForecastWeatherData representing the detailed weather conditions at the specified time.
+     */
     val time: String,
     val data: LocationForecastWeatherData
 )
