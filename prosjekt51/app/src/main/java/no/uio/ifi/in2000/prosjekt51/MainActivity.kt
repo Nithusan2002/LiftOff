@@ -127,10 +127,10 @@ private fun preloadGribData() {
 private fun calculateTimesToFetch(): List<String> {
     val possibleTimes = listOf("00", "03", "06", "09", "12", "15", "18", "21")
     val currentHour = LocalDateTime.now().hour
-    val closestTimes = possibleTimes.map { it.toInt() }.filter { it >= currentHour }.take(4)
+    val closestTimes = possibleTimes.map { it.toInt() }.filter { it >= currentHour }.take(5)
 
-    // If we have less than 4 times, it means we need to take some from the next day
-    val timesNeededFromNextDay = 4 - closestTimes.size
+    // If we have less than 5 times, it means we need to take some from the next day
+    val timesNeededFromNextDay = 5 - closestTimes.size
     val nextDayTimes = if (timesNeededFromNextDay > 0) possibleTimes.take(timesNeededFromNextDay).map { it.toInt() } else listOf()
 
     val today = LocalDate.now()
