@@ -124,7 +124,7 @@ private fun preloadGribData() {
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-private fun calculateTimesToFetch(): List<String> {
+fun calculateTimesToFetch(): List<String> {
     val possibleTimes = listOf("00", "03", "06", "09", "12", "15", "18", "21")
     val currentHour = LocalDateTime.now().hour
     val closestTimes = possibleTimes.map { it.toInt() }.filter { it >= currentHour }.take(5)
