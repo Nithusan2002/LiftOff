@@ -110,6 +110,8 @@ class WeatherDataRepository(
         return if (jsonstring.successfulConnection) {
             Log.d("GribTesting", "Successfully fetched jsondata from api: ${parseGribJsonString(jsonstring.gribString)}")
             jsonstring.parsedGribData = parseGribJsonString(jsonstring.gribString)
+            Log.d("GribJsonFull", jsonstring.parsedGribData.filter { it.header.parameterNumberName == "Temperature" }
+                .map { "${it.header}: ${it.data}" }.toString())
             jsonstring
         } else {
             Log.d("GribTesting", "Fetching failed: $jsonstring")

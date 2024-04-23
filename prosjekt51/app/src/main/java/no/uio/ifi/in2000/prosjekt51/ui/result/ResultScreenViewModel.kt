@@ -154,8 +154,6 @@ class ResultScreenViewModel: ViewModel() {
             else -> true
         }
 
-        logvalue()
-
         return when (launchCheckResult) {
             true -> "Forholdene er innenfor grenseverdiene for oppskytning."
             false -> "Forholdene er ikke innenfor grenseverdiene for oppskytning"

@@ -51,15 +51,16 @@ fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?):
     val dataByHeight = mutableMapOf<Double, GribPoint>()
 
     for (g in grib) {
+        Log.d("GribFetching", "Got grib ${g.header.surface1Value}")
         val height = g.header.surface1Value
         val value = getValueFromGribjson(n, m, g)
 
         val gribData = dataByHeight.getOrPut(height) { GribPoint(height, 0.0, 0.0, 0.0) }
 
         when (g.header.parameterNumberName) {
-            "U-component_of_wind" -> gribData.uComponent = value
-            "V-component_of_wind" -> gribData.vComponent = value
-            "temperature" -> gribData.temperature = value
+            "U-component_of_wind" -> gribData.uComponent = String.format("%.1f", value).toDouble()
+            "V-component_of_wind" -> gribData.vComponent = String.format("%.1f", value).toDouble()
+            "Temperature" -> gribData.temperature = String.format("%.1f", kelvinToCelsius(value)).toDouble()
         }
     }
 

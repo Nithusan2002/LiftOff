@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.prosjekt51.ui.result.scripts
 
 import android.util.Log
 import kotlin.math.pow
+import kotlin.math.round
 
 fun pressureToHeight(P: Double, t: Double, P_b: Double?, t_b: Double?): Double{
     /*
@@ -14,11 +15,16 @@ fun pressureToHeight(P: Double, t: Double, P_b: Double?, t_b: Double?): Double{
     val exponent = (l * R)/(g0 * M)
     val middleFactor = t_b?.times((P / P_b!!).pow(exponent))
     if (middleFactor != null) {
-        Log.d("GribTesting", "Found value ${(middleFactor + t)/l}")
+        Log.d("GribConversion", "Pressure $P converted to ${(middleFactor + t)/l}")
     }
     return if (middleFactor != null) {
-        (middleFactor + t)/l
+        round((middleFactor + t)/l)
     } else {
         0.0
     }
+}
+
+
+fun kelvinToCelsius(K: Double): Double{
+    return K - 273.15
 }

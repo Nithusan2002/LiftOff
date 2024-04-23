@@ -146,7 +146,7 @@ fun GribPointList(gribPoints: List<GribPoint>?, ground_pressure: Double?, ground
 @Composable
 fun GribPointItem(gribPoint: GribPoint, ground_pressure: Double?, ground_temp: Double?) {
     Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Height: ${pressureToHeight(gribPoint.height, gribPoint.temperature, ground_pressure, ground_temp)}")
+        Text(text = "Height: ${pressureToHeight(gribPoint.height, gribPoint.temperature, ground_pressure, ground_temp)} meters")
         Text(text = "U-component of wind: ${gribPoint.uComponent}")
         Text(text = "V-component of wind: ${gribPoint.vComponent}")
         Text(text = "Temperature: ${gribPoint.temperature}")
