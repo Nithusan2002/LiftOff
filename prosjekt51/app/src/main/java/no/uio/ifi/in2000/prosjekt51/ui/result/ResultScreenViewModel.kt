@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,17 +21,22 @@ import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
 import java.time.Instant
 
 data class ResultScreenUiState(
-    val locationForecastData: List<TimeAndData>? = null, // TODO: Er det beste praksis å initialisere til null?
+    val locationForecastData: List<TimeAndData>? = null,
     val currentLocationForecastData: TimeAndData? = null,
     val isobaricGribData: List<GribJson>? = null,
-    val currentGribData: List<GribPoint>? = null
-)
+    val currentGribData: List<GribPoint>? = null,
+    val error: String? = null
+) {
+    val hasError: Boolean
+        get() = error != null
+}
+
 
 class ResultScreenViewModel: ViewModel() {
     private val weatherDataRepository = WeatherDataRepository(LocationForecastAPI())
 
-    private val _uiState = MutableStateFlow(ResultScreenUiState())
-    val uiState: StateFlow<ResultScreenUiState> = _uiState.asStateFlow()
+    private val _resultScreenUiState = MutableStateFlow(ResultScreenUiState())
+    val resultScreenUiState: StateFlow<ResultScreenUiState> = _resultScreenUiState.asStateFlow()
 
     @RequiresApi(Build.VERSION_CODES.O)  // TODO: Er dette requiresapi-greiene uunngåelig?
     fun fetchLocationForecast(lat: Double, lon: Double, alt: Int, time: String) {
@@ -44,24 +50,23 @@ class ResultScreenViewModel: ViewModel() {
         */
 
         viewModelScope.launch {
-            _uiState.update {currentUiState ->
+            try {
                 val result = weatherDataRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
-
-                if (result.successfulConnection) {
-                    var first = result.parsedLocationForecastData.first()
-                    for (element in result.parsedLocationForecastData) {
-                        if (element.time == time) {
-                            first = element
-                        }
+                var first = result.parsedLocationForecastData.first()
+                for (element in result.parsedLocationForecastData) {
+                    if (element.time == time) {
+                        first = element
                     }
-
-                    currentUiState.copy(currentLocationForecastData = first)
-                } else {
-                    Log.d("MVPTesting", "Failed to fetch location forecast data")
-                    return@launch // TODO: Update with snackbar or similar
                 }
+                _resultScreenUiState.update { currentUiState ->
+                    currentUiState.copy(currentLocationForecastData = first, error = null)
+                }
+            } catch (e: Exception) {
+                Log.e("ResultScreenViewModel", "Error loading location forecast data: ${e.message}", e)
+                _resultScreenUiState.value = _resultScreenUiState.value.copy(error = "Kan ikke hente locationforecast data")
             }
         }
+
     }
 
     fun fetchIsobaricGribFromCache(time: String) {
@@ -74,7 +79,7 @@ class ResultScreenViewModel: ViewModel() {
         */
 
         viewModelScope.launch {
-            _uiState.update { currentUiState ->
+            _resultScreenUiState.update { currentUiState ->
                 currentUiState.copy(isobaricGribData = getGribData(time))
             }
         }
@@ -85,31 +90,22 @@ class ResultScreenViewModel: ViewModel() {
     }
 
     fun getCurrentGribData(lat: Double, lon: Double, time: String){
-        _uiState.update { currentUiState ->
+        _resultScreenUiState.update { currentUiState ->
             val gribPoints = getGribDataFromCoordinates(lat, lon, getGribData(time))
             currentUiState.copy(isobaricGribData = getGribData(time), currentGribData = gribPoints)
         }
     }
 
     fun fetchIsobaricGrib(time: String) {
-        /*
-        Fetch IsobaricGrib-data through repository, and update uistate accordingly.
-        arguments:
-            lat: latitude between -90 and 90 as a double
-            lon: longitude between -180 and 180 as a double
-            alt: altitude as an integer
-        */
-
-        viewModelScope.launch {
-            _uiState.update { currentUiState ->
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
                 val result = weatherDataRepository.fetchDataFromIsobaricGribAPI(time)
-
-                if (result.successfulConnection) {
-                    currentUiState.copy(isobaricGribData = result.parsedGribData)
-                } else {
-                    Log.d("GribTesting", "Failed to fetch gribdata in viewmodel")
-                    return@launch // TODO: Update with snackbar or similar
+                _resultScreenUiState.update { currentUiState ->
+                    currentUiState.copy(isobaricGribData = result.parsedGribData, error = null)
                 }
+            } catch (e: Exception) {
+                Log.e("ResultScreenViewModel", "Failed to fetch gribdata: ${e.message}", e)
+                _resultScreenUiState.value = _resultScreenUiState.value.copy(error = "Kan ikke hente gribdata")
             }
         }
     }
@@ -136,7 +132,7 @@ class ResultScreenViewModel: ViewModel() {
         getCurrentGribData(lat, lon, time)
         val launchCheckResult: Boolean
         //TODO Håndtere at tiden ikke finnes.
-        val data = uiState.value.locationForecastData?.get(uiState.value.locationForecastData!!.indexOfFirst { it.time == time })?.data
+        val data = resultScreenUiState.value.locationForecastData?.get(resultScreenUiState.value.locationForecastData!!.indexOfFirst { it.time == time })?.data
 
         //If a value is above the limit value or null the result is false
         launchCheckResult = when {
@@ -163,7 +159,7 @@ class ResultScreenViewModel: ViewModel() {
     fun logvalue(){
         /* Brukes bare til testing. Bør fjernes etter hvert, og erstattes av unit tests. */
         val gj = fetchIsobaricGrib("2024-03-19T15:00:00Z")
-        Log.d("GribTesting", _uiState.value.isobaricGribData?.first().toString())
+        Log.d("GribTesting", _resultScreenUiState.value.isobaricGribData?.first().toString())
         //Log.d("GribTesting", "GribObject: ${GribDataCache.gribDataCache}")
     }
 }

@@ -13,14 +13,22 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
@@ -34,21 +42,48 @@ fun ResultScreen(
     date: Long,
     hour: Int,
     onNavigateToHomeScreen: () -> Unit,
-    resultScreenViewModel: ResultScreenViewModel= viewModel()
+    resultScreenViewModel: ResultScreenViewModel= viewModel(),
+    snackbarHostState: SnackbarHostState,
+    onRetryClicked: () -> Unit,
+    errorMessage: String? // Parameter for feilmelding
 ) {
-    val resultScreenUiState = resultScreenViewModel.uiState.collectAsState()
+    val resultScreenUiState: ResultScreenUiState by resultScreenViewModel.resultScreenUiState.collectAsState()
 
-    val launchCheckResultText: String = resultScreenViewModel.checkLaunchConditions(lat = latitude.toDouble(), lon = longitude.toDouble(), date = date, hour = hour)
+    val launchCheckResultText: String = resultScreenViewModel.checkLaunchConditions(
+        lat = latitude.toDouble(),
+        lon = longitude.toDouble(),
+        date = date,
+        hour = hour
+    )
 
+    val scope = rememberCoroutineScope()
+
+    if (resultScreenUiState.hasError) {
+        LaunchedEffect(snackbarHostState) {
+            scope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = "En feil oppstod",
+                    actionLabel = "Prøv igjen",
+                    duration = SnackbarDuration.Indefinite
+                )
+                when(result){
+                    SnackbarResult.ActionPerformed -> {
+                        onRetryClicked()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            onNavigateToHomeScreen()
-                        }) {
+                    IconButton(onClick = { onNavigateToHomeScreen() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = null
@@ -70,11 +105,12 @@ fun ResultScreen(
                 )
             }
 
-            WeatherDataItem(data = resultScreenUiState.value.currentLocationForecastData)
-            GribPointList(resultScreenUiState.value.currentGribData,
-                resultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level,
-                resultScreenUiState.value.currentLocationForecastData?.data?.air_temperature
-                )
+            WeatherDataItem(data = resultScreenUiState.currentLocationForecastData)
+            GribPointList(
+                resultScreenUiState.currentGribData,
+                resultScreenUiState.currentLocationForecastData?.data?.air_pressure_at_sea_level,
+                resultScreenUiState.currentLocationForecastData?.data?.air_temperature
+            )
         }
     }
 }
