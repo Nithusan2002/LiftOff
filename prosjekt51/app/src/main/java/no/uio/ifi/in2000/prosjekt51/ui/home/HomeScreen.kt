@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.prosjekt51.ui.home
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DisplayMode
@@ -17,9 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +32,26 @@ fun HomeScreen(
     val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
     val timePickerState = rememberTimePickerState()
 
+    // Function to validate latitude
+    fun isLatitudeValid(lat: String): Boolean {
+        return try {
+            val value = lat.toDouble()
+            value in -90.0..90.0
+        } catch (e: NumberFormatException) {
+            false
+        }
+    }
+
+    // Function to validate longitude
+    fun isLongitudeValid(lon: String): Boolean {
+        return try {
+            val value = lon.toDouble()
+            value in -180.0..180.0
+        } catch (e: NumberFormatException) {
+            false
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
@@ -38,19 +59,21 @@ fun HomeScreen(
         TextField(
             value = latitude,
             onValueChange = { latitude = it },
-            label = { Text("Breddegrader") },
-            modifier = Modifier
-                .padding(16.dp),
-            singleLine = true
+            label = { Text("Breddegrad") },
+            modifier = Modifier.padding(16.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            isError = !isLatitudeValid(latitude) && latitude.isNotEmpty()
         )
 
         TextField(
             value = longitude,
             onValueChange = { longitude = it },
-            label = { Text(text = "Lengdegrader") },
-            modifier = Modifier
-                .padding(16.dp),
-            singleLine = true
+            label = { Text("Lengdegrad") },
+            modifier = Modifier.padding(16.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            isError = !isLongitudeValid(longitude) && longitude.isNotEmpty()
         )
 
         DatePicker(
@@ -66,9 +89,14 @@ fun HomeScreen(
         )
 
         //Navigates to result screen with parameters
-        Button(onClick = { datePickerState.selectedDateMillis?.let {
-            onNavigateToResultScreen(latitude.toString(), longitude.toString(), it, timePickerState.hour)
-        } }) {
+        Button(
+            onClick = { datePickerState.selectedDateMillis?.let {
+                if (isLatitudeValid(latitude) && isLongitudeValid(longitude)) {
+                    onNavigateToResultScreen(latitude, longitude, it, timePickerState.hour)
+                }
+            }},
+            enabled = isLatitudeValid(latitude) && isLongitudeValid(longitude)
+        ) {
             Text("Start")
         }
     }
@@ -77,5 +105,6 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    //HomeScreen()
+    //HomeScreen { _, _, _, _ -> }
 }
+
