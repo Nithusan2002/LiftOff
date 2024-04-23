@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.prosjekt51.calculateTimesToFetch
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.LocationForecastAPI
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
@@ -19,6 +20,9 @@ import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 
 data class ResultScreenUiState(
     val locationForecastData: List<TimeAndData>? = null,
@@ -128,8 +132,10 @@ class ResultScreenViewModel: ViewModel() {
 
         //Convert hour of the day to milliseconds and add to milliseconds of day, before converting to ISO_8601 date format as a String
         val time: String = Instant.ofEpochMilli(date + hour*60*60*1000).toString()
+        val correctedTime = findClosestGribData(time)
+        Log.d("GribTesting", "Date looks like: $correctedTime")
         fetchLocationForecast(lat, lon, alt, time)
-        getCurrentGribData(lat, lon, time)
+        getCurrentGribData(lat, lon, correctedTime)
         val launchCheckResult: Boolean
         //TODO Håndtere at tiden ikke finnes.
         val data = resultScreenUiState.value.locationForecastData?.get(resultScreenUiState.value.locationForecastData!!.indexOfFirst { it.time == time })?.data
@@ -154,6 +160,36 @@ class ResultScreenViewModel: ViewModel() {
             true -> "Forholdene er innenfor grenseverdiene for oppskytning."
             false -> "Forholdene er ikke innenfor grenseverdiene for oppskytning"
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun findClosestGribData(target: String): String {
+        val possTimes = calculateTimesToFetch()
+        val formatter = DateTimeFormatter.ISO_DATE_TIME
+        val targetDateTime = LocalDateTime.parse(target, formatter)
+
+        // Placeholder for the best match
+        var closestTime: LocalDateTime? = null
+        var minDifference = Int.MAX_VALUE
+
+        for (time in possTimes) {
+            val possibleTime = LocalDateTime.parse(time, formatter)
+            // Ensure comparison happens on the same date
+            if (possibleTime.toLocalDate() == targetDateTime.toLocalDate()) {
+                val difference = abs(possibleTime.toLocalTime().toSecondOfDay() - targetDateTime.toLocalTime().toSecondOfDay())
+                if (difference < minDifference) {
+                    minDifference = difference
+                    closestTime = possibleTime
+                }
+            }
+        }
+
+        // Check if the closest time is within 90 minutes (5400 seconds)
+        if (closestTime != null && minDifference <= 5400) {
+            return formatter.format(closestTime) + "Z"
+        }
+
+        return target
     }
 
     fun logvalue(){
