@@ -1,0 +1,152 @@
+{
+  "name": "section_separator",
+  "version": 33,
+  "source-key": {
+    "type": "figma",
+    "file": "VrGHT3PkHFoQi0BURx0R5f",
+    "node": "116:75",
+    "version": "5609133529",
+    "component-id": "be96995c32d413dd059b74dee7b8aed369461711"
+  },
+  "default": "Section separator",
+  "design": {
+    "atoms": [
+      {
+        "type": "group",
+        "id": "top_level",
+        "root": "true"
+      },
+      {
+        "type": "vector",
+        "id": "Line 3"
+      },
+      {
+        "type": "group",
+        "id": "Frame 1"
+      },
+      {
+        "type": "text",
+        "id": "Solution found!"
+      }
+    ],
+    "modes": {
+      "Section separator": {
+        "rules": [
+          {
+            "id": "top_level",
+            "is-structured": false,
+            "children": [
+              "Line 3",
+              "Frame 1"
+            ],
+            "clip-content": false
+          },
+          {
+            "id": "Line 3",
+            "margin": {
+              "top": 12.0,
+              "bottom": 12.0
+            },
+            "alignment": {
+              "horizontal": {
+                "attachment": "start",
+                "offset": 0.0
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": -1.0
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "proportional",
+                "value": 1.0
+              },
+              "height-constraints": {
+                "sizing-mode": "proportional",
+                "value": 1.0
+              }
+            },
+            "vector-content": "line_3.svg"
+          },
+          {
+            "id": "Frame 1",
+            "padding": {
+              "left": 4.0,
+              "right": 4.0
+            },
+            "alignment": {
+              "horizontal": {
+                "attachment": "start",
+                "offset": 14.0
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": 0.0
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "shrink"
+              },
+              "height-constraints": {
+                "sizing-mode": "shrink"
+              }
+            },
+            "arrangement": "row",
+            "main-axis-align": "start",
+            "cross-axis-align": "start",
+            "children": [
+              "Solution found!"
+            ],
+            "background-color": {
+              "alpha": 1.0,
+              "hue": 0.0,
+              "saturation": 0.0,
+              "value": 0.14901960784313725
+            },
+            "clip-content": false
+          },
+          {
+            "id": "Solution found!",
+            "font-weight": 700.0,
+            "color": {
+              "alpha": 1.0,
+              "hue": 0.0,
+              "saturation": 0.0,
+              "value": 1.0
+            },
+            "text-content": "$Separator text",
+            "overflow": "visible",
+            "text-align-vertical": "center",
+            "text-size": 10.0,
+            "letter-spacing": 0.5,
+            "line-height": 2.4
+          }
+        ]
+      }
+    }
+  },
+  "parameters": {
+    "Separator text": {
+      "data-type": "text",
+      "required": false,
+      "description": ""
+    }
+  },
+  "previews": [
+    {
+      "design": "Section separator",
+      "size": {
+        "width": 354.0,
+        "height": 24.0
+      },
+      "parameters": {
+        "Separator text": "Solution found!"
+      }
+    }
+  ],
+  "adin-component-search-paths": [],
+  "image-search-paths": [],
+  "vector-search-paths": []
+}

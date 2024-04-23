@@ -1,0 +1,6 @@
+{
+    "target": "FavoriteItem",
+    "package": "no.uio.ifi.in2000.prosjekt51.favoriteitem",
+    "generateImplementation": true,
+    "generatePreviews": true
+}
