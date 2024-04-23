@@ -5,6 +5,7 @@ Første commits:
 * Nithusan
 * Johanna
 * Christine
+* Dušan
 
 Git commands:
 
