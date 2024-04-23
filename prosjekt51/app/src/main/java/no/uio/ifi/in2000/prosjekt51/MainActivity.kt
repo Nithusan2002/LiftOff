@@ -8,8 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -51,8 +54,14 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    resultScreenViewModel: ResultScreenViewModel = remember { ResultScreenViewModel() } // Lagrer ViewModel som et husket verdi
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Observerer endringer i feilmeldingen
+    val errorMessageState = resultScreenViewModel.resultScreenUiState.collectAsState()
+
     NavHost(navController = navController, startDestination = "homeScreen") {
         composable("homeScreen") {
             HomeScreen(
@@ -68,14 +77,13 @@ fun App(
                 navArgument("longitude") {type = NavType.StringType},
                 navArgument("date") {type = NavType.LongType},
                 navArgument("hour") {type = NavType.IntType}
-                )
-        ) {backStackEntry ->
+            )
+        ) { backStackEntry ->
             val latitude = backStackEntry.arguments?.getString("latitude")
             val longitude = backStackEntry.arguments?.getString("longitude")
             val date = backStackEntry.arguments?.getLong("date")
             val hour = backStackEntry.arguments?.getInt("hour")
             if (latitude != null && longitude != null && date != null && hour != null) {
-                val resultScreenViewModel = ResultScreenViewModel()
                 ResultScreen(
                     latitude = latitude,
                     longitude = longitude,
@@ -84,7 +92,12 @@ fun App(
                     onNavigateToHomeScreen = {
                         navController.navigate("homeScreen")
                     },
-                    resultScreenViewModel = resultScreenViewModel
+                    resultScreenViewModel = resultScreenViewModel,
+                    snackbarHostState = snackbarHostState,
+                    onRetryClicked = {
+                        navController.popBackStack()
+                    },
+                    errorMessage = errorMessageState.value.error
                 )
             }
         }
