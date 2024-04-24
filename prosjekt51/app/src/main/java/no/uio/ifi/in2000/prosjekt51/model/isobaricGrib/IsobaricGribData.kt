@@ -59,7 +59,10 @@ data class GribPoint(
     val height: Double,
     var vComponent: Double,
     var uComponent: Double,
-    var temperature: Double
+    var temperature: Double,
+    var wind: Double,
+    var winddir: Double,
+    var windshear: Double
 )
 
 

@@ -51,19 +51,40 @@ fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?):
     val dataByHeight = mutableMapOf<Double, GribPoint>()
 
     for (g in grib) {
-        Log.d("GribFetching", "Got grib ${g.header.surface1Value}")
         val height = g.header.surface1Value
         val value = getValueFromGribjson(n, m, g)
 
-        val gribData = dataByHeight.getOrPut(height) { GribPoint(height, 0.0, 0.0, 0.0) }
+        val gribData = dataByHeight.getOrPut(height) { GribPoint(height, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0) }
 
         when (g.header.parameterNumberName) {
             "U-component_of_wind" -> gribData.uComponent = String.format("%.1f", value).toDouble()
             "V-component_of_wind" -> gribData.vComponent = String.format("%.1f", value).toDouble()
             "Temperature" -> gribData.temperature = String.format("%.1f", kelvinToCelsius(value)).toDouble()
         }
+
+        gribData.wind = String.format("%.1f", windStrength(gribData.uComponent, gribData.vComponent)).toDouble()
+        gribData.winddir = String.format("%.1f", windDirection(gribData.uComponent, gribData.vComponent)).toDouble()
+
+        val result = mutableListOf<GribPoint>()
+        var previousGribPoint: GribPoint? = null
+
+        for (gribPoint in dataByHeight.values) {
+            if (previousGribPoint != null) {
+                // Calculate the wind shear between the current point and the point just below it
+                gribPoint.windshear = String.format("%.1f", windShear(
+                    previousGribPoint.uComponent, previousGribPoint.vComponent,
+                    gribPoint.uComponent, gribPoint.vComponent
+                )).toDouble()
+            } else {
+                gribPoint.windshear = 0.0
+            }
+            result.add(gribPoint)
+            previousGribPoint = gribPoint
+        }
+
+
     }
 
     // Convert the map values to a list of GribPoint
-    return dataByHeight.values.map { GribPoint(it.height, it.vComponent, it.uComponent, it.temperature) }.toMutableList()
+    return dataByHeight.values.map { GribPoint(it.height, it.vComponent, it.uComponent, it.temperature, it.wind, it.winddir, it.windshear) }.toMutableList()
 }
