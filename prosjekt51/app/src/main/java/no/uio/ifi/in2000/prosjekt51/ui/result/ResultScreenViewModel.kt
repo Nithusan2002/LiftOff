@@ -131,6 +131,7 @@ class ResultScreenViewModel: ViewModel() {
          */
 
         //Convert hour of the day to milliseconds and add to milliseconds of day, before converting to ISO_8601 date format as a String
+        Log.d("Search", "$hour")
         val time: String = Instant.ofEpochMilli(date + hour*60*60*1000).toString()
         val correctedTime = findClosestGribData(time)
         Log.d("GribTesting", "Date looks like: $correctedTime")

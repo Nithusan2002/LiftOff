@@ -1,4 +1,5 @@
 package no.uio.ifi.in2000.prosjekt51.ui.home
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -91,6 +92,7 @@ fun HomeScreen(
         //Navigates to result screen with parameters
         Button(
             onClick = { datePickerState.selectedDateMillis?.let {
+                Log.d("Search", "$it")
                 if (isLatitudeValid(latitude) && isLongitudeValid(longitude)) {
                     onNavigateToResultScreen(latitude, longitude, it, timePickerState.hour)
                 }

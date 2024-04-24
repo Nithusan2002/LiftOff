@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -20,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.compose.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,7 +30,7 @@ import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
 import no.uio.ifi.in2000.prosjekt51.ui.home.HomeScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
-import no.uio.ifi.in2000.prosjekt51.ui.theme.Prosjekt51Theme
+import no.uio.ifi.in2000.prosjekt51.ui.search.SearchScreen
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -38,7 +40,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         preloadGribData()
         setContent {
-            Prosjekt51Theme {
+            AppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -51,6 +53,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App(
@@ -62,9 +65,9 @@ fun App(
     // Observerer endringer i feilmeldingen
     val errorMessageState = resultScreenViewModel.resultScreenUiState.collectAsState()
 
-    NavHost(navController = navController, startDestination = "homeScreen") {
-        composable("homeScreen") {
-            HomeScreen(
+    NavHost(navController = navController, startDestination = "searchScreen") {
+        composable("searchScreen") {
+            SearchScreen(
                 onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int ->
                     navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
                 }
@@ -90,7 +93,7 @@ fun App(
                     date = date,
                     hour = hour,
                     onNavigateToHomeScreen = {
-                        navController.navigate("homeScreen")
+                        navController.navigate("searchScreen")
                     },
                     resultScreenViewModel = resultScreenViewModel,
                     snackbarHostState = snackbarHostState,
