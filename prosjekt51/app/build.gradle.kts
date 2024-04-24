@@ -91,6 +91,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("androidx.appcompat:appcompat:1.4.1")
+
+
     implementation("org.slf4j:slf4j-simple:1.7.30")
     val nav_version = "2.7.7"
     implementation("androidx.navigation:navigation-compose:$nav_version")

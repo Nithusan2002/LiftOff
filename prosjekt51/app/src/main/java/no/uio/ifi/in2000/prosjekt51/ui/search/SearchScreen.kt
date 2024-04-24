@@ -16,12 +16,20 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -39,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
+import androidx.navigation.NavController
 import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -69,23 +78,11 @@ private fun isLongitudeValid(lon: String): Boolean {
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-private fun getTimes(): List<String> {
-    var currtime = LocalDateTime.now().hour
-    val alltimes = mutableListOf<String>()
-    repeat(24) {
-        alltimes.add("$currtime")
-        currtime += 1
-    }
-    return alltimes
-}
-
-
-
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterial3Api
 @Composable
 fun SearchScreen(
     onNavigateToResultScreen: (String, String, Long, Int) -> Unit,
+    navController: NavController
     ) {
 
     var latitude by remember { mutableStateOf("") }
@@ -102,7 +99,29 @@ fun SearchScreen(
 
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text(text = "Search") }) }
+        topBar = { CenterAlignedTopAppBar(title = { Text(text = "Search") }) },
+        bottomBar = {
+            BottomAppBar {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(onClick = { navController.navigate("searchScreen") }) {
+                        Icon(Icons.Filled.Search, contentDescription = "Search")
+                    }
+                    IconButton(onClick = { navController.navigate("mapScreen") }) {
+                        Icon(Icons.Filled.Place, contentDescription = "Map")
+                    }
+                    IconButton(onClick = { /* Placeholder action */ }) {
+                        Icon(Icons.Filled.Star, contentDescription = "Favourites")
+                    }
+                    IconButton(onClick = { /* Placeholder action */ }) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                }
+            }
+        }
+
     ) {innerPadding ->
         Column(
             verticalArrangement = Arrangement.SpaceBetween,

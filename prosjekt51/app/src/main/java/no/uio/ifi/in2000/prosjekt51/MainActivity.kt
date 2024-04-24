@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51
 
+import MapScreen
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +29,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
 import no.uio.ifi.in2000.prosjekt51.ui.home.HomeScreen
+import no.uio.ifi.in2000.prosjekt51.ui.map.MapViewScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.search.SearchScreen
@@ -66,11 +68,14 @@ fun App(
     val errorMessageState = resultScreenViewModel.resultScreenUiState.collectAsState()
 
     NavHost(navController = navController, startDestination = "searchScreen") {
+
+
         composable("searchScreen") {
             SearchScreen(
                 onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int ->
                     navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
-                }
+                },
+                navController = navController
             )
         }
         composable(
@@ -103,6 +108,10 @@ fun App(
                     errorMessage = errorMessageState.value.error
                 )
             }
+        }
+
+        composable("mapScreen") {
+            MapScreen(navController)
         }
     }
 }
