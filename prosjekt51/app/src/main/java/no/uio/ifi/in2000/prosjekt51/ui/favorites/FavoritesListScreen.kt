@@ -29,7 +29,8 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
 import kotlinx.coroutines.flow.collect
 
 @Composable
-fun FavoritesListScreen(navController: NavController) {
+fun FavoritesListScreen(
+    navController: NavController) {
     val context = LocalContext.current
     val viewModel: FavoriteViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -54,7 +55,7 @@ fun FavoritesListScreen(navController: NavController) {
                     modifier = Modifier.fillMaxWidth().height(56.dp),  // TODO: Same height on all screens
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    IconButton(onClick = { navController.navigate("searchScreen") }) {
+                    IconButton(onClick = { navController.navigate("searchScreen/-1/-1") }) {
                         Icon(Icons.Filled.Search, contentDescription = "Search")
                     }
                     IconButton(onClick = { navController.navigate("mapScreen") }) {
@@ -86,7 +87,7 @@ fun FavoritesListScreen(navController: NavController) {
 
                     LazyColumn {
                         items(favorites) { favorite ->
-                            FavoriteItem(favorite, viewModel)
+                            FavoriteItem(favorite, viewModel, navController)
                         }
                     }
                 }
@@ -96,11 +97,12 @@ fun FavoritesListScreen(navController: NavController) {
 }
 
 @Composable
-fun FavoriteItem(favorite: Favorite, viewModel: FavoriteViewModel) {
+fun FavoriteItem(favorite: Favorite, viewModel: FavoriteViewModel, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        onClick = { navController.navigate("searchScreen/${favorite.lat}/${favorite.lon}")}
     ) {
         Row(
             modifier = Modifier

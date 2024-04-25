@@ -91,17 +91,28 @@ fun App(
     // Observerer endringer i feilmeldingen
     val errorMessageState = resultScreenViewModel.resultScreenUiState.collectAsState()
 
-    NavHost(navController = navController, startDestination = "searchScreen") {
+    NavHost(navController = navController, startDestination = "searchScreen/0/0") {
+        composable(
+            route = "searchScreen/{latitudeInit}/{longitudeInit}",
+            arguments = listOf(
+                navArgument("latitudeInit") { type = NavType.StringType },
+                navArgument("longitudeInit") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val latitudeInit = if (backStackEntry.arguments?.getString("latitudeInit") == "-1") "" else backStackEntry.arguments?.getString("latitudeInit") ?: ""
+            val longitudeInit = if (backStackEntry.arguments?.getString("longitudeInit") == "-1") "" else backStackEntry.arguments?.getString("longitudeInit") ?: ""
 
-
-        composable("searchScreen") {
             SearchScreen(
+                latitudeInit = latitudeInit,
+                longitudeInit = longitudeInit,
                 onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int ->
                     navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
                 },
                 navController = navController
             )
         }
+
+
         composable(
             "resultScreen/{latitude}/{longitude}/{date}/{hour}",
             arguments = listOf(

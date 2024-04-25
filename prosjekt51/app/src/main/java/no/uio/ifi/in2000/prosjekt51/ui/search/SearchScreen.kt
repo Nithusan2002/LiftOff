@@ -74,12 +74,14 @@ private fun isLongitudeValid(lon: String): Boolean {
 @ExperimentalMaterial3Api
 @Composable
 fun SearchScreen(
+    latitudeInit: String,
+    longitudeInit: String,
     onNavigateToResultScreen: (String, String, Long, Int) -> Unit,
     navController: NavController
     ) {
 
-    var latitude by remember { mutableStateOf("") }
-    var longitude by remember { mutableStateOf("") }
+    var latitude by remember { mutableStateOf(latitudeInit) }
+    var longitude by remember { mutableStateOf(longitudeInit) }
     var time by remember { mutableStateOf("${(LocalDateTime.now().hour + 1).mod(24)}:00") }
     var date by remember { mutableStateOf("${LocalDateTime.now().dayOfMonth}.${"${LocalDateTime.now().monthValue}".padStart(3, 0.toChar())}.${LocalDateTime.now().year}")}
     var dateint by remember { mutableIntStateOf(0)}
@@ -99,7 +101,7 @@ fun SearchScreen(
                     modifier = Modifier.fillMaxWidth().height(56.dp),  // TODO: Same height on all screens
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    IconButton(onClick = { navController.navigate("searchScreen") }) {
+                    IconButton(onClick = { navController.navigate("searchScreen/-1/-1") }) {
                         Icon(Icons.Filled.Search, contentDescription = "Search")
                     }
                     IconButton(onClick = { navController.navigate("mapScreen") }) {

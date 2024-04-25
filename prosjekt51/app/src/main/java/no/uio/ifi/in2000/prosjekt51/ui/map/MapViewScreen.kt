@@ -80,7 +80,7 @@ fun MapScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        IconButton(onClick = { navController.navigate("searchScreen") }) {
+                        IconButton(onClick = { navController.navigate("searchScreen/-1/-1") }) {
                             Icon(Icons.Filled.Search, contentDescription = "Search")
                         }
                         IconButton(onClick = { navController.navigate("mapScreen") }) {
