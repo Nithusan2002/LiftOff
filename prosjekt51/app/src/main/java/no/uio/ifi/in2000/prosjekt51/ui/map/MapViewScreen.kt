@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -33,14 +34,28 @@ import com.google.android.gms.maps.model.MarkerOptions
 import no.uio.ifi.in2000.prosjekt51.ui.map.MapViewScreen
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.DatabaseManager
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.Favorite
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
+import android.content.Context
 
 @Composable
 fun MapScreen(navController: NavController) {
     var selectedLatLng by remember { mutableStateOf<LatLng?>(null) } // State to hold selected coordinates
     var showSaveButton by remember { mutableStateOf(false) }  // State to control button visibility
+    var showSaveDialog by remember { mutableStateOf(false) }
+
+    if (showSaveDialog) {
+        SaveToFavoritesDialog(selectedLatLng!!)
+    }
+
 
     Scaffold(
         bottomBar = {
@@ -53,7 +68,7 @@ fun MapScreen(navController: NavController) {
                 ) {
                     if (showSaveButton && selectedLatLng != null) {
                         Button(
-                            onClick = { /* Currently does nothing, but could save to favorites */ },
+                            onClick = { showSaveDialog = true },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp)
@@ -91,8 +106,6 @@ fun MapScreen(navController: NavController) {
             MapViewWithState(showSaveButton, selectedLatLng, { latLng ->
                 selectedLatLng = latLng
                 showSaveButton = true
-                Log.d("MapScreen", "LatLng selected: $latLng")  // Debugging log
-                Log.d("MapScreen", "showSaveButton = $showSaveButton")
             })
         }
     }
@@ -134,4 +147,62 @@ fun rememberMapViewWithLifecycle(): MapView {
         }
     }
     return mapView
+}
+
+
+@Composable
+fun SaveToFavoritesDialog(latlon: LatLng) {
+    val context = LocalContext.current
+    val viewModel: FavoriteViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = DatabaseManager.getFavoriteRepository(context)
+                if (modelClass.isAssignableFrom(FavoriteViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return FavoriteViewModel(repository) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }
+    )
+
+    // Collect the list of favorites from the ViewModel.
+    val favorites by viewModel.favorites.collectAsState()
+    var showDialog by remember { mutableStateOf(true) }
+    var text by remember { mutableStateOf("") }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDialog = false
+            },
+            title = { Text("Save to Favorites") },
+            text = {
+                TextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text("Enter a name for the location") }
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.addFavorite(Favorite(lat = latlon.latitude, lon = latlon.longitude, name = text))
+                        showDialog = false
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }

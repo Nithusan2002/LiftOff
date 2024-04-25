@@ -94,7 +94,7 @@ fun SearchScreen(
     Scaffold(
         topBar = { CenterAlignedTopAppBar(title = { Text(text = "Search") }) },
         bottomBar = {
-            BottomAppBar {
+            BottomAppBar {// TODO: Separate into a component for importing, so it's easier to maintain
                 Row(
                     modifier = Modifier.fillMaxWidth().height(56.dp),  // TODO: Same height on all screens
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -105,7 +105,7 @@ fun SearchScreen(
                     IconButton(onClick = { navController.navigate("mapScreen") }) {
                         Icon(Icons.Filled.Place, contentDescription = "Map")
                     }
-                    IconButton(onClick = { /* Placeholder action */ }) {
+                    IconButton(onClick = { navController.navigate("favoritesScreen") }) {
                         Icon(Icons.Filled.Star, contentDescription = "Favourites")
                     }
                     IconButton(onClick = { /* Placeholder action */ }) {

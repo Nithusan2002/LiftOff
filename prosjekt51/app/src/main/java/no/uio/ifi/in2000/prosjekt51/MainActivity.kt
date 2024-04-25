@@ -16,18 +16,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.room.Room
 import com.example.compose.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.AppDatabase
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteRepository
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoritesListScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.search.SearchScreen
@@ -35,10 +42,29 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
+    private lateinit var favoriteViewModel: FavoriteViewModel
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preloadGribData()
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "favoritesDatabase.db"
+        ).fallbackToDestructiveMigration().build()
+
+        val favoriteDao = db.favoriteDao()
+        val favoriteRepository = FavoriteRepository(favoriteDao)
+        favoriteViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(FavoriteViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return FavoriteViewModel(favoriteRepository) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        })[FavoriteViewModel::class.java]
+
         setContent {
             AppTheme {
                 // A surface container using the 'background' color from the theme
@@ -110,6 +136,10 @@ fun App(
 
         composable("mapScreen") {
             MapScreen(navController)
+        }
+
+        composable("favoritesScreen") {
+            FavoritesListScreen(navController)
         }
     }
 }
