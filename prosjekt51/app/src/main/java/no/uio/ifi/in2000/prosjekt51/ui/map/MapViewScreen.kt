@@ -86,7 +86,7 @@ fun MapScreen(navController: NavController) {
                         IconButton(onClick = { navController.navigate("mapScreen") }) {
                             Icon(Icons.Filled.Place, contentDescription = "Map")
                         }
-                        IconButton(onClick = { /* Placeholder action */ }) {
+                        IconButton(onClick = { navController.navigate("favoritesScreen") }) {
                             Icon(Icons.Filled.Star, contentDescription = "Favourites")  // TODO: Favourites or Favorites or Favoritter?
                         }
                         IconButton(onClick = { /* Placeholder action */ }) {
