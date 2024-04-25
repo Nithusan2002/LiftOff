@@ -15,13 +15,10 @@ import no.uio.ifi.in2000.prosjekt51.R
 
 class MapViewScreen : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
-    private lateinit var confirmButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
-
-        confirmButton = findViewById(R.id.confirmButton)
 
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -35,18 +32,6 @@ class MapViewScreen : AppCompatActivity(), OnMapReadyCallback {
             mMap.clear()
             mMap.addMarker(MarkerOptions().position(latLng).title("Selected Location"))
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10f))
-
-            confirmButton.visibility = View.VISIBLE
-            confirmButton.setOnClickListener {
-                saveToFavorites(latLng)
-                confirmButton.visibility = View.GONE  // Optionally hide the button after saving
-            }
         }
     }
-}
-
-private fun saveToFavorites(latLng: LatLng) {
-    // Implement saving to favorites
-    // For example, save to a SharedPreferences or a database
-    Log.d("MapTesting", latLng.toString())
 }
