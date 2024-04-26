@@ -38,6 +38,8 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoritesListScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.search.SearchScreen
+import no.uio.ifi.in2000.prosjekt51.ui.search.VisualResultScreen
+import no.uio.ifi.in2000.prosjekt51.ui.search.VisualResultScreenViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -84,12 +86,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App(
     navController: NavHostController = rememberNavController(),
-    resultScreenViewModel: ResultScreenViewModel = remember { ResultScreenViewModel() } // Lagrer ViewModel som et husket verdi
+    visualResultScreenViewModel: VisualResultScreenViewModel = remember { VisualResultScreenViewModel() } // Lagrer ViewModel som et husket verdi
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Observerer endringer i feilmeldingen
-    val errorMessageState = resultScreenViewModel.resultScreenUiState.collectAsState()
+    //val errorMessageState = resultScreenViewModel.resultScreenUiState.collectAsState()
 
     NavHost(navController = navController, startDestination = "searchScreen/0/0") {
         composable(
@@ -127,20 +129,16 @@ fun App(
             val date = backStackEntry.arguments?.getLong("date")
             val hour = backStackEntry.arguments?.getInt("hour")
             if (latitude != null && longitude != null && date != null && hour != null) {
-                ResultScreen(
+                VisualResultScreen(
                     latitude = latitude,
                     longitude = longitude,
                     date = date,
                     hour = hour,
                     onNavigateToHomeScreen = {
-                        navController.navigate("searchScreen")
+                        navController.navigate("searchScreen/-1/-1")
                     },
-                    resultScreenViewModel = resultScreenViewModel,
-                    snackbarHostState = snackbarHostState,
-                    onRetryClicked = {
-                        navController.popBackStack()
-                    },
-                    errorMessage = errorMessageState.value.error
+                    visualResultScreenViewModel = visualResultScreenViewModel,
+                    navController = navController
                 )
             }
         }

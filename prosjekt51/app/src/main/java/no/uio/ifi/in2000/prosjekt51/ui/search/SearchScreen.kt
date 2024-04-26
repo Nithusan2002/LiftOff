@@ -82,7 +82,7 @@ fun SearchScreen(
 
     var latitude by remember { mutableStateOf(latitudeInit) }
     var longitude by remember { mutableStateOf(longitudeInit) }
-    var time by remember { mutableStateOf("${(LocalDateTime.now().hour + 1).mod(24)}:00") }
+    var time by remember { mutableStateOf("${(LocalDateTime.now().hour + 1).mod(24)}:00") } // TODO: When 23:00, it becomes 0:00 rather than 00:00 and crashes
     var date by remember { mutableStateOf("${LocalDateTime.now().dayOfMonth}.${"${LocalDateTime.now().monthValue}".padStart(3, 0.toChar())}.${LocalDateTime.now().year}")}
     var dateint by remember { mutableIntStateOf(0)}
     var height by remember { mutableIntStateOf(0) }
