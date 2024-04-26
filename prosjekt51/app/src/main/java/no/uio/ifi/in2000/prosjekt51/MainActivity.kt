@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51
 
+import no.uio.ifi.in2000.prosjekt51.ui.map.MapScreen
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -14,31 +16,57 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.room.Room
+import com.example.compose.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
-import no.uio.ifi.in2000.prosjekt51.ui.home.HomeScreen
-import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreen
-import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
-import no.uio.ifi.in2000.prosjekt51.ui.theme.Prosjekt51Theme
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.AppDatabase
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteRepository
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
+import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoritesListScreen
+import no.uio.ifi.in2000.prosjekt51.ui.search.SearchScreen
+import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreen
+import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreenViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
+    private lateinit var favoriteViewModel: FavoriteViewModel
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preloadGribData()
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "favoritesDatabase.db"
+        ).fallbackToDestructiveMigration().build()
+
+        val favoriteDao = db.favoriteDao()
+        val favoriteRepository = FavoriteRepository(favoriteDao)
+        favoriteViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(FavoriteViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return FavoriteViewModel(favoriteRepository) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        })[FavoriteViewModel::class.java]
+
         setContent {
-            Prosjekt51Theme {
+            AppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -51,25 +79,40 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App(
     navController: NavHostController = rememberNavController(),
-    resultScreenViewModel: ResultScreenViewModel = remember { ResultScreenViewModel() } // Lagrer ViewModel som et husket verdi
+    visualResultScreenViewModel: VisualResultScreenViewModel = remember { VisualResultScreenViewModel() } // Lagrer ViewModel som et husket verdi
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Observerer endringer i feilmeldingen
-    val errorMessageState = resultScreenViewModel.resultScreenUiState.collectAsState()
+    val errorMessageState = visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
-    NavHost(navController = navController, startDestination = "homeScreen") {
-        composable("homeScreen") {
-            HomeScreen(
+    NavHost(navController = navController, startDestination = "searchScreen/0/0") {
+        composable(
+            route = "searchScreen/{latitudeInit}/{longitudeInit}",
+            arguments = listOf(
+                navArgument("latitudeInit") { type = NavType.StringType },
+                navArgument("longitudeInit") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val latitudeInit = if (backStackEntry.arguments?.getString("latitudeInit") == "-500") "" else backStackEntry.arguments?.getString("latitudeInit") ?: ""
+            val longitudeInit = if (backStackEntry.arguments?.getString("longitudeInit") == "-500") "" else backStackEntry.arguments?.getString("longitudeInit") ?: ""
+
+            SearchScreen(
+                latitudeInit = latitudeInit,
+                longitudeInit = longitudeInit,
                 onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int ->
                     navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
-                }
+                },
+                navController = navController
             )
         }
+
+
         composable(
             "resultScreen/{latitude}/{longitude}/{date}/{hour}",
             arguments = listOf(
@@ -84,15 +127,16 @@ fun App(
             val date = backStackEntry.arguments?.getLong("date")
             val hour = backStackEntry.arguments?.getInt("hour")
             if (latitude != null && longitude != null && date != null && hour != null) {
-                ResultScreen(
+                VisualResultScreen(
                     latitude = latitude,
                     longitude = longitude,
                     date = date,
                     hour = hour,
                     onNavigateToHomeScreen = {
-                        navController.navigate("homeScreen")
+                        navController.navigate("searchScreen/-500/-500")
                     },
-                    resultScreenViewModel = resultScreenViewModel,
+                    visualResultScreenViewModel = visualResultScreenViewModel,
+                    navController = navController,
                     snackbarHostState = snackbarHostState,
                     onRetryClicked = {
                         navController.popBackStack()
@@ -100,6 +144,14 @@ fun App(
                     errorMessage = errorMessageState.value.error
                 )
             }
+        }
+
+        composable("mapScreen") {
+            MapScreen(navController)
+        }
+
+        composable("favoritesScreen") {
+            FavoritesListScreen(navController)
         }
     }
 }

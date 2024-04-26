@@ -78,7 +78,7 @@ object GribDataCache {
      properties:
         gribDataCache A map structure that holds time keys associated with lists of GribJson data.
      */
-    var gribDataCache: Map<String, List<GribJson>> = emptyMap()
+    private var gribDataCache: Map<String, List<GribJson>> = emptyMap()
 
     fun storeData(timeKey: String, data: List<GribJson>) {
         gribDataCache = gribDataCache.plus(timeKey to data)

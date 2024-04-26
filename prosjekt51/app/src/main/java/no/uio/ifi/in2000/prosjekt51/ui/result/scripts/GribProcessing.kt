@@ -74,7 +74,8 @@ fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?):
                 gribPoint.windshear = String.format("%.1f", windShear(
                     previousGribPoint.uComponent, previousGribPoint.vComponent,
                     gribPoint.uComponent, gribPoint.vComponent
-                )).toDouble()
+                )
+                ).toDouble()
             } else {
                 gribPoint.windshear = 0.0
             }

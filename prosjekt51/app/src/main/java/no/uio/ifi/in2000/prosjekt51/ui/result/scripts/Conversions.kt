@@ -1,17 +1,15 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result.scripts
 
-import android.util.Log
 import kotlin.math.atan2
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sqrt
 
-fun pressureToHeight(P: Double, t: Double, P_b: Double?, t_b: Double?): Double{
+fun pressureToHeight(P: Double, P_b: Double?, t_b: Double?): Double{
     /*
     Computes the altitude as a function of atmospheric pressure.
      */
     val P_b_pa = P_b?.times(100) ?: 0.0
-    val t_kel = celsiusToKelvin(t)
     val t_b_kel = celsiusToKelvin(t_b)
     val l = -(6.5/1000)
     val M = 0.028964425278793993
@@ -19,7 +17,6 @@ fun pressureToHeight(P: Double, t: Double, P_b: Double?, t_b: Double?): Double{
     val R = 8.3144598
     val exponent = (l * -R)/(g0 * M)
     val middleFactor = (t_b_kel/l).times((P / P_b_pa).pow(exponent) - 1)
-    Log.d("GribConversion", "Pressure $P converted to ${middleFactor}. Values: P: $P, t: $t, P_b: ${P_b_pa}, t_b: ${t_b}. Lapse rate is $exponent")
     return round(middleFactor)
 }
 
