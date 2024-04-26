@@ -1,20 +1,12 @@
+package no.uio.ifi.in2000.prosjekt51.ui.map
+
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.*
@@ -28,12 +20,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import no.uio.ifi.in2000.prosjekt51.ui.map.MapViewScreen
 import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,7 +33,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.DatabaseManager
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.Favorite
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
-import android.content.Context
 import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 
 @Composable
@@ -88,19 +76,20 @@ fun MapScreen(navController: NavController) {
                 .padding(innerPadding)
                 .fillMaxHeight()
         ) {
-            MapViewWithState(showSaveButton, selectedLatLng, { latLng ->
+            MapViewWithState { latLng ->
                 selectedLatLng = latLng
                 showSaveButton = true
-            })
+
+            }
         }
     }
 }
 
 @Composable
-fun MapViewWithState(showSaveButton: Boolean, selectedLatLng: LatLng?, onLocationSelected: (LatLng) -> Unit) {
+fun MapViewWithState(onLocationSelected: (LatLng) -> Unit) {
     val mapView = rememberMapViewWithLifecycle()
-    AndroidView({ mapView }) { mapView ->
-        mapView.getMapAsync { googleMap ->
+    AndroidView({ mapView }) { mv ->
+        mv.getMapAsync { googleMap ->
             googleMap.setOnMapClickListener { latLng ->
                 googleMap.clear()
                 googleMap.addMarker(
@@ -121,9 +110,9 @@ fun rememberMapViewWithLifecycle(): MapView {
         MapView(context).apply {
             onCreate(Bundle())
             onResume()
-            getMapAsync(OnMapReadyCallback { googleMap ->
+            getMapAsync { _ ->
                 MapViewScreen()
-            })
+            }
         }
     }
     DisposableEffect(mapView) {
@@ -152,7 +141,6 @@ fun SaveToFavoritesDialog(latlon: LatLng) {
     )
 
     // Collect the list of favorites from the ViewModel.
-    val favorites by viewModel.favorites.collectAsState()
     var showDialog by remember { mutableStateOf(true) }
     var text by remember { mutableStateOf("") }
 

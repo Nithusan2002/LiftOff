@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -100,7 +99,7 @@ class VisualResultScreenViewModel: ViewModel() {
 
 
     private fun checkWindCondition(lfwData: LocationForecastWeatherData?): Boolean{
-        Log.d("WeatcherChecked", "data: ${lfwData}")
+        Log.d("WeatcherChecked", "data: $lfwData")
         Log.d("WeatherChecked", "windspeedofgust: ${lfwData?.wind_speed_of_gust}")
         Log.d("WeatherChecked", "maxwindspeed: ${findMaximumAirWindSpeed()}")
         Log.d("WeatherChecked", "maxwindshear: ${findMaximumWindShear()}")
@@ -146,7 +145,7 @@ class VisualResultScreenViewModel: ViewModel() {
     }
 
 
-    fun getGribData(time: String): List<GribJson>? {
+    private fun getGribData(time: String): List<GribJson>? {
         return GribDataCache.getData(time)
     }
 
@@ -192,19 +191,7 @@ class VisualResultScreenViewModel: ViewModel() {
 
     }
 
-    fun fetchIsobaricGrib(time: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val result = weatherDataRepository.fetchDataFromIsobaricGribAPI(time)
-                _visualResultScreenUiState.update { currentUiState ->
-                    currentUiState.copy(isobaricGribData = result.parsedGribData, error = null)
-                }
-            } catch (e: Exception) {
-                Log.e("ResultScreenViewModel", "Failed to fetch gribdata: ${e.message}", e)
-                _visualResultScreenUiState.value = _visualResultScreenUiState.value.copy(error = "Kan ikke hente gribdata")
-            }
-        }
-    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun findClosestGribData(target: String): String {
         val possTimes = calculateTimesToFetch()

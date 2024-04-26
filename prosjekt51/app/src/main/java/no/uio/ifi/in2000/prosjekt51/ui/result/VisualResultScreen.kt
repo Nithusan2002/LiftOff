@@ -212,41 +212,47 @@ fun VisualResultScreen(
                 }
             }
             Divider()
-            if (displayState == DisplayStates.TOTAL) {
-                SummaryDisplay(
-                    visualResultScreenViewModel = visualResultScreenViewModel,
-                    visualResultScreenUiState = visualResultScreenUiState,
-                    enterFuncWind = { displayState = DisplayStates.WIND },
-                    enterFuncSight = { displayState = DisplayStates.SIGHT },
-                    enterFuncPrecipitation = { displayState = DisplayStates.PRECIPITATION },
-                    enterFuncAir = { displayState = DisplayStates.AIR },
-                    lat = latitude.toDouble(),
-                    lon = longitude.toDouble()
-                )
-            } else if (displayState == DisplayStates.WIND) {
-                WindDisplay(
-                    exitFunc = { displayState = DisplayStates.TOTAL },
-                    data = visualResultScreenUiState.currentLocationForecastData,
-                    gribPoints = visualResultScreenUiState.currentGribData,
-                    ground_pressure = visualResultScreenUiState.currentLocationForecastData?.data?.air_pressure_at_sea_level,
-                    ground_temp = visualResultScreenUiState.currentLocationForecastData?.data?.air_temperature
-                )
-            } else if (displayState == DisplayStates.SIGHT) {
-                SightDisplay(
-                    exitFunc = { displayState = DisplayStates.TOTAL },
-                    data = visualResultScreenUiState.currentLocationForecastData
-                )
+            when (displayState) {
+                DisplayStates.TOTAL -> {
+                    SummaryDisplay(
+                        visualResultScreenViewModel = visualResultScreenViewModel,
+                        visualResultScreenUiState = visualResultScreenUiState,
+                        enterFuncWind = { displayState = DisplayStates.WIND },
+                        enterFuncSight = { displayState = DisplayStates.SIGHT },
+                        enterFuncPrecipitation = { displayState = DisplayStates.PRECIPITATION },
+                        enterFuncAir = { displayState = DisplayStates.AIR },
+                        lat = latitude.toDouble(),
+                        lon = longitude.toDouble()
+                    )
+                }
+                DisplayStates.WIND -> {
+                    WindDisplay(
+                        exitFunc = { displayState = DisplayStates.TOTAL },
+                        data = visualResultScreenUiState.currentLocationForecastData,
+                        gribPoints = visualResultScreenUiState.currentGribData,
+                        groundPressure = visualResultScreenUiState.currentLocationForecastData?.data?.air_pressure_at_sea_level,
+                        groundTemp = visualResultScreenUiState.currentLocationForecastData?.data?.air_temperature
+                    )
+                }
+                DisplayStates.SIGHT -> {
+                    SightDisplay(
+                        exitFunc = { displayState = DisplayStates.TOTAL },
+                        data = visualResultScreenUiState.currentLocationForecastData
+                    )
 
-            } else if (displayState == DisplayStates.PRECIPITATION) {
-                PrecipitationDisplay(
-                    exitFunc = { displayState = DisplayStates.TOTAL },
-                    data = visualResultScreenUiState.currentLocationForecastData
-                )
-            } else if (displayState == DisplayStates.AIR) {
-                AirDisplay(
-                    exitFunc = { displayState = DisplayStates.TOTAL },
-                    data = visualResultScreenUiState.currentLocationForecastData
-                )
+                }
+                DisplayStates.PRECIPITATION -> {
+                    PrecipitationDisplay(
+                        exitFunc = { displayState = DisplayStates.TOTAL },
+                        data = visualResultScreenUiState.currentLocationForecastData
+                    )
+                }
+                DisplayStates.AIR -> {
+                    AirDisplay(
+                        exitFunc = { displayState = DisplayStates.TOTAL },
+                        data = visualResultScreenUiState.currentLocationForecastData
+                    )
+                }
             }
         }
     }
@@ -274,7 +280,7 @@ fun SummaryDisplay(visualResultScreenViewModel: VisualResultScreenViewModel, vis
 }
 
 @Composable
-fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribPoint>?, ground_pressure: Double?, ground_temp: Double?){
+fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribPoint>?, groundPressure: Double?, groundTemp: Double?){
     val safeGribPoints = gribPoints ?: emptyList()
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -300,7 +306,7 @@ fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribP
                 .fillMaxWidth()
                 .padding(16.dp)) {
                 items(safeGribPoints) { gribPoint ->
-                    GribPointItems(gribPoint, ground_pressure, ground_temp)
+                    GribPointItems(gribPoint, groundPressure, groundTemp)
                 }
             }
         }
@@ -505,9 +511,9 @@ fun AirSection(enterFunc: () -> Unit, data: TimeAndData?) {
 }
 
 @Composable
-fun GribPointItems(gribPoint: GribPoint, ground_pressure: Double?, ground_temp: Double?) {
+fun GribPointItems(gribPoint: GribPoint, groundPressure: Double?, groundTemp: Double?) {
     Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Height: ${pressureToHeight(gribPoint.height, gribPoint.temperature, ground_pressure, ground_temp)} meters")
+        Text(text = "Height: ${pressureToHeight(gribPoint.height, groundPressure, groundTemp)} meters")
         Text(text = "Wind: ${gribPoint.wind}")
         Text(text = "Temperature: ${gribPoint.temperature}")
         Text(text = "Wind-Shear: ${gribPoint.windshear}")

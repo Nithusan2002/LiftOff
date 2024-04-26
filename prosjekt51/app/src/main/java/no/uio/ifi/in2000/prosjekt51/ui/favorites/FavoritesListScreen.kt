@@ -1,32 +1,23 @@
 package no.uio.ifi.in2000.prosjekt51.ui.favorites
 
 import android.content.Context
-import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.CardElevation
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.room.Room
-import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
-import kotlinx.coroutines.flow.collect
 import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 
 @Composable
@@ -116,7 +107,7 @@ fun FavoriteItem(favorite: Favorite, viewModel: FavoriteViewModel, navController
 object DatabaseManager {
     private var appDatabase: AppDatabase? = null
 
-    fun getDatabase(context: Context): AppDatabase {
+    private fun getDatabase(context: Context): AppDatabase {
         if (appDatabase == null) {
             appDatabase = Room.databaseBuilder(
                 context.applicationContext,

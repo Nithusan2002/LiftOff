@@ -1,6 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51
 
-import MapScreen
+import no.uio.ifi.in2000.prosjekt51.ui.map.MapScreen
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
