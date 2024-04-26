@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import androidx.room.Room
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
 import kotlinx.coroutines.flow.collect
+import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 
 @Composable
 fun FavoritesListScreen(
@@ -50,24 +51,8 @@ fun FavoritesListScreen(
 
     Scaffold(
         bottomBar = {
-            BottomAppBar {// TODO: Separate into a component for importing, so it's easier to maintain
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(56.dp),  // TODO: Same height on all screens
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    IconButton(onClick = { navController.navigate("searchScreen/-1/-1") }) {
-                        Icon(Icons.Filled.Search, contentDescription = "Search")
-                    }
-                    IconButton(onClick = { navController.navigate("mapScreen") }) {
-                        Icon(Icons.Filled.Place, contentDescription = "Map")
-                    }
-                    IconButton(onClick = { navController.navigate("favoritesScreen") }) {
-                        Icon(Icons.Filled.Star, contentDescription = "Favourites")
-                    }
-                    IconButton(onClick = { /* Placeholder action */ }) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
-                    }
-                }
+            BottomAppBar {
+                BottomNavigation(navController = navController)
             }
         }
 

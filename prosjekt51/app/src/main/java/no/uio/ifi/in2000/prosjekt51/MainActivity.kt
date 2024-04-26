@@ -35,11 +35,9 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.AppDatabase
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteRepository
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoritesListScreen
-import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreen
-import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.search.SearchScreen
-import no.uio.ifi.in2000.prosjekt51.ui.search.VisualResultScreen
-import no.uio.ifi.in2000.prosjekt51.ui.search.VisualResultScreenViewModel
+import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreen
+import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreenViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -91,7 +89,7 @@ fun App(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Observerer endringer i feilmeldingen
-    //val errorMessageState = resultScreenViewModel.resultScreenUiState.collectAsState()
+    val errorMessageState = visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
     NavHost(navController = navController, startDestination = "searchScreen/0/0") {
         composable(
@@ -101,8 +99,8 @@ fun App(
                 navArgument("longitudeInit") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val latitudeInit = if (backStackEntry.arguments?.getString("latitudeInit") == "-1") "" else backStackEntry.arguments?.getString("latitudeInit") ?: ""
-            val longitudeInit = if (backStackEntry.arguments?.getString("longitudeInit") == "-1") "" else backStackEntry.arguments?.getString("longitudeInit") ?: ""
+            val latitudeInit = if (backStackEntry.arguments?.getString("latitudeInit") == "-500") "" else backStackEntry.arguments?.getString("latitudeInit") ?: ""
+            val longitudeInit = if (backStackEntry.arguments?.getString("longitudeInit") == "-500") "" else backStackEntry.arguments?.getString("longitudeInit") ?: ""
 
             SearchScreen(
                 latitudeInit = latitudeInit,
@@ -135,10 +133,15 @@ fun App(
                     date = date,
                     hour = hour,
                     onNavigateToHomeScreen = {
-                        navController.navigate("searchScreen/-1/-1")
+                        navController.navigate("searchScreen/-500/-500")
                     },
                     visualResultScreenViewModel = visualResultScreenViewModel,
-                    navController = navController
+                    navController = navController,
+                    snackbarHostState = snackbarHostState,
+                    onRetryClicked = {
+                        navController.popBackStack()
+                    },
+                    errorMessage = errorMessageState.value.error
                 )
             }
         }

@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.prosjekt51.ui.search
+package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
 import android.util.Log

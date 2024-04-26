@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavController
+import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -96,24 +97,8 @@ fun SearchScreen(
     Scaffold(
         topBar = { CenterAlignedTopAppBar(title = { Text(text = "Search") }) },
         bottomBar = {
-            BottomAppBar {// TODO: Separate into a component for importing, so it's easier to maintain
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(56.dp),  // TODO: Same height on all screens
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    IconButton(onClick = { navController.navigate("searchScreen/-1/-1") }) {
-                        Icon(Icons.Filled.Search, contentDescription = "Search")
-                    }
-                    IconButton(onClick = { navController.navigate("mapScreen") }) {
-                        Icon(Icons.Filled.Place, contentDescription = "Map")
-                    }
-                    IconButton(onClick = { navController.navigate("favoritesScreen") }) {
-                        Icon(Icons.Filled.Star, contentDescription = "Favourites")
-                    }
-                    IconButton(onClick = { /* Placeholder action */ }) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
-                    }
-                }
+            BottomAppBar {
+                BottomNavigation(navController = navController)
             }
         }
 
@@ -276,7 +261,9 @@ fun SearchScreen(
                         }
                     },
                     label = { Text(text = "[meter]") },
-                    modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, bottom = 2.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp, bottom = 2.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                 )

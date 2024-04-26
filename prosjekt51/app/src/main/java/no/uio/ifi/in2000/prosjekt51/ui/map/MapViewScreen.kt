@@ -45,6 +45,7 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.DatabaseManager
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.Favorite
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
 import android.content.Context
+import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 
 @Composable
 fun MapScreen(navController: NavController) {
@@ -76,23 +77,7 @@ fun MapScreen(navController: NavController) {
                             Text("Save position to favourites")
                         }
                     }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        IconButton(onClick = { navController.navigate("searchScreen/-1/-1") }) {
-                            Icon(Icons.Filled.Search, contentDescription = "Search")
-                        }
-                        IconButton(onClick = { navController.navigate("mapScreen") }) {
-                            Icon(Icons.Filled.Place, contentDescription = "Map")
-                        }
-                        IconButton(onClick = { navController.navigate("favoritesScreen") }) {
-                            Icon(Icons.Filled.Star, contentDescription = "Favourites")  // TODO: Favourites or Favorites or Favoritter?
-                        }
-                        IconButton(onClick = { /* Placeholder action */ }) {
-                            Icon(Icons.Filled.Settings, contentDescription = "Settings")
-                        }
-                    }
+                    BottomNavigation(navController = navController)
                 }
             }
         }
