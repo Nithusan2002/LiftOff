@@ -1,8 +1,8 @@
-# Sekvensdiagram 
+# Sequencediagram 
 
 ```mermaid
 sequenceDiagram
-    actor Bruker
+    actor User
     participant UI
     participant ViewModel
     participant Repository
@@ -10,59 +10,58 @@ sequenceDiagram
     participant LocationForecast
     participant IsobaricGRIB
 
-    Bruker->>UI: Velger lokasjon, tidspunkt og høyde
+    User->>UI: Choosing location, time and altitide
 
     UI->>ViewModel: fetchLocationForecast(lat, lon, alt, time)
     UI->>ViewModel: fetchIsobaricGrib(time)
     
     
-    alt LocationForecast suksess
+    alt LocationForecast Success
         ViewModel->>Repository: fetchLocationForecast(lat, lon, alt, time)
         Repository->>DataSource: fetchLocationForecast(lat, lon, alt, time)
         DataSource->>LocationForecast: fetchLocationForecast(lat, lon, alt, time)
 
-        LocationForecast-->>DataSource: data
-        DataSource-->>ViewModel: data
-        
-    else LocationForecast feil
-        LocationForecast-->>DataSource:Feil
-        DataSource-->>ViewModel: Feil
-    end
-
-    alt IsobaricGRIB suksess
-        IsobaricGRIB-->>DataSource: Returnerer IsobaricGRIB data
+        LocationForecast-->>DataSource: Data
         DataSource-->>ViewModel: Data
-    else IsobaricGRIB feil
-        IsobaricGRIB-->>DataSource: Feil
-        DataSource-->>ViewModel: Feil
+        
+    else LocationForecast Error
+        LocationForecast-->>DataSource: Error
+        DataSource-->>ViewModel: Error
     end
 
-    alt suksess
-        UI-->>Bruker: Viser data 
+    alt IsobaricGRIB Success
+        IsobaricGRIB-->>DataSource: Returns IsobaricGRIB data
+        DataSource-->>ViewModel: Data
+    else IsobaricGRIB Error
+        IsobaricGRIB-->>DataSource: Error
+        DataSource-->>ViewModel: Error
+    end
 
-    else Feil
-        ViewModel-->>UI: Viser snackbar
+    alt Success
+        UI-->>User: Show data 
+
+    else Error
+        ViewModel-->>UI: Show snackbar
 
     end
 ```
     
 # Use Case
 
-## Tekstlig beskrivelse av use case
-**Navn**: Reserver bil
-**Primæraktør**: Kundebehandler
-**Sekundæraktør**: -
-**Prebetingelse**: Ingen
-**Postbetingelse**: Leiekontrakt for spesifisert bil og kunde med gitte utleiedatoer er opprettet
+## Textual description of the use case
 
-**Hovedflyt**:
-1. Kundebehandler velger tidsintervall (hentedato og returdato)
-2. Systemet returnerer en liste over tilgjengelige biler innenfor de spesifiserte datoene
-3. Kundebehandler velger én av bilene.
-4. Systemet ber om kundenr og finner kunden i systemet
-5. Systemet bekrefter at bilen er reservert for den gitte perioden
+**Primary actor**: User: A person who wants to obtain a weather forecast for a specific location, time, and altitude to check if it is possible to launch a rocket. <br>
+**Precondition**: The user must have access to the application, and the UI must be ready to receive user input. <br>
+**Postcondition**: The user has been presented with the desired information for the selected location, time, and altitude, along with a result indicating whether it is possible or not to launch a rocket. <br>
 
-**Alternativ flyt punkt 2*:
-2.1: Det finnes ingen tilgjengelige biler i valgt tidsintervall.
-2.2. Systemet opplyser om at det ikke er tilgjengelige biler innenfor oppgitt tidsintervall. 2.3. Kundebehandler
-oppgir et nytt tidsintervall (steg 1) eller avslutter bruksmønsteret
+**Main flow**:
+1. LOREM IPSUM
+2. LOREM IPSUM
+3. LOREM IPSUM
+4. LOREM IPSUM
+5. LOREM IPSUM
+
+**Alternative flow**: <br>
+X.1: LOREM IPSUM <br>
+X.2: LOREM IPSUM <br>
+X.3: LOREM IPSUM <br>
