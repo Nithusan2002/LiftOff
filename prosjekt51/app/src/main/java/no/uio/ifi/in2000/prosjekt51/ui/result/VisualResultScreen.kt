@@ -27,6 +27,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -86,17 +87,17 @@ fun VisualResultScreen(
         }
     }
 
-    var time by remember { mutableStateOf("$hour:00") }
-    var dropdownDate by remember { mutableStateOf(Instant.ofEpochMilli(date).toString().take(10))}
-    var timeexpanded by remember { mutableStateOf(false) }
-    var dateexpanded by remember { mutableStateOf(false) }
-    var displayState by remember { mutableStateOf(DisplayStates.TOTAL)}
+    var time by rememberSaveable { mutableStateOf("$hour:00") }
+    var dropdownDate by rememberSaveable { mutableStateOf(Instant.ofEpochMilli(date).toString().take(10))}
+    var timeexpanded by rememberSaveable { mutableStateOf(false) }
+    var dateexpanded by rememberSaveable { mutableStateOf(false) }
+    var displayState by rememberSaveable { mutableStateOf(DisplayStates.TOTAL)}
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    var expanded by remember { mutableStateOf(false) }
+                    var expanded by rememberSaveable { mutableStateOf(false) }
                     IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
                     }
@@ -104,8 +105,10 @@ fun VisualResultScreen(
                         ExposedDropdownMenuBox(
                             expanded = timeexpanded,
                             onExpandedChange = { timeexpanded = !timeexpanded },
-                            modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
-                                .width(160.dp).height(56.dp)
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
+                                .width(160.dp)
+                                .height(56.dp)
                         ) {
                             TextField(
                                 modifier = Modifier
@@ -146,8 +149,10 @@ fun VisualResultScreen(
                         ExposedDropdownMenuBox(
                             expanded = dateexpanded,
                             onExpandedChange = { dateexpanded = !dateexpanded },
-                            modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
-                                .width(160.dp).height(56.dp)
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
+                                .width(160.dp)
+                                .height(56.dp)
                         ) {
                             TextField(
                                 modifier = Modifier

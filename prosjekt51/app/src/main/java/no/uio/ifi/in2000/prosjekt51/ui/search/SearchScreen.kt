@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,9 +77,9 @@ fun SearchScreen(
     navController: NavController
     ) {
 
-    var latitude by remember { mutableStateOf(latitudeInit) }
-    var longitude by remember { mutableStateOf(longitudeInit) }
-    var height by remember { mutableIntStateOf(0) }
+    var latitude by rememberSaveable { mutableStateOf(latitudeInit) }
+    var longitude by rememberSaveable { mutableStateOf(longitudeInit) }
+    var height by rememberSaveable { mutableIntStateOf(0) }
 
 
 
