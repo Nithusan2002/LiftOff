@@ -213,12 +213,13 @@ fun SearchScreen(
 
 
                         if (isLatitudeValid(latitude) && isLongitudeValid(longitude)) {
+                            Log.d("FinalTesting", "Height: ${if (height == 0) 80_000.0 else height.toDouble()}")
                             onNavigateToResultScreen(
                                 latitude,
                                 longitude,
                                 searchdate,
                                 "${LocalDateTime.now().hour}".take(2).toInt(),
-                                3000.0
+                                if (height == 0) 80_000.0 else height.toDouble()
                             )
                         }
                     },
