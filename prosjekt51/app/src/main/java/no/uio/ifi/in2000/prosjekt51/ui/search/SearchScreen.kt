@@ -199,19 +199,16 @@ fun SearchScreen(
                         // Get the current date
                         val currentdate = LocalDateTime.now()
 
-                        Log.d("TimeZoneShenanigans", "Currentdate: $currentdate")
 
                         // Strip the time to get midnight
                         val dateAtMidnight = currentdate.toLocalDate().atStartOfDay()
 
-                        Log.d("TimeZoneShenanigans", "dateAtMidnight: $dateAtMidnight")
 
 
                         // Convert to milliseconds since January 1, 1970
                         val searchdate =
                             dateAtMidnight.toInstant(ZoneOffset.UTC).toEpochMilli()
 
-                        Log.d("TimeZoneShenanigans", "Searchdate: ${dateAtMidnight.toInstant(ZoneOffset.UTC)}")
 
 
 

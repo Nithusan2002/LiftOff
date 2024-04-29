@@ -27,10 +27,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -50,6 +54,7 @@ fun VisualResultScreen(
     errorMessage: String?
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
+
 
     Log.d("height","In VisualResultScreen, got height $height")
     visualResultScreenViewModel.fetchData(
@@ -82,7 +87,9 @@ fun VisualResultScreen(
     }
 
     var time by remember { mutableStateOf("$hour:00") }
+    var dropdownDate by remember { mutableStateOf(Instant.ofEpochMilli(date).toString().take(10))}
     var timeexpanded by remember { mutableStateOf(false) }
+    var dateexpanded by remember { mutableStateOf(false) }
     var displayState by remember { mutableStateOf(DisplayStates.TOTAL)}
 
     Scaffold(
@@ -93,43 +100,100 @@ fun VisualResultScreen(
                     IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
                     }
-                    ExposedDropdownMenuBox(
-                        expanded = timeexpanded,
-                        onExpandedChange = { timeexpanded = !timeexpanded },
-                        modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 1.dp).width(160.dp)
-                    ) {
-                        TextField(
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth(),
-                            readOnly = true,
-                            value = time,
-                            onValueChange = {
-                                time = it
-                            },
-                            label = { Text(text = "Launch time") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = timeexpanded) },
-                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                        )
-
-                        ExposedDropdownMenu(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
+                    Row() {
+                        ExposedDropdownMenuBox(
                             expanded = timeexpanded,
-                            onDismissRequest = { timeexpanded = false }
+                            onExpandedChange = { timeexpanded = !timeexpanded },
+                            modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
+                                .width(160.dp).height(56.dp)
                         ) {
-                            (0..23).forEach { hour ->
-                                val hourText = "%02d:00".format(hour)
-                                DropdownMenuItem(
-                                    text = { Text(hourText) },
-                                    onClick = {
-                                        time = hourText
-                                        navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
-                                        timeexpanded = false
-                                    },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                )
+                            TextField(
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth(),
+                                readOnly = true,
+                                value = time,
+                                onValueChange = {
+                                    time = it
+                                },
+                                label = { Text(text = "Launch time") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = timeexpanded) },
+                                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                                textStyle = TextStyle(fontSize = 22.sp)
+                            )
+
+                            ExposedDropdownMenu(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
+                                expanded = timeexpanded,
+                                onDismissRequest = { timeexpanded = false }
+                            ) {
+                                (0..23).forEach { hour ->
+                                    val hourText = "%02d:00".format(hour)
+                                    DropdownMenuItem(
+                                        text = { Text(hourText) },
+                                        onClick = {
+                                            time = hourText
+                                            navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
+                                            timeexpanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
+                            }
+                        }
+                        ExposedDropdownMenuBox(
+                            expanded = dateexpanded,
+                            onExpandedChange = { dateexpanded = !dateexpanded },
+                            modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
+                                .width(160.dp).height(56.dp)
+                        ) {
+                            TextField(
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth(),
+                                readOnly = true,
+                                value = dropdownDate,
+                                onValueChange = {
+                                    dropdownDate = it
+                                },
+                                label = { Text(text = "Launch date") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dateexpanded) },
+                                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                                textStyle = TextStyle(fontSize = 16.sp)
+                            )
+
+                            ExposedDropdownMenu(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
+                                expanded = dateexpanded,
+                                onDismissRequest = { dateexpanded = false }
+                            ) {
+                                (0..7).forEach { day ->
+                                    val nextday = LocalDateTime.now().plusDays(day.toLong())
+                                    val dateText = "${nextday.dayOfMonth}.${
+                                        "${nextday.monthValue}".padStart(
+                                            3,
+                                            0.toChar()
+                                        )
+                                    }.${nextday.year}"
+                                    DropdownMenuItem(
+                                        text = { Text(dateText) },
+                                        onClick = {
+                                            dropdownDate = dateText
+                                            val dateAtMidnight =
+                                                nextday.toLocalDate().atStartOfDay()
+                                            val newdate =
+                                                dateAtMidnight.toInstant(ZoneOffset.UTC)
+                                                    .toEpochMilli()
+                                            navController.navigate("resultScreen/$latitude/$longitude/$newdate/$hour/$height")
+                                            dateexpanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
                             }
                         }
                     }
