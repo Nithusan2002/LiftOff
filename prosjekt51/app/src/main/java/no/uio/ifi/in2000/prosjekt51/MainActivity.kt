@@ -105,8 +105,8 @@ fun App(
             SearchScreen(
                 latitudeInit = latitudeInit,
                 longitudeInit = longitudeInit,
-                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int ->
-                    navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
+                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int, height: Double ->
+                    navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
                 },
                 navController = navController
             )
@@ -114,24 +114,28 @@ fun App(
 
 
         composable(
-            "resultScreen/{latitude}/{longitude}/{date}/{hour}",
+            "resultScreen/{latitude}/{longitude}/{date}/{hour}/{height}",
             arguments = listOf(
                 navArgument("latitude") {type = NavType.StringType},
                 navArgument("longitude") {type = NavType.StringType},
                 navArgument("date") {type = NavType.LongType},
-                navArgument("hour") {type = NavType.IntType}
+                navArgument("hour") {type = NavType.IntType},
+                navArgument("height") {type = NavType.FloatType}
             )
         ) { backStackEntry ->
             val latitude = backStackEntry.arguments?.getString("latitude")
             val longitude = backStackEntry.arguments?.getString("longitude")
             val date = backStackEntry.arguments?.getLong("date")
             val hour = backStackEntry.arguments?.getInt("hour")
+            val height = backStackEntry.arguments?.getFloat("height")
             if (latitude != null && longitude != null && date != null && hour != null) {
+                Log.d("height", "In MainActivity got height $height")
                 VisualResultScreen(
                     latitude = latitude,
                     longitude = longitude,
                     date = date,
                     hour = hour,
+                    height = height?.toDouble(),
                     onNavigateToHomeScreen = {
                         navController.navigate("searchScreen/-500/-500")
                     },
@@ -191,7 +195,7 @@ private fun preloadGribData() {
 @RequiresApi(Build.VERSION_CODES.O)
 fun calculateTimesToFetch(): List<String> {
     val possibleTimes = listOf("00", "03", "06", "09", "12", "15", "18", "21")
-    val currentHour = LocalDateTime.now().hour
+    val currentHour = LocalDateTime.now().hour - 3
     val closestTimes = possibleTimes.map { it.toInt() }.filter { it >= currentHour }.take(5)
 
     // If we have less than 5 times, it means we need to take some from the next day

@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51.model.isobaricGrib
 
+import android.util.Log
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -81,6 +82,7 @@ object GribDataCache {
     private var gribDataCache: Map<String, List<GribJson>> = emptyMap()
 
     fun storeData(timeKey: String, data: List<GribJson>) {
+        Log.d("GribFixing", "CURRENTLY STORING TIME $timeKey FOR ${data.take(40)}")
         gribDataCache = gribDataCache.plus(timeKey to data)
     }
 

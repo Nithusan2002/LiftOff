@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.prosjekt51.ui.search
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 // Function to validate latitude
 private fun isLatitudeValid(lat: String): Boolean {
@@ -70,19 +72,14 @@ private fun isLongitudeValid(lon: String): Boolean {
 fun SearchScreen(
     latitudeInit: String,
     longitudeInit: String,
-    onNavigateToResultScreen: (String, String, Long, Int) -> Unit,
+    onNavigateToResultScreen: (String, String, Long, Int, Double) -> Unit,
     navController: NavController
     ) {
 
     var latitude by remember { mutableStateOf(latitudeInit) }
     var longitude by remember { mutableStateOf(longitudeInit) }
-    var time by remember { mutableStateOf("${(LocalDateTime.now().hour + 1).mod(24)}:00") } // TODO: When 23:00, it becomes 0:00 rather than 00:00 and crashes
-    var date by remember { mutableStateOf("${LocalDateTime.now().dayOfMonth}.${"${LocalDateTime.now().monthValue}".padStart(3, 0.toChar())}.${LocalDateTime.now().year}")}
-    var dateint by remember { mutableIntStateOf(0)}
     var height by remember { mutableIntStateOf(0) }
 
-    var timeexpanded by remember { mutableStateOf(false) }
-    var dateexpanded by remember { mutableStateOf(false) }
 
 
 
@@ -120,7 +117,7 @@ fun SearchScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     OutlinedButton(
-                        onClick = { /*TODO*/ },
+                        onClick = { },
                         shape = RoundedCornerShape(5.dp),
                         modifier = Modifier
                             .height(52.dp)
@@ -149,7 +146,7 @@ fun SearchScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     OutlinedButton(
-                        onClick = { /*TODO*/ },
+                        onClick = { },
                         shape = RoundedCornerShape(5.dp),
                         modifier = Modifier
                             .height(52.dp)
@@ -165,83 +162,6 @@ fun SearchScreen(
                         singleLine = true,
                         isError = !isLongitudeValid(longitude) && longitude.isNotEmpty()
                     )
-                }
-
-                LabeledDivider(label = "Time")
-
-                ExposedDropdownMenuBox(
-                    expanded = timeexpanded,
-                    onExpandedChange = { timeexpanded = !timeexpanded },
-                    modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 2.dp)
-                ) {
-                    TextField(
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        value = time,
-                        onValueChange = { time = it },
-                        label = { Text(text = "Launch time") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = timeexpanded) },
-                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                    )
-
-                    ExposedDropdownMenu(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
-                        expanded = timeexpanded,
-                        onDismissRequest = { timeexpanded = false }
-                    ) {
-                        (0..23).forEach { hour ->
-                            val hourText = "%02d:00".format(hour)
-                            DropdownMenuItem(
-                                text = { Text(hourText) },
-                                onClick = {
-                                    time = hourText
-                                    timeexpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
-
-
-                LabeledDivider(label = "Date")
-
-                ExposedDropdownMenuBox(expanded = dateexpanded, onExpandedChange = { dateexpanded = !dateexpanded }, modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 2.dp)) {
-                    TextField(
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        value = date,
-                        onValueChange = { date = it },
-                        label = { Text(text = "Launch time") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dateexpanded) },
-                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                    )
-
-                    ExposedDropdownMenu(
-                        modifier = Modifier.fillMaxWidth(),
-                        expanded = dateexpanded,
-                        onDismissRequest = { dateexpanded = false },
-                    ) {
-                        (0..7).forEach { day ->
-                            val nextday = LocalDateTime.now().plusDays(day.toLong())
-                            val dateText = "${nextday.dayOfMonth}.${"${nextday.monthValue}".padStart(3, 0.toChar())}.${nextday.year}" // TODO: PadStart not working?
-                            DropdownMenuItem(
-                                text = { Text(dateText) },
-                                onClick = {
-                                    date = dateText
-                                    dateint = day
-                                    dateexpanded = false
-                                          },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
                 }
 
                 LabeledDivider(label = "Expected height")
@@ -274,25 +194,44 @@ fun SearchScreen(
                 ) {
                     Text(text = "More options")
                 }
-                Button(onClick = {
-                    // Get the current date and add days
-                    val currentdate = LocalDateTime.now().plusDays(dateint.toLong())
+                Button(
+                    onClick = {
+                        // Get the current date
+                        val currentdate = LocalDateTime.now()
 
-                    // Strip the time to get midnight
-                    val dateAtMidnight = currentdate.toLocalDate().atStartOfDay()
+                        Log.d("TimeZoneShenanigans", "Currentdate: $currentdate")
 
-                    // Convert to milliseconds since January 1, 1970
-                    val searchdate = dateAtMidnight.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                        // Strip the time to get midnight
+                        val dateAtMidnight = currentdate.toLocalDate().atStartOfDay()
+
+                        Log.d("TimeZoneShenanigans", "dateAtMidnight: $dateAtMidnight")
 
 
-                    if (isLatitudeValid(latitude) && isLongitudeValid(longitude)) {
-                        onNavigateToResultScreen(latitude, longitude, searchdate, time.take(2).toInt())
-                    } },
+                        // Convert to milliseconds since January 1, 1970
+                        val searchdate =
+                            dateAtMidnight.toInstant(ZoneOffset.UTC).toEpochMilli()
+
+                        Log.d("TimeZoneShenanigans", "Searchdate: ${dateAtMidnight.toInstant(ZoneOffset.UTC)}")
+
+
+
+                        if (isLatitudeValid(latitude) && isLongitudeValid(longitude)) {
+                            onNavigateToResultScreen(
+                                latitude,
+                                longitude,
+                                searchdate,
+                                "${LocalDateTime.now().hour}".take(2).toInt(),
+                                3000.0
+                            )
+                        }
+                    },
                     shape = RoundedCornerShape(5.dp),
                     modifier = Modifier
                         .height(52.dp)
-                        .fillMaxWidth(),
-                    contentPadding = PaddingValues(0.dp),) {
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    contentPadding = PaddingValues(0.dp),
+                ) {
                     Text(text = "Search")
                 }
 

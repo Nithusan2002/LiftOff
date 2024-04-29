@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,7 @@ fun VisualResultScreen(
     longitude: String,
     date: Long,
     hour: Int,
+    height: Double?,
     visualResultScreenViewModel: VisualResultScreenViewModel = viewModel(),
     onNavigateToHomeScreen: () -> Unit,
     navController: NavController,
@@ -49,11 +51,13 @@ fun VisualResultScreen(
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
+    Log.d("height","In VisualResultScreen, got height $height")
     visualResultScreenViewModel.fetchData(
         lat = latitude.toDouble(),
         lon = longitude.toDouble(),
         date = date,
-        hour = hour
+        hour = hour,
+        height = height
     )
 
 
@@ -77,7 +81,7 @@ fun VisualResultScreen(
         }
     }
 
-    var time by remember { mutableStateOf("${(LocalDateTime.now().hour + 1).mod(24)}:00") }
+    var time by remember { mutableStateOf("$hour:00") }
     var timeexpanded by remember { mutableStateOf(false) }
     var displayState by remember { mutableStateOf(DisplayStates.TOTAL)}
 
@@ -88,44 +92,44 @@ fun VisualResultScreen(
                     var expanded by remember { mutableStateOf(false) }
                     IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                        ExposedDropdownMenuBox(
-                            expanded = timeexpanded,
-                            onExpandedChange = { timeexpanded = !timeexpanded },
-                            modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 2.dp)
-                        ) {
-                            TextField(
-                                modifier = Modifier
-                                    .menuAnchor()
-                                    .fillMaxWidth(),
-                                readOnly = true,
-                                value = time,
-                                onValueChange = {
-                                    time = it
-                                                },
-                                label = { Text(text = "Launch time") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = timeexpanded) },
-                                colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                            )
+                    }
+                    ExposedDropdownMenuBox(
+                        expanded = timeexpanded,
+                        onExpandedChange = { timeexpanded = !timeexpanded },
+                        modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 1.dp).width(160.dp)
+                    ) {
+                        TextField(
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            readOnly = true,
+                            value = time,
+                            onValueChange = {
+                                time = it
+                            },
+                            label = { Text(text = "Launch time") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = timeexpanded) },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        )
 
-                            ExposedDropdownMenu(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
-                                expanded = timeexpanded,
-                                onDismissRequest = { timeexpanded = false }
-                            ) {
-                                (0..23).forEach { hour ->
-                                    val hourText = "%02d:00".format(hour)
-                                    DropdownMenuItem(
-                                        text = { Text(hourText) },
-                                        onClick = {
-                                            time = hourText
-                                            navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
-                                            timeexpanded = false
-                                        },
-                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                    )
-                                }
+                        ExposedDropdownMenu(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
+                            expanded = timeexpanded,
+                            onDismissRequest = { timeexpanded = false }
+                        ) {
+                            (0..23).forEach { hour ->
+                                val hourText = "%02d:00".format(hour)
+                                DropdownMenuItem(
+                                    text = { Text(hourText) },
+                                    onClick = {
+                                        time = hourText
+                                        navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
+                                        timeexpanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                )
                             }
                         }
                     }
@@ -137,7 +141,7 @@ fun VisualResultScreen(
                             contentDescription = "Back"
                         )
                     }
-                }
+                },
             )
         },
         bottomBar = {

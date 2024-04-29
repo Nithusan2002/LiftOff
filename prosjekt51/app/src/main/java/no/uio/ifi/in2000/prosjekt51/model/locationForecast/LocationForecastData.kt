@@ -14,7 +14,7 @@ data class TimeseriesEntry(
         data: An Instance of InstantDataContainer representing the weather conditions at the given time.
      */
     val time: String,
-    val data: InstantDataContainer
+    val data: InstantDataContainer,
 )
 
 @Serializable
@@ -24,7 +24,8 @@ data class InstantDataContainer(
      properties:
         instant: An instance of InstantDetails representing the detailed weather conditions at a specific time.
      */
-    val instant: InstantDetails
+    val instant: InstantDetails,
+    val next_1_hours: NextHourDetails? = null
 )
 
 @Serializable
@@ -37,8 +38,18 @@ data class InstantDetails(
     val details: LocationForecastWeatherData
 )
 
+@Serializable
+data class NextHourDetails(
+    /*A serializable data class which holds the minutiae of weather conditions at a specific time, plus one hour.
 
-// The following two data classes are the classes we actually want to store in the uistate. // TODO: Sikkert mye bedre/mer effektive måter å gjøre dette på.
+     properties:
+        details: An Instance of LocationForecastWeatherData representing the exact weather conditions/details during the next hour.
+     */
+    val details: LocationForecastWeatherNextHourData
+)
+
+
+// The following three data classes are the classes we actually want to store in the uistate. // TODO: Sikkert mye bedre/mer effektive måter å gjøre dette på.
 @Serializable
 data class LocationForecastWeatherData(
     /* A serializable data class representing the detailed weather condition data at a specific time.
@@ -55,7 +66,6 @@ data class LocationForecastWeatherData(
     val cloud_area_fraction_medium: Double? = null,
     val dew_point_temperature: Double,
     val fog_area_fraction: Double? = null,
-    val precipitation_amount: Double? = null,
     val relative_humidity: Double,
     val ultraviolet_index_clear_sky: Double? = null,
     val wind_from_direction: Double,
@@ -64,6 +74,20 @@ data class LocationForecastWeatherData(
     val wind_speed_percentile_10: Double? = null,
     val wind_speed_percentile_90: Double? = null
 )
+
+@Serializable
+data class LocationForecastWeatherNextHourData(
+    /* A serializable data class representing the detailed weather condition data during the next hour
+    from a specific time. It contains information about different precipitation parameters.
+     */
+    val precipitation_amount: Double? = null,
+    val precipitation_amount_max: Double? = null,
+    val precipitation_amount_min: Double? = null,
+    val probability_of_precipitation: Double? = null,
+    val probability_of_thunder: Double? = null
+)
+
+
 
 data class TimeAndData(
     /*
@@ -74,5 +98,6 @@ data class TimeAndData(
      data: An Instance of LocationForecastWeatherData representing the detailed weather conditions at the specified time.
      */
     val time: String,
-    val data: LocationForecastWeatherData
+    val data: LocationForecastWeatherData,
+    val nexthourdata: LocationForecastWeatherNextHourData?
 )

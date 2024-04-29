@@ -18,9 +18,12 @@ import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherData
+import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherNextHourData
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
+import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
@@ -33,7 +36,8 @@ data class VisualResultScreenUiState(
     val windCondition: Boolean = false,
     val sightCondition: Boolean = false,
     val precipitationCondition: Boolean = false,
-    val airCondition: Boolean = false
+    val airCondition: Boolean = false,
+    val height: Double = 80_000.0
 ) {
     val hasError: Boolean
         get() = error != null
@@ -47,7 +51,7 @@ class VisualResultScreenViewModel: ViewModel() {
     val visualResultScreenUiState: StateFlow<VisualResultScreenUiState> = _visualResultScreenUiState.asStateFlow()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun fetchData(lat: Double, lon:Double, alt: Int = 0, date: Long, hour: Int) {
+    fun fetchData(lat: Double, lon:Double, alt: Int = 0, date: Long, hour: Int, height: Double? = null) {
         /*
         Fetches weather data into uiState
 
@@ -63,6 +67,8 @@ class VisualResultScreenViewModel: ViewModel() {
         val correctedTime = findClosestGribData(time)
         fetchLocationForecast(lat, lon, alt, time)
         getCurrentGribData(lat, lon, correctedTime)
+        Log.d("Height", "Height found in fetchdata: $height")
+        if (height != null) { updateHeight(height)}
     }
 
 
@@ -79,11 +85,12 @@ class VisualResultScreenViewModel: ViewModel() {
         val launchCheckResult: List<Boolean>
 
         val data = visualResultScreenUiState.value.currentLocationForecastData?.data
+        val nexthourdata = visualResultScreenUiState.value.currentLocationForecastData?.nexthourdata
         //If a value is above the limit value or null the result is false
         launchCheckResult = listOf(
             checkWindCondition(data),
             checkSightCondition(data),
-            checkPrecipitationCondition(data),
+            checkPrecipitationCondition(nexthourdata),
             checkAirCondition(data)
         )
 
@@ -97,17 +104,24 @@ class VisualResultScreenViewModel: ViewModel() {
         }
     }
 
+    private fun updateHeight(height: Double){
+        _visualResultScreenUiState.update { currentUiState ->
+            currentUiState.copy(height = height, error = null)
+        }
+    }
+
 
     private fun checkWindCondition(lfwData: LocationForecastWeatherData?): Boolean{
-        Log.d("WeatcherChecked", "data: $lfwData")
-        Log.d("WeatherChecked", "windspeedofgust: ${lfwData?.wind_speed_of_gust}")
-        Log.d("WeatherChecked", "maxwindspeed: ${findMaximumAirWindSpeed()}")
-        Log.d("WeatherChecked", "maxwindshear: ${findMaximumWindShear()}")
-
         return when {
             (lfwData?.wind_speed_of_gust?.compareTo(8.6) ?: 1) > 0 -> false
-            (findMaximumAirWindSpeed() ?: 0.0).compareTo(17.2) > 0 -> false
-            (findMaximumWindShear() ?: 0.0).compareTo(24.5) > 0 -> false
+            (findMaximumAirWindSpeed(visualResultScreenUiState.value.height,
+                visualResultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
+                visualResultScreenUiState.value.currentLocationForecastData?.data?.air_temperature ?: 0.0
+            ) ?: 0.0).compareTo(17.2) > 0 -> false
+            (findMaximumWindShear(visualResultScreenUiState.value.height,
+                visualResultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
+                visualResultScreenUiState.value.currentLocationForecastData?.data?.air_temperature ?: 0.0
+                ) ?: 0.0).compareTo(24.5) > 0 -> false
             else -> true
         }
     }
@@ -121,7 +135,7 @@ class VisualResultScreenViewModel: ViewModel() {
         }
     }
 
-    private fun checkPrecipitationCondition(lfwData: LocationForecastWeatherData?): Boolean{
+    private fun checkPrecipitationCondition(lfwData: LocationForecastWeatherNextHourData?): Boolean{
         return when {
             (lfwData?.precipitation_amount?.compareTo(0) ?: 1) > 0 -> false
             else -> true
@@ -136,23 +150,38 @@ class VisualResultScreenViewModel: ViewModel() {
         }
     }
 
-    fun findMaximumAirWindSpeed(): Double? {
-        return visualResultScreenUiState.value.currentGribData?.maxOfOrNull { it.wind }
+    fun findMaximumAirWindSpeed(height: Double, P_b: Double, t_b: Double): Double? {
+        Log.d("Height", "Finding maximum wind for height $height")
+        Log.d("Height", "Here's before the filter: ${visualResultScreenUiState.value.currentGribData}")
+        Log.d("Height", "Here's all the heights: ${
+            visualResultScreenUiState.value.currentGribData?.map { 
+                pressureToHeight( it.height, P_b, t_b) 
+            }?.joinToString(", ")}")
+        Log.d("Height", "Here's the filter: ${visualResultScreenUiState.value.currentGribData
+            ?.filter { it.height <= height }}")
+        return visualResultScreenUiState.value.currentGribData
+            ?.filter { pressureToHeight( it.height, P_b, t_b)  <= height }
+            ?.maxOfOrNull { it.wind }
     }
 
-    fun findMaximumWindShear(): Double? {
-        return visualResultScreenUiState.value.currentGribData?.maxOfOrNull { it.windshear }
+    fun findMaximumWindShear(height: Double, P_b: Double, t_b: Double): Double? {
+        return visualResultScreenUiState.value.currentGribData
+            ?.filter {pressureToHeight( it.height, P_b, t_b)  <= height }
+            ?.maxOfOrNull { it.windshear }
     }
 
 
     private fun getGribData(time: String): List<GribJson>? {
+        Log.d("GribFixing", "TRYING TO FETCH TIME $time FROM GRIBCACHE")
         return GribDataCache.getData(time)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentGribData(lat: Double, lon: Double, time: String){
+        Log.d("GribFixing", "Getting current data for: $time")
         _visualResultScreenUiState.update { currentUiState ->
             val gribPoints = getGribDataFromCoordinates(lat, lon, getGribData(time))
+            Log.d("GribFixing", "Surprise; found that gribPoints is: $gribPoints")
             currentUiState.copy(isobaricGribData = getGribData(time), currentGribData = gribPoints)
         }
         checkLaunchConditions()
@@ -216,9 +245,11 @@ class VisualResultScreenViewModel: ViewModel() {
 
         // Check if the closest time is within 90 minutes (5400 seconds)
         if (closestTime != null && minDifference <= 5400) {
+            Log.d("GribFixing", "PRESTO! I HAVE TRANSFORMED YOUR TIME OF $target into ${formatter.format(closestTime) + "Z"}")
             return formatter.format(closestTime) + "Z"
         }
 
+        Log.d("GribFixing", "I have failed... $target is still $target ")
         return target
     }
 }

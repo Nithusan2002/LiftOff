@@ -48,7 +48,8 @@ class WeatherDataRepository(
         return timeseriesList.map { timeseriesEntry ->     // TODO: Per nå returneres kun data innenfor "instant".
             TimeAndData(                                   // TODO: Etter hvert burde vi sjekke om den andre dataen er relevant også.
                 time = timeseriesEntry.time,
-                data = timeseriesEntry.data.instant.details
+                data = timeseriesEntry.data.instant.details,
+                nexthourdata = timeseriesEntry.data.next_1_hours?.details
             )
         }
     }
