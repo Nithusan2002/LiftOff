@@ -4,7 +4,6 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
@@ -32,7 +31,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -52,7 +50,6 @@ fun VisualResultScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
     onRetryClicked: () -> Unit,
-    errorMessage: String?
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
@@ -94,6 +91,9 @@ fun VisualResultScreen(
     var displayState by rememberSaveable { mutableStateOf(DisplayStates.TOTAL)}
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             TopAppBar(
                 title = {
