@@ -7,9 +7,13 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -31,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
+import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.AppDatabase
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteRepository
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
@@ -91,72 +96,84 @@ fun App(
     // Observerer endringer i feilmeldingen
     val errorMessageState = visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
-    NavHost(navController = navController, startDestination = "searchScreen/0/0") {
-        composable(
-            route = "searchScreen/{latitudeInit}/{longitudeInit}",
-            arguments = listOf(
-                navArgument("latitudeInit") { type = NavType.StringType },
-                navArgument("longitudeInit") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val latitudeInit = if (backStackEntry.arguments?.getString("latitudeInit") == "-500") "" else backStackEntry.arguments?.getString("latitudeInit") ?: ""
-            val longitudeInit = if (backStackEntry.arguments?.getString("longitudeInit") == "-500") "" else backStackEntry.arguments?.getString("longitudeInit") ?: ""
-
-            SearchScreen(
-                latitudeInit = latitudeInit,
-                longitudeInit = longitudeInit,
-                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int, height: Double ->
-                    navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
-                },
-                navController = navController
-            )
-        }
-
-
-        composable(
-            "resultScreen/{latitude}/{longitude}/{date}/{hour}/{height}",
-            arguments = listOf(
-                navArgument("latitude") {type = NavType.StringType},
-                navArgument("longitude") {type = NavType.StringType},
-                navArgument("date") {type = NavType.LongType},
-                navArgument("hour") {type = NavType.IntType},
-                navArgument("height") {type = NavType.FloatType}
-            )
-        ) { backStackEntry ->
-            val latitude = backStackEntry.arguments?.getString("latitude")
-            val longitude = backStackEntry.arguments?.getString("longitude")
-            val date = backStackEntry.arguments?.getLong("date")
-            val hour = backStackEntry.arguments?.getInt("hour")
-            val height = backStackEntry.arguments?.getFloat("height")
-            if (latitude != null && longitude != null && date != null && hour != null) {
-                Log.d("height", "In MainActivity got height $height")
-                VisualResultScreen(
-                    latitude = latitude,
-                    longitude = longitude,
-                    date = date,
-                    hour = hour,
-                    height = height?.toDouble(),
-                    onNavigateToHomeScreen = {
-                        navController.navigate("searchScreen/-500/-500")
-                    },
-                    visualResultScreenViewModel = visualResultScreenViewModel,
-                    navController = navController,
-                    snackbarHostState = snackbarHostState,
-                    onRetryClicked = {
-                        navController.popBackStack()
-                    },
-                    errorMessage = errorMessageState.value.error
-                )
+    Scaffold (
+        bottomBar = {
+            BottomAppBar {
+                BottomNavigation(navController = navController)
             }
         }
+    ) {
+        innerPadding ->
+            Column(
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                NavHost(navController = navController, startDestination = "searchScreen/0/0") {
+                    composable(
+                        route = "searchScreen/{latitudeInit}/{longitudeInit}",
+                        arguments = listOf(
+                            navArgument("latitudeInit") { type = NavType.StringType },
+                            navArgument("longitudeInit") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val latitudeInit = if (backStackEntry.arguments?.getString("latitudeInit") == DEFAULT_COORDS) "" else backStackEntry.arguments?.getString("latitudeInit") ?: ""
+                        val longitudeInit = if (backStackEntry.arguments?.getString("longitudeInit") == DEFAULT_COORDS) "" else backStackEntry.arguments?.getString("longitudeInit") ?: ""
 
-        composable("mapScreen") {
-            MapScreen(navController)
-        }
+                        SearchScreen(
+                            latitudeInit = latitudeInit,
+                            longitudeInit = longitudeInit,
+                            onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int, height: Double ->
+                                navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
+                            },
+                        )
+                    }
 
-        composable("favoritesScreen") {
-            FavoritesListScreen(navController)
-        }
+
+                    composable(
+                        "resultScreen/{latitude}/{longitude}/{date}/{hour}/{height}",
+                        arguments = listOf(
+                            navArgument("latitude") {type = NavType.StringType},
+                            navArgument("longitude") {type = NavType.StringType},
+                            navArgument("date") {type = NavType.LongType},
+                            navArgument("hour") {type = NavType.IntType},
+                            navArgument("height") {type = NavType.FloatType}
+                        )
+                    ) { backStackEntry ->
+                        val latitude = backStackEntry.arguments?.getString("latitude")
+                        val longitude = backStackEntry.arguments?.getString("longitude")
+                        val date = backStackEntry.arguments?.getLong("date")
+                        val hour = backStackEntry.arguments?.getInt("hour")
+                        val height = backStackEntry.arguments?.getFloat("height")
+                        if (latitude != null && longitude != null && date != null && hour != null) {
+                            Log.d("height", "In MainActivity got height $height")
+                            VisualResultScreen(
+                                latitude = latitude,
+                                longitude = longitude,
+                                date = date,
+                                hour = hour,
+                                height = height?.toDouble(),
+                                onNavigateToHomeScreen = {
+                                    navController.navigate("searchScreen/$DEFAULT_COORDS/$DEFAULT_COORDS")
+                                },
+                                visualResultScreenViewModel = visualResultScreenViewModel,
+                                navController = navController,
+                                snackbarHostState = snackbarHostState,
+                                onRetryClicked = {
+                                    navController.popBackStack()
+                                },
+                                errorMessage = errorMessageState.value.error
+                            )
+                        }
+                    }
+
+                    composable("mapScreen") {
+                        MapScreen(navController)
+                    }
+
+                    composable("favoritesScreen") {
+                        FavoritesListScreen(navController)
+                    }
+                }
+            }
     }
 }
 

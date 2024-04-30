@@ -212,11 +212,6 @@ fun VisualResultScreen(
                     }
                 },
             )
-        },
-        bottomBar = {
-            BottomAppBar {
-                BottomNavigation(navController = navController)
-            }
         }
     ) { innerPadding ->
         Column(

@@ -40,36 +40,28 @@ fun FavoritesListScreen(
     // Collect the list of favorites from the ViewModel.
     val favorites by viewModel.favorites.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            BottomAppBar {
-                BottomNavigation(navController = navController)
-            }
-        }
 
-    ) { innerPadding ->
-        Column(
-            verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxHeight()) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Favorites", style = MaterialTheme.typography.headlineSmall)
-                    Spacer(modifier = Modifier.height(10.dp))
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxHeight()) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Favorites", style = MaterialTheme.typography.headlineSmall)
+                Spacer(modifier = Modifier.height(10.dp))
 
-                    LazyColumn {
-                        items(favorites) { favorite ->
-                            FavoriteItem(favorite, viewModel, navController)
-                        }
+                LazyColumn {
+                    items(favorites) { favorite ->
+                        FavoriteItem(favorite, viewModel, navController)
                     }
                 }
             }
         }
     }
+
 }
 
 @Composable

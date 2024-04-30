@@ -47,25 +47,20 @@ fun MapScreen(navController: NavController) {
 
 
     Scaffold(
-        bottomBar = {
-            BottomAppBar(
-                modifier = Modifier.height(if (showSaveButton && selectedLatLng != null) 122.dp else 56.dp) // TODO: Add height so bottom bar looks unchanged
+        topBar = {
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (showSaveButton && selectedLatLng != null) {
-                        Button(
-                            onClick = { showSaveDialog = true },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text("Save position to favourites")
-                        }
+                if (showSaveButton && selectedLatLng != null) {
+                    Button(
+                        onClick = { showSaveDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text("Save position to favourites")
                     }
-                    BottomNavigation(navController = navController)
                 }
             }
         }

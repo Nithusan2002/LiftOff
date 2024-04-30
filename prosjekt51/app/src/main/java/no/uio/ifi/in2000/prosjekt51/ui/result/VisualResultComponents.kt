@@ -39,7 +39,7 @@ fun SummaryDisplay(visualResultScreenViewModel: VisualResultScreenViewModel, vis
         .padding(8.dp)
         .fillMaxWidth()
         .fillMaxHeight()) {
-        WindSection(enterFunc = enterFuncWind, data = visualResultScreenUiState.currentLocationForecastData, visualResultScreenViewModel = visualResultScreenViewModel, visualResultScreenUiState = visualResultScreenUiState, lat = lat, lon = lon)
+        WindSection(enterFunc = enterFuncWind, data = visualResultScreenUiState.currentLocationForecastData, visualResultScreenUiState = visualResultScreenUiState, lat = lat, lon = lon)
         SightSection(enterFunc = enterFuncSight, data = visualResultScreenUiState.currentLocationForecastData)
         PrecipitationSection(enterFunc = enterFuncPrecipitation, data = visualResultScreenUiState.currentLocationForecastData)
         AirSection(enterFunc = enterFuncAir, data = visualResultScreenUiState.currentLocationForecastData)
@@ -210,7 +210,7 @@ fun AirDisplay(exitFunc: () -> Unit, data: TimeAndData?){
 
 
 @Composable
-fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenViewModel: VisualResultScreenViewModel, visualResultScreenUiState: VisualResultScreenUiState, lat: Double, lon: Double) {
+fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiState: VisualResultScreenUiState, lat: Double, lon: Double) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -223,12 +223,8 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenVie
                 Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = Color.DarkGray)
             }
             Text("Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s")
-            Text("Maximum wind-speed: ${visualResultScreenViewModel.findMaximumAirWindSpeed(visualResultScreenUiState.height, 
-                visualResultScreenUiState.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0, 
-                visualResultScreenUiState.currentLocationForecastData?.data?.air_temperature ?: 0.0)} m/s")
-            Text("Maximum wind-shear: ${visualResultScreenViewModel.findMaximumWindShear(visualResultScreenUiState.height,
-                visualResultScreenUiState.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
-                visualResultScreenUiState.currentLocationForecastData?.data?.air_temperature ?: 0.0)} m/s")
+            Text("Maximum wind-speed: ${visualResultScreenUiState.maxWindSpeed} m/s")
+            Text("Maximum wind-shear: ${visualResultScreenUiState.maxWindShear} m/s")
 
         }
     }

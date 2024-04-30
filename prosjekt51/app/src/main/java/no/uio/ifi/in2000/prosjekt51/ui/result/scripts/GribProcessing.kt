@@ -1,8 +1,11 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result.scripts
 
 import android.util.Log
+import no.uio.ifi.in2000.prosjekt51.INVALID_GRIB
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
+
+
 
 
 fun findCoordinateCell(lat: Double, lon: Double, gribJson: GribJson): Pair<Int, Int> {
@@ -16,15 +19,13 @@ fun findCoordinateCell(lat: Double, lon: Double, gribJson: GribJson): Pair<Int, 
         A Pair of Integers indicating the indices (`n`, `m`) in the data grid corresponding to the coordinates.
      */
     if (lat < gribJson.header.la1 || lat > gribJson.header.la2) {
-        Log.d("CoordinateError", "Latitude $lat is out of bounds [${gribJson.header.la1} to ${gribJson.header.la2}]")
-        return Pair(-1, -1)
+        return Pair(INVALID_GRIB, INVALID_GRIB)
     }
 
     val fittedlon = if (gribJson.header.lo1 > 180) gribJson.header.lo1 - 360 else gribJson.header.lo1
 
     if (lon < fittedlon || lon > gribJson.header.lo2) {
-        Log.d("CoordinateError", "Longitude $lon is out of bounds [${gribJson.header.lo1} to ${gribJson.header.lo2}]")
-        return Pair(-1, -1)
+        return Pair(INVALID_GRIB, INVALID_GRIB)
     }
 
     val n = ((lon - gribJson.header.lo1 + gribJson.header.dx / 2) / gribJson.header.dx).toInt()
@@ -54,7 +55,7 @@ fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?):
 
     val (n, m) = findCoordinateCell(lat, lon, grib.first())
 
-    if (n == -1 && m == -1) {
+    if (n == INVALID_GRIB && m == INVALID_GRIB) {
         Log.d("GribFixing","Coordinates were invalid >:(")
         return mutableListOf()
     }
