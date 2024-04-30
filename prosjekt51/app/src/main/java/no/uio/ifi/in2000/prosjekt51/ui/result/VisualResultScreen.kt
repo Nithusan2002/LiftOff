@@ -31,6 +31,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -50,6 +51,7 @@ fun VisualResultScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
     onRetryClicked: () -> Unit,
+    errorMessage: String?
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
