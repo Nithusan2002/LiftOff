@@ -39,7 +39,7 @@ fun SummaryDisplay(visualResultScreenViewModel: VisualResultScreenViewModel, vis
         .padding(8.dp)
         .fillMaxWidth()
         .fillMaxHeight()) {
-        WindSection(enterFunc = enterFuncWind, data = visualResultScreenUiState.currentLocationForecastData, visualResultScreenViewModel = visualResultScreenViewModel, lat = lat, lon = lon)
+        WindSection(enterFunc = enterFuncWind, data = visualResultScreenUiState.currentLocationForecastData, visualResultScreenUiState = visualResultScreenUiState, lat = lat, lon = lon)
         SightSection(enterFunc = enterFuncSight, data = visualResultScreenUiState.currentLocationForecastData)
         PrecipitationSection(enterFunc = enterFuncPrecipitation, data = visualResultScreenUiState.currentLocationForecastData)
         AirSection(enterFunc = enterFuncAir, data = visualResultScreenUiState.currentLocationForecastData)
@@ -148,7 +148,7 @@ fun PrecipitationDisplay(exitFunc: () -> Unit, data: TimeAndData?){
             .fillMaxSize()
             .padding(top = 48.dp)) {
             Text(
-                text = "Precipitation: ${data?.data?.precipitation_amount} mm",
+                text = "Precipitation: ${data?.nexthourdata?.precipitation_amount} mm",
                 fontSize = 20.sp,
                 modifier = Modifier.padding(16.dp)
             )
@@ -198,7 +198,7 @@ fun AirDisplay(exitFunc: () -> Unit, data: TimeAndData?){
                 modifier = Modifier.padding(16.dp)
             )
             Text(
-                text = "Air pressure: ${data?.data?.air_pressure_at_sea_level} mB", // TODO: Er det millibar?
+                text = "Air pressure: ${data?.data?.air_pressure_at_sea_level} hPa",
                 fontSize = 20.sp,
                 modifier = Modifier.padding(16.dp)
             )
@@ -210,7 +210,7 @@ fun AirDisplay(exitFunc: () -> Unit, data: TimeAndData?){
 
 
 @Composable
-fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenViewModel: VisualResultScreenViewModel, lat: Double, lon: Double) {
+fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiState: VisualResultScreenUiState, lat: Double, lon: Double) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -223,8 +223,8 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenVie
                 Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = Color.DarkGray)
             }
             Text("Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s")
-            Text("Maximum wind-speed in athmosphere: ${visualResultScreenViewModel.findMaximumAirWindSpeed()} %")
-            Text("Maximum wind-shear in athmosphere: ${visualResultScreenViewModel.findMaximumWindShear()} %")
+            Text("Maximum wind-speed: ${visualResultScreenUiState.maxWindSpeed} m/s")
+            Text("Maximum wind-shear: ${visualResultScreenUiState.maxWindShear} m/s")
 
         }
     }
@@ -257,7 +257,7 @@ fun PrecipitationSection(enterFunc: () -> Unit, data: TimeAndData?) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "Precipitation", style = MaterialTheme.typography.titleMedium)
-            Text("Precipitation amount: ${data?.data?.precipitation_amount} mm") // TODO: Doesn't work?
+            Text("Precipitation amount: ${data?.nexthourdata?.precipitation_amount} mm")
         }
     }
 }
