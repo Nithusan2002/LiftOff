@@ -28,6 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.edgeConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.goodConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onBadConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onEdgeConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onGoodConditionsContainerLight
 
 // Structural
 
@@ -81,18 +87,18 @@ fun BottomNavigation(navController: NavController){
 
 // Data visualisation
 
-data class LaunchWindow(val hour: Int, val color: Color)
+data class LaunchWindow(val hour: Int, val color: Color, val textColor: Color)
 
 val launchWindows = listOf(
-    LaunchWindow(hour = 10, color = Color.Green),
-    LaunchWindow(hour = 11, color = Color.Green),
-    LaunchWindow(hour = 12, color = Color.Yellow),
-    LaunchWindow(hour = 13, color = Color.Yellow),
-    LaunchWindow(hour = 14, color = Color.Red),
-    LaunchWindow(hour = 15, color = Color.Red),
-    LaunchWindow(hour = 25, color = Color.Green),  // Next day data
-    LaunchWindow(hour = 26, color = Color.Red),
-    LaunchWindow(hour = 27, color = Color.Green),
+    LaunchWindow(hour = 10, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
+    LaunchWindow(hour = 11, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
+    LaunchWindow(hour = 12, color = edgeConditionsContainerLight, textColor = onEdgeConditionsContainerLight),
+    LaunchWindow(hour = 13, color = edgeConditionsContainerLight, textColor = onEdgeConditionsContainerLight),
+    LaunchWindow(hour = 14, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
+    LaunchWindow(hour = 15, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
+    LaunchWindow(hour = 25, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),  // Next day data
+    LaunchWindow(hour = 26, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
+    LaunchWindow(hour = 27, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
 )
 
 @Composable
@@ -100,7 +106,7 @@ fun LaunchWindows(
     data: List<LaunchWindow>,
     lon: Double,
     lat: Double,
-    //onWindowClick: (Double, Double, Int) -> Unit // Callback for navigation
+    onWindowClick: (Int) -> Unit // Callback for navigation
 ) {
     val cells = mutableListOf<MutableList<LaunchWindow>>()
     var currentDay = -1
@@ -114,6 +120,7 @@ fun LaunchWindows(
 
     Column {
         cells.forEach { day ->
+            Text(text = "Day")
             Row {
                 day.forEach { window ->
                     Box(
@@ -121,10 +128,10 @@ fun LaunchWindows(
                             .size(50.dp)
                             .background(color = window.color)
                             .clickable {
-                                //onWindowClick(lon, lat, window.hour)
+                                onWindowClick(window.hour)
                             }
                     ) {
-                        Text(text = window.hour.toString(), modifier = Modifier.align(Alignment.Center))
+                        Text(text = window.hour.toString(), modifier = Modifier.align(Alignment.Center), color = window.textColor)
                     }
                 }
             }
@@ -136,5 +143,5 @@ fun LaunchWindows(
 @Preview
 @Composable
 fun LaunchWindowsPreview() {
-    LaunchWindows(data = launchWindows, lon = 48.12, lat = 19.05)
+    LaunchWindows(data = launchWindows, lon = 48.12, lat = 19.05, onWindowClick = {})
 }

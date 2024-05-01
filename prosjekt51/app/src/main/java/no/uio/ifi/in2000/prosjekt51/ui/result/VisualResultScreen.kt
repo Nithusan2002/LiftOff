@@ -3,7 +3,6 @@ package no.uio.ifi.in2000.prosjekt51.ui.result
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
@@ -29,6 +28,14 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
+import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindow
+import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindows
+import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.edgeConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.goodConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onBadConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onEdgeConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onGoodConditionsContainerLight
 import java.time.LocalDateTime
 
 
@@ -45,7 +52,8 @@ fun VisualResultScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
     onRetryClicked: () -> Unit,
-    errorMessage: String?
+    errorMessage: String?,
+    onNavigateToResultScreen: (String, String, Long, Int) -> Unit
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
@@ -226,6 +234,21 @@ fun VisualResultScreen(
                     )
                 }
             }
+
+            val launchWindows = listOf(
+                LaunchWindow(hour = 10, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
+                LaunchWindow(hour = 11, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
+                LaunchWindow(hour = 12, color = edgeConditionsContainerLight, textColor = onEdgeConditionsContainerLight),
+                LaunchWindow(hour = 13, color = edgeConditionsContainerLight, textColor = onEdgeConditionsContainerLight),
+                LaunchWindow(hour = 14, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
+                LaunchWindow(hour = 22, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
+                LaunchWindow(hour = 25, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),  // Next day data
+                LaunchWindow(hour = 26, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
+                LaunchWindow(hour = 27, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
+            )
+
+            
+            LaunchWindows(data = launchWindows, lon = 48.3, lat = 39.5, onWindowClick = {onNavigateToResultScreen(latitude,longitude,date,it)})
         }
     }
 }

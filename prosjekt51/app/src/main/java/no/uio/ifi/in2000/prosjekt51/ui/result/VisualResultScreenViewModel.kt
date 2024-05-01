@@ -99,7 +99,7 @@ class VisualResultScreenViewModel: ViewModel() {
 
 
     private fun checkWindCondition(lfwData: LocationForecastWeatherData?): Boolean{
-        Log.d("WeatcherChecked", "data: $lfwData")
+        Log.d("WeatherChecked", "data: $lfwData")
         Log.d("WeatherChecked", "windspeedofgust: ${lfwData?.wind_speed_of_gust}")
         Log.d("WeatherChecked", "maxwindspeed: ${findMaximumAirWindSpeed()}")
         Log.d("WeatherChecked", "maxwindshear: ${findMaximumWindShear()}")
@@ -148,6 +148,11 @@ class VisualResultScreenViewModel: ViewModel() {
     private fun getGribData(time: String): List<GribJson>? {
         return GribDataCache.getData(time)
     }
+
+   // private fun getLaunchWindows(lon: Double,lat: Double) {
+   //     val completeData:
+   //     for
+   // }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentGribData(lat: Double, lon: Double, time: String){

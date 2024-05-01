@@ -135,6 +135,9 @@ fun App(
                     onNavigateToHomeScreen = {
                         navController.navigate("searchScreen/-500/-500")
                     },
+                    onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int ->
+                        navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
+                    },
                     visualResultScreenViewModel = visualResultScreenViewModel,
                     navController = navController,
                     snackbarHostState = snackbarHostState,
