@@ -8,11 +8,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -153,6 +157,9 @@ fun App(
                                 height = height?.toDouble(),
                                 onNavigateToHomeScreen = {
                                     navController.navigate("searchScreen/$DEFAULT_COORDS/$DEFAULT_COORDS")
+                                },
+                                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int ->
+                                    navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
                                 },
                                 visualResultScreenViewModel = visualResultScreenViewModel,
                                 navController = navController,

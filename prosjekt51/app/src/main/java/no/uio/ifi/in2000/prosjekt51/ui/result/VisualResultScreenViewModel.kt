@@ -248,6 +248,11 @@ class VisualResultScreenViewModel: ViewModel() {
         return GribDataCache.getData(time)
     }
 
+   // private fun getLaunchWindows(lon: Double,lat: Double) {
+   //     val completeData:
+   //     for
+   // }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentGribData(lat: Double, lon: Double, time: String){
         _visualResultScreenUiState.update { currentUiState ->
