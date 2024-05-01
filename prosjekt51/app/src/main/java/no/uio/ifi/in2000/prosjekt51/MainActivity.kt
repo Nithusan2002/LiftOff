@@ -8,15 +8,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -125,9 +121,9 @@ fun App(
                         SearchScreen(
                             latitudeInit = latitudeInit,
                             longitudeInit = longitudeInit,
-                            onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int, height: Double ->
+                            onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: String, height: Double ->
                                 navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
-                            },
+                            }
                         )
                     }
 
@@ -138,14 +134,14 @@ fun App(
                             navArgument("latitude") {type = NavType.StringType},
                             navArgument("longitude") {type = NavType.StringType},
                             navArgument("date") {type = NavType.LongType},
-                            navArgument("hour") {type = NavType.IntType},
+                            navArgument("hour") {type = NavType.StringType},
                             navArgument("height") {type = NavType.FloatType}
                         )
                     ) { backStackEntry ->
                         val latitude = backStackEntry.arguments?.getString("latitude")
                         val longitude = backStackEntry.arguments?.getString("longitude")
                         val date = backStackEntry.arguments?.getLong("date")
-                        val hour = backStackEntry.arguments?.getInt("hour")
+                        val hour = backStackEntry.arguments?.getString("hour")
                         val height = backStackEntry.arguments?.getFloat("height")
                         if (latitude != null && longitude != null && date != null && hour != null) {
                             Log.d("height", "In MainActivity got height $height")
@@ -158,8 +154,8 @@ fun App(
                                 onNavigateToHomeScreen = {
                                     navController.navigate("searchScreen/$DEFAULT_COORDS/$DEFAULT_COORDS")
                                 },
-                                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: Int ->
-                                    navController.navigate("resultScreen/$latitude/$longitude/$date/$hour")
+                                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: String ->
+                                    navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
                                 },
                                 visualResultScreenViewModel = visualResultScreenViewModel,
                                 navController = navController,

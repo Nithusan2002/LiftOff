@@ -3,44 +3,56 @@ package no.uio.ifi.in2000.prosjekt51.ui.result
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Divider
-import androidx.compose.runtime.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import no.uio.ifi.in2000.prosjekt51.R
-import androidx.compose.material3.*
-import androidx.compose.runtime.getValue
-import androidx.navigation.NavController
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
-import java.time.Instant
-import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindow
 import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindows
 import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
-import no.uio.ifi.in2000.prosjekt51.ui.theme.edgeConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.goodConditionsContainerLight
-import no.uio.ifi.in2000.prosjekt51.ui.theme.onBadConditionsContainerLight
-import no.uio.ifi.in2000.prosjekt51.ui.theme.onEdgeConditionsContainerLight
-import no.uio.ifi.in2000.prosjekt51.ui.theme.onGoodConditionsContainerLight
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -52,7 +64,7 @@ fun VisualResultScreen(
     latitude: String,
     longitude: String,
     date: Long,
-    hour: Int,
+    hour: String,
     height: Double?,
     visualResultScreenViewModel: VisualResultScreenViewModel = viewModel(),
     onNavigateToHomeScreen: () -> Unit,
@@ -60,7 +72,7 @@ fun VisualResultScreen(
     snackbarHostState: SnackbarHostState,
     onRetryClicked: () -> Unit,
     errorMessage: String?,
-    onNavigateToResultScreen: (String, String, Long, Int) -> Unit
+    onNavigateToResultScreen: (String, String, Long, String) -> Unit
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
@@ -74,6 +86,7 @@ fun VisualResultScreen(
         height = height
     )
 
+    visualResultScreenViewModel.fetchLaunchWindows()
 
     val scope = rememberCoroutineScope()
 
@@ -106,118 +119,13 @@ fun VisualResultScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         topBar = {
-            TopAppBar(
-                title = {
-                    var expanded by rememberSaveable { mutableStateOf(false) }
-                    IconButton(onClick = { expanded = true }) {
-                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                    }
-                    Row() {
-                        ExposedDropdownMenuBox(
-                            expanded = timeexpanded,
-                            onExpandedChange = { timeexpanded = !timeexpanded },
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
-                                .width(160.dp)
-                                .height(56.dp)
-                        ) {
-                            TextField(
-                                modifier = Modifier
-                                    .menuAnchor()
-                                    .fillMaxWidth(),
-                                readOnly = true,
-                                value = time,
-                                onValueChange = {
-                                    time = it
-                                },
-                                label = { Text(text = "Launch time") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = timeexpanded) },
-                                colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                                textStyle = TextStyle(fontSize = 22.sp)
-                            )
-
-                            ExposedDropdownMenu(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
-                                expanded = timeexpanded,
-                                onDismissRequest = { timeexpanded = false }
-                            ) {
-                                (0..23).forEach { hour ->
-                                    val hourText = "%02d:00".format(hour)
-                                    DropdownMenuItem(
-                                        text = { Text(hourText) },
-                                        onClick = {
-                                            time = hourText
-                                            navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
-                                            timeexpanded = false
-                                        },
-                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                    )
-                                }
-                            }
-                        }
-                        ExposedDropdownMenuBox(
-                            expanded = dateexpanded,
-                            onExpandedChange = { dateexpanded = !dateexpanded },
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
-                                .width(160.dp)
-                                .height(56.dp)
-                        ) {
-                            TextField(
-                                modifier = Modifier
-                                    .menuAnchor()
-                                    .fillMaxWidth(),
-                                readOnly = true,
-                                value = dropdownDate,
-                                onValueChange = {
-                                    dropdownDate = it
-                                },
-                                label = { Text(text = "Launch date") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dateexpanded) },
-                                colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                                textStyle = TextStyle(fontSize = 16.sp)
-                            )
-
-                            ExposedDropdownMenu(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
-                                expanded = dateexpanded,
-                                onDismissRequest = { dateexpanded = false }
-                            ) {
-                                (0..7).forEach { day ->
-                                    val nextday = LocalDateTime.now().plusDays(day.toLong())
-                                    val dateText = "${nextday.dayOfMonth}.${
-                                        "${nextday.monthValue}".padStart(
-                                            3,
-                                            0.toChar()
-                                        )
-                                    }.${nextday.year}"
-                                    DropdownMenuItem(
-                                        text = { Text(dateText) },
-                                        onClick = {
-                                            dropdownDate = dateText
-                                            val dateAtMidnight =
-                                                nextday.toLocalDate().atStartOfDay()
-                                            val newdate =
-                                                dateAtMidnight.toInstant(ZoneOffset.UTC)
-                                                    .toEpochMilli()
-                                            navController.navigate("resultScreen/$latitude/$longitude/$newdate/$hour/$height")
-                                            dateexpanded = false
-                                        },
-                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                    )
-                                }
-                            }
-                        }
-                    }
+            CenterAlignedTopAppBar(
+                title = { Text(text = "Result")
                 },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateToHomeScreen() }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -229,7 +137,111 @@ fun VisualResultScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxHeight()
+                .verticalScroll(rememberScrollState())
         ) {
+            Row {
+                ExposedDropdownMenuBox(
+                    expanded = timeexpanded,
+                    onExpandedChange = { timeexpanded = !timeexpanded },
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    TextField(
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth(),
+                        readOnly = true,
+                        value = time,
+                        onValueChange = {
+                            time = it
+                        },
+                        label = { Text(text = "Launch time") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = timeexpanded) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        textStyle = TextStyle(fontSize = 22.sp)
+                    )
+
+                    ExposedDropdownMenu(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
+                        expanded = timeexpanded,
+                        onDismissRequest = { timeexpanded = false }
+                    ) {
+                        (0..23).forEach { hour ->
+                            val hourText = "%02d:00".format(hour)
+                            DropdownMenuItem(
+                                text = { Text(hourText) },
+                                onClick = {
+                                    time = hourText
+                                    navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
+                                    timeexpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
+                    }
+                }
+                ExposedDropdownMenuBox(
+                    expanded = dateexpanded,
+                    onExpandedChange = { dateexpanded = !dateexpanded },
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 4.dp, bottom = 1.dp)
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    TextField(
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth(),
+                        readOnly = true,
+                        value = dropdownDate,
+                        onValueChange = {
+                            dropdownDate = it
+                        },
+                        label = { Text(text = "Launch date") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dateexpanded) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        textStyle = TextStyle(fontSize = 16.sp)
+                    )
+
+                    ExposedDropdownMenu(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
+                        expanded = dateexpanded,
+                        onDismissRequest = { dateexpanded = false }
+                    ) {
+                        (0..7).forEach { day ->
+                            val nextday = LocalDateTime.now().plusDays(day.toLong())
+                            val dateText = "${nextday.dayOfMonth}.${
+                                "${nextday.monthValue}".padStart(
+                                    3,
+                                    0.toChar()
+                                )
+                            }.${nextday.year}"
+                            DropdownMenuItem(
+                                text = { Text(dateText) },
+                                onClick = {
+                                    dropdownDate = dateText
+                                    val dateAtMidnight =
+                                        nextday.toLocalDate().atStartOfDay()
+                                    val newdate =
+                                        dateAtMidnight.toInstant(ZoneOffset.UTC)
+                                            .toEpochMilli()
+                                    navController.navigate("resultScreen/$latitude/$longitude/$newdate/$hour/$height")
+                                    dateexpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
+                    }
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -242,16 +254,18 @@ fun VisualResultScreen(
                     && visualResultScreenUiState.precipitationCondition
                     && visualResultScreenUiState.airCondition
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.checkmark),
+                    Icon(
+                        Icons.Filled.Check,
                         contentDescription = "Checkmark",
-                        modifier = Modifier.size(100.dp)
+                        modifier = Modifier.size(100.dp),
+                        tint = goodConditionsContainerLight
                     )
                 } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.weirdx),
-                        contentDescription = "X",
-                        modifier = Modifier.size(100.dp)
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = "Checkmark",
+                        modifier = Modifier.size(100.dp),
+                        tint = badConditionsContainerLight
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -262,7 +276,7 @@ fun VisualResultScreen(
                     Text("Air", color = if (visualResultScreenUiState.airCondition) Color.Green else Color.Red)
                 }
             }
-            Divider()
+
             when (displayState) {
                 DisplayStates.TOTAL -> {
                     SummaryDisplay(
@@ -306,20 +320,20 @@ fun VisualResultScreen(
                 }
             }
 
-            val launchWindows = listOf(
-                LaunchWindow(hour = 10, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
-                LaunchWindow(hour = 11, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
-                LaunchWindow(hour = 12, color = edgeConditionsContainerLight, textColor = onEdgeConditionsContainerLight),
-                LaunchWindow(hour = 13, color = edgeConditionsContainerLight, textColor = onEdgeConditionsContainerLight),
-                LaunchWindow(hour = 14, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
-                LaunchWindow(hour = 22, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
-                LaunchWindow(hour = 25, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),  // Next day data
-                LaunchWindow(hour = 26, color = badConditionsContainerLight, textColor = onBadConditionsContainerLight),
-                LaunchWindow(hour = 27, color = goodConditionsContainerLight, textColor = onGoodConditionsContainerLight),
-            )
-
-
-            LaunchWindows(data = launchWindows, lon = 48.3, lat = 39.5, onWindowClick = {onNavigateToResultScreen(latitude,longitude,date,it)})
+            if (visualResultScreenUiState.launchWindowsData?.size != 0 && visualResultScreenUiState.launchWindowsData != null) {
+                LaunchWindows(
+                    data = visualResultScreenUiState.launchWindowsData!!,
+                    onWindowClick = {
+                        hour: String,
+                        date: String ->
+                        onNavigateToResultScreen(
+                            latitude,
+                            longitude,
+                            visualResultScreenViewModel.convertDateToEpochMilli(date),
+                            hour)
+                    }
+                )
+            }
         }
     }
 }

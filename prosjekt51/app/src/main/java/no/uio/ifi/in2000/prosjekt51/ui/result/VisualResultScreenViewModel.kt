@@ -20,11 +20,16 @@ import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherData
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherNextHourData
+import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindow
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.goodConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onBadConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onGoodConditionsContainerLight
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
@@ -33,6 +38,7 @@ data class VisualResultScreenUiState(
     val currentLocationForecastData: TimeAndData? = null,
     val isobaricGribData: List<GribJson>? = null,
     val currentGribData: List<GribPoint>? = null,
+    val launchWindowsData: List<LaunchWindow>? = null,
     val error: String? = null,
     val windCondition: Boolean = false,
     val sightCondition: Boolean = false,
@@ -54,12 +60,13 @@ class VisualResultScreenViewModel: ViewModel() {
     val visualResultScreenUiState: StateFlow<VisualResultScreenUiState> = _visualResultScreenUiState.asStateFlow()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun fetchData(lat: Double,
-                  lon:Double,
-                  alt: Int = 0,
-                  date: Long,
-                  hour: Int,
-                  height: Double? = null) {
+    fun fetchData(
+        lat: Double,
+        lon:Double,
+        alt: Int = 0,
+        date: Long,
+        hour: String,
+        height: Double? = null) {
         /*
         Fetches weather data into uiState
 
@@ -72,10 +79,13 @@ class VisualResultScreenViewModel: ViewModel() {
             height: maximum height of launch
 
          */
-        val time: String = Instant.ofEpochMilli(date + hour*60*60*1000).toString()
+
+        val time: String = Instant.ofEpochMilli(date + hour.toInt()*60*60*1000).toString()
         // Correct time by forcing time to closest 3-hour-interval value
         val correctedTime = findClosestGribData(time)
+        Log.d("fetchData arguments","lat ${lat},lon ${lon}, date ${date}, hour ${hour}, time ${time}")
         fetchLocationForecast(lat, lon, alt, time)
+        Log.d("fetchData arguments","lat ${lat},lon ${lon}, date ${date}, hour ${hour}, time ${time}")
         getCurrentGribData(lat, lon, correctedTime)
         if (height != null) { updateHeight(height)}
     }
@@ -248,10 +258,36 @@ class VisualResultScreenViewModel: ViewModel() {
         return GribDataCache.getData(time)
     }
 
-   // private fun getLaunchWindows(lon: Double,lat: Double) {
-   //     val completeData:
-   //     for
-   // }
+    fun fetchLaunchWindows() {
+        val updatedLaunchWindows: MutableList<LaunchWindow> = mutableListOf()
+        Log.d("Forecast data", "This is the size: ${visualResultScreenUiState.value.locationForecastData?.size}")
+        visualResultScreenUiState.value.locationForecastData?.forEach {
+            if (
+            checkWindCondition(it.data)&&
+            checkPrecipitationCondition(it.nexthourdata)&&
+            checkAirCondition(it.data)
+            //&&checkSightCondition(it.data) // not implemented so far
+        ) {
+                updatedLaunchWindows.add(
+                    LaunchWindow(
+                        it.time,
+                        goodConditionsContainerLight,
+                        onGoodConditionsContainerLight)
+            )
+        } else {
+                updatedLaunchWindows.add(
+                    LaunchWindow(
+                        it.time,
+                        badConditionsContainerLight,
+                        onBadConditionsContainerLight)
+            )
+        }
+        }
+        _visualResultScreenUiState.update {
+            it.copy(launchWindowsData = updatedLaunchWindows)
+        }
+        Log.d("LaunchWindowData fetching","Fetched; ${updatedLaunchWindows.size} , ${visualResultScreenUiState.value.launchWindowsData?.size}")
+   }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentGribData(lat: Double, lon: Double, time: String){
@@ -275,6 +311,7 @@ class VisualResultScreenViewModel: ViewModel() {
 
         viewModelScope.launch {
             try {
+                Log.d("Result size", "DDDDDDDDDD ${lat}")
                 val result = weatherDataRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
                 var first = result.parsedLocationForecastData.first()
                 for (element in result.parsedLocationForecastData) {
@@ -283,7 +320,7 @@ class VisualResultScreenViewModel: ViewModel() {
                     }
                 }
                 _visualResultScreenUiState.update { currentUiState ->
-                    currentUiState.copy(currentLocationForecastData = first, error = null)
+                    currentUiState.copy(currentLocationForecastData = first, locationForecastData = result.parsedLocationForecastData, error = null)
                 }
                 checkLaunchConditions()
             } catch (e: Exception) {
@@ -291,6 +328,12 @@ class VisualResultScreenViewModel: ViewModel() {
             }
         }
 
+    }
+
+    fun convertDateToEpochMilli(dateString: String): Long {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val date = dateFormat.parse(dateString)
+        return date!!.time
     }
 
 
