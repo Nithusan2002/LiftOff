@@ -104,8 +104,6 @@ val launchWindows = listOf(
 @Composable
 fun LaunchWindows(
     data: List<LaunchWindow>,
-    lon: Double,
-    lat: Double,
     onWindowClick: (Int) -> Unit // Callback for navigation
 ) {
     val cells = mutableListOf<MutableList<LaunchWindow>>()
@@ -143,5 +141,5 @@ fun LaunchWindows(
 @Preview
 @Composable
 fun LaunchWindowsPreview() {
-    LaunchWindows(data = launchWindows, lon = 48.12, lat = 19.05, onWindowClick = {})
+    LaunchWindows(data = launchWindows, onWindowClick = {})
 }
