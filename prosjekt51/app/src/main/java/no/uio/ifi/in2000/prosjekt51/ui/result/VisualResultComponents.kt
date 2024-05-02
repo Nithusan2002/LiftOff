@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
@@ -125,7 +126,7 @@ fun SightDisplay(exitFunc: () -> Unit, data: TimeAndData?){
             Text(
                 text = "UV-index (clear sky): ${data?.data?.ultraviolet_index_clear_sky} ",
                 fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp).testTag("UV")
             )
         }
     }

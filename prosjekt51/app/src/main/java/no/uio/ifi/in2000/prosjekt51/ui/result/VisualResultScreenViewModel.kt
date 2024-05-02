@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,7 +23,6 @@ import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
@@ -319,3 +317,5 @@ class VisualResultScreenViewModel: ViewModel() {
         return target
     }
 }
+
+
