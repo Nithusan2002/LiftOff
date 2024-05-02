@@ -62,6 +62,16 @@ fun MapScreen(navController: NavController) {
                         Text("Save position to favourites")
                     }
                 }
+                if (showSaveButton && selectedLatLng != null) {
+                    Button(
+                        onClick = { navController.navigate("searchScreen/${selectedLatLng!!.latitude}/${selectedLatLng!!.longitude}") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text("Search position")
+                    }
+                }
             }
         }
     ) { innerPadding ->
