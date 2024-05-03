@@ -223,9 +223,9 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
             if (lat > 64.25 || lat < 55.35 || lon > 14.51 || lon < -1.45) {
                 Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = Color.DarkGray)
             }
-            Text("Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s")
-            Text("Maximum wind-speed: ${visualResultScreenUiState.maxWindSpeed} m/s")
-            Text("Maximum wind-shear: ${visualResultScreenUiState.maxWindShear} m/s")
+            Text("Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s") // TODO: Har plutselig begynt å si "null" utenfor sør-norge?
+            Text("Maximum wind-speed: ${visualResultScreenUiState.maxWindSpeed} m/s") // TODO: Er 0.0 selv når data ikke er tilgjengelig?
+            Text("Maximum wind-shear: ${visualResultScreenUiState.maxWindShear} m/s") // TODO: ---||---
 
         }
     }
