@@ -1,8 +1,11 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result.scripts
 
 import android.util.Log
+import no.uio.ifi.in2000.prosjekt51.INVALID_GRIB
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
+
+
 
 
 fun findCoordinateCell(lat: Double, lon: Double, gribJson: GribJson): Pair<Int, Int> {
@@ -15,14 +18,14 @@ fun findCoordinateCell(lat: Double, lon: Double, gribJson: GribJson): Pair<Int, 
         gribJson (Double): The GribJson object containing header and data which defines the grid spacing and bounds.
         A Pair of Integers indicating the indices (`n`, `m`) in the data grid corresponding to the coordinates.
      */
-    if (lat > gribJson.header.la1 || lat < gribJson.header.la2) {
-        Log.d("CoordinateError", "Latitude coordinate out of bounds")
-        return Pair(0, 0)
+    if (lat < gribJson.header.la1 || lat > gribJson.header.la2) {
+        return Pair(INVALID_GRIB, INVALID_GRIB)
     }
 
-    if (lon < gribJson.header.lo1 || lon > gribJson.header.lo2) {
-        Log.d("CoordinateError", "Longitude coordinate out of bounds")
-        return Pair(0, 0)
+    val fittedlon = if (gribJson.header.lo1 > 180) gribJson.header.lo1 - 360 else gribJson.header.lo1
+
+    if (lon < fittedlon || lon > gribJson.header.lo2) {
+        return Pair(INVALID_GRIB, INVALID_GRIB)
     }
 
     val n = ((lon - gribJson.header.lo1 + gribJson.header.dx / 2) / gribJson.header.dx).toInt()
@@ -43,9 +46,20 @@ fun getValueFromGribjson(n: Int, m: Int, gribJson: GribJson): Double{
 
 fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?): MutableList<GribPoint> {
     if (grib == null) {
+        Log.d("GribFixing","Grib was NULL, sorry :)")
         return mutableListOf()
     }
+
+    Log.d("GribFixing","In GribProcessing: Finding data for coordinates: $lat and $lon, with list of gribJson: $grib")
+
+
     val (n, m) = findCoordinateCell(lat, lon, grib.first())
+
+    if (n == INVALID_GRIB && m == INVALID_GRIB) {
+        Log.d("GribFixing","Coordinates were invalid >:(")
+        return mutableListOf()
+    }
+
 
     // Use a map to collect data by height
     val dataByHeight = mutableMapOf<Double, GribPoint>()

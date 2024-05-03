@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.prosjekt51.MAX_HEIGHT
 import no.uio.ifi.in2000.prosjekt51.calculateTimesToFetch
 import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.LocationForecastAPI
@@ -18,7 +18,9 @@ import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherData
+import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherNextHourData
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
+import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -33,7 +35,10 @@ data class VisualResultScreenUiState(
     val windCondition: Boolean = false,
     val sightCondition: Boolean = false,
     val precipitationCondition: Boolean = false,
-    val airCondition: Boolean = false
+    val airCondition: Boolean = false,
+    val height: Double = MAX_HEIGHT.toDouble(),
+    val maxWindSpeed: Double? = null,
+    val maxWindShear: Double? = null
 ) {
     val hasError: Boolean
         get() = error != null
@@ -47,7 +52,12 @@ class VisualResultScreenViewModel: ViewModel() {
     val visualResultScreenUiState: StateFlow<VisualResultScreenUiState> = _visualResultScreenUiState.asStateFlow()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun fetchData(lat: Double, lon:Double, alt: Int = 0, date: Long, hour: Int) {
+    fun fetchData(lat: Double,
+                  lon:Double,
+                  alt: Int = 0,
+                  date: Long,
+                  hour: Int,
+                  height: Double? = null) {
         /*
         Fetches weather data into uiState
 
@@ -56,13 +66,16 @@ class VisualResultScreenViewModel: ViewModel() {
             lon: longitude between -180 and 180 as a double
             alt: altitude as an integer
             date: milliseconds since epoch of 1970-01-01T00:00:00Z as a Long
-            hour: hour of the day as an integer
+            hour: hour of the day as an integer,
+            height: maximum height of launch
 
          */
         val time: String = Instant.ofEpochMilli(date + hour*60*60*1000).toString()
+        // Correct time by forcing time to closest 3-hour-interval value
         val correctedTime = findClosestGribData(time)
         fetchLocationForecast(lat, lon, alt, time)
         getCurrentGribData(lat, lon, correctedTime)
+        if (height != null) { updateHeight(height)}
     }
 
 
@@ -79,11 +92,12 @@ class VisualResultScreenViewModel: ViewModel() {
         val launchCheckResult: List<Boolean>
 
         val data = visualResultScreenUiState.value.currentLocationForecastData?.data
+        val nexthourdata = visualResultScreenUiState.value.currentLocationForecastData?.nexthourdata
         //If a value is above the limit value or null the result is false
         launchCheckResult = listOf(
             checkWindCondition(data),
             checkSightCondition(data),
-            checkPrecipitationCondition(data),
+            checkPrecipitationCondition(nexthourdata),
             checkAirCondition(data)
         )
 
@@ -97,22 +111,62 @@ class VisualResultScreenViewModel: ViewModel() {
         }
     }
 
+    private fun updateHeight(height: Double){
+        /*
+           Updates height in uiState
 
-    private fun checkWindCondition(lfwData: LocationForecastWeatherData?): Boolean{
-        Log.d("WeatcherChecked", "data: $lfwData")
-        Log.d("WeatherChecked", "windspeedofgust: ${lfwData?.wind_speed_of_gust}")
-        Log.d("WeatherChecked", "maxwindspeed: ${findMaximumAirWindSpeed()}")
-        Log.d("WeatherChecked", "maxwindshear: ${findMaximumWindShear()}")
-
-        return when {
-            (lfwData?.wind_speed_of_gust?.compareTo(8.6) ?: 1) > 0 -> false
-            (findMaximumAirWindSpeed() ?: 0.0).compareTo(17.2) > 0 -> false
-            (findMaximumWindShear() ?: 0.0).compareTo(24.5) > 0 -> false
-            else -> true
+           arguments:
+               height: Double of the height
+        */
+        _visualResultScreenUiState.update { currentUiState ->
+            currentUiState.copy(height = height, error = null)
         }
     }
 
+
+    private fun checkWindCondition(lfwData: LocationForecastWeatherData?): Boolean{
+        /*
+          Calculates maximum wind speed and maximum wind shear for height,
+          and checks whether wind values are within limits
+
+          arguments:
+              lfwData: LocationForecastWeatherData-instance of the given time and coordinates
+
+          returns:
+              Boolean
+       */
+        val maxWindSpeed = findMaximumAirWindSpeed(visualResultScreenUiState.value.height,
+            visualResultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
+            visualResultScreenUiState.value.currentLocationForecastData?.data?.air_temperature ?: 0.0
+        ) ?: 0.0
+
+        val maxWindShear = findMaximumWindShear(visualResultScreenUiState.value.height,
+            visualResultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
+            visualResultScreenUiState.value.currentLocationForecastData?.data?.air_temperature ?: 0.0
+        ) ?: 0.0
+
+        _visualResultScreenUiState.update { currentUiState ->
+            currentUiState.copy(maxWindSpeed = maxWindSpeed, maxWindShear = maxWindShear)
+        }
+        val result = when {
+            (lfwData?.wind_speed_of_gust?.compareTo(8.6) ?: 1) > 0 -> false
+            (maxWindSpeed).compareTo(17.2) > 0 -> false
+            (maxWindShear).compareTo(24.5) > 0 -> false
+            else -> true
+        }
+        return result
+    }
+
     private fun checkSightCondition(lfwData: LocationForecastWeatherData?): Boolean{
+        /*
+          Checks whether wind values are within limits
+
+          arguments:
+              lfwData: LocationForecastWeatherData-instance of the given time and coordinates
+
+          returns:
+              Boolean
+        */
         return when {
             (lfwData?.cloud_area_fraction_high?.compareTo(15.0) ?: 1) > 0 -> false
             (lfwData?.cloud_area_fraction_medium?.compareTo(15.0) ?: 1) > 0 -> false
@@ -121,7 +175,16 @@ class VisualResultScreenViewModel: ViewModel() {
         }
     }
 
-    private fun checkPrecipitationCondition(lfwData: LocationForecastWeatherData?): Boolean{
+    private fun checkPrecipitationCondition(lfwData: LocationForecastWeatherNextHourData?): Boolean{
+        /*
+          Checks whether precipitation values are within limits
+
+          arguments:
+              lfwData: LocationForecastWeatherData-instance of the given time and coordinates
+
+          returns:
+              Boolean
+        */
         return when {
             (lfwData?.precipitation_amount?.compareTo(0) ?: 1) > 0 -> false
             else -> true
@@ -129,6 +192,15 @@ class VisualResultScreenViewModel: ViewModel() {
     }
 
     private fun checkAirCondition(lfwData: LocationForecastWeatherData?): Boolean{
+        /*
+          Checks whether humidity- and temperature values are within limits
+
+          arguments:
+              lfwData: LocationForecastWeatherData-instance of the given time and coordinates
+
+          returns:
+              Boolean
+        */
         return when {
             (lfwData?.relative_humidity?.compareTo(75.0) ?: 1) > 0 -> false
             (lfwData?.dew_point_temperature?.compareTo(15.0) ?: 1) > 0 -> false
@@ -136,12 +208,37 @@ class VisualResultScreenViewModel: ViewModel() {
         }
     }
 
-    fun findMaximumAirWindSpeed(): Double? {
-        return visualResultScreenUiState.value.currentGribData?.maxOfOrNull { it.wind }
+    fun findMaximumAirWindSpeed(height: Double, P_b: Double, t_b: Double): Double? {
+        /*
+         Finds the maximum wind speed value below a given height value.
+
+         arguments:
+             height: The height beneath which maximum wind speed is found
+             P_b: Ground pressure, used to calculate height of grib data
+             t_b: Ground temperature, used to calculate height of grib data
+
+         returns:
+             Double of maximum wind speed
+       */
+        return visualResultScreenUiState.value.currentGribData
+            ?.filter { pressureToHeight( it.height, P_b, t_b)  <= height }
+            ?.maxOfOrNull { it.wind }
     }
 
-    fun findMaximumWindShear(): Double? {
-        return visualResultScreenUiState.value.currentGribData?.maxOfOrNull { it.windshear }
+    fun findMaximumWindShear(height: Double, P_b: Double, t_b: Double): Double? {/*
+         Finds the maximum wind shear value below a given height value.
+
+         arguments:
+             height: The height beneath which maximum wind shear is found
+             P_b: Ground pressure, used to calculate height of grib data
+             t_b: Ground temperature, used to calculate height of grib data
+
+         returns:
+             Double of maximum wind shear
+       */
+        return visualResultScreenUiState.value.currentGribData
+            ?.filter {pressureToHeight( it.height, P_b, t_b)  <= height }
+            ?.maxOfOrNull { it.windshear }
     }
 
 
@@ -158,7 +255,7 @@ class VisualResultScreenViewModel: ViewModel() {
         checkLaunchConditions()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)  // TODO: Er dette requiresapi-greiene uunngåelig?
+    @RequiresApi(Build.VERSION_CODES.O)
     fun fetchLocationForecast(lat: Double, lon: Double, alt: Int, time: String) {
         /*
         Fetch LocationForecast-data through repository, and update uistate accordingly.
@@ -181,10 +278,8 @@ class VisualResultScreenViewModel: ViewModel() {
                 _visualResultScreenUiState.update { currentUiState ->
                     currentUiState.copy(currentLocationForecastData = first, error = null)
                 }
-                Log.d("Fetching", "Fetched LocationForecast: ${visualResultScreenUiState.value.locationForecastData}")
                 checkLaunchConditions()
             } catch (e: Exception) {
-                Log.e("ResultScreenViewModel", "Error loading location forecast data: ${e.message}", e)
                 _visualResultScreenUiState.value = _visualResultScreenUiState.value.copy(error = "Kan ikke hente locationforecast data")
             }
         }
@@ -222,3 +317,5 @@ class VisualResultScreenViewModel: ViewModel() {
         return target
     }
 }
+
+

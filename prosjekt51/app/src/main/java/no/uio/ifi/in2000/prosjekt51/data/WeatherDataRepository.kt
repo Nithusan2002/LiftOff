@@ -45,10 +45,11 @@ class WeatherDataRepository(
         val timeseriesList = customJson.decodeFromJsonElement<List<TimeseriesEntry>>(jsonArray)
 
         // Map each TimeseriesEntry to a timeAndData object, extracting only the relevant data
-        return timeseriesList.map { timeseriesEntry ->     // TODO: Per nå returneres kun data innenfor "instant".
-            TimeAndData(                                   // TODO: Etter hvert burde vi sjekke om den andre dataen er relevant også.
+        return timeseriesList.map { timeseriesEntry ->
+            TimeAndData(
                 time = timeseriesEntry.time,
-                data = timeseriesEntry.data.instant.details
+                data = timeseriesEntry.data.instant.details,
+                nexthourdata = timeseriesEntry.data.next_1_hours?.details
             )
         }
     }

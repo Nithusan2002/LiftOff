@@ -22,23 +22,24 @@ import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import kotlin.math.abs
 
 
-class LocationForecastAPI {
+class LocationForecastAPI(private val testClient: HttpClient? = null) {
     /*
       Data source class for fetching data from the LocationForecast API
       The class uses coroutines for asynchronous execution and KTOR HTTP client for network requests.
      */
 
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-            })
+    private val client = testClient
+        ?: HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(Json {
+                    prettyPrint = true
+                    isLenient = true
+                })
+            }
+            defaultRequest {
+                header("X-Gravitee-Api-Key", "50ef5733-05b0-47ed-8976-f90a15527894")
+            }
         }
-        defaultRequest {
-            header("X-Gravitee-Api-Key", "50ef5733-05b0-47ed-8976-f90a15527894")
-        }
-    }
 
 
 

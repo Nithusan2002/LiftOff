@@ -68,6 +68,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core:2.3.8")
     implementation("io.ktor:ktor-server-netty:2.3.8")
     implementation("androidx.compose.material3:material3-android:1.2.1")
+    implementation("androidx.test.ext:junit-ktx:1.1.5")
     val ktorVersion = "2.3.8"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
@@ -81,6 +82,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-cbor:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-protobuf:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
+    implementation("io.ktor:ktor-client-mock:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
@@ -103,12 +105,22 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk-agent-jvm:1.12.0")
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
+    testImplementation("io.mockk:mockk:1.12.0")
+    testImplementation("org.mockito:mockito-inline:4.0.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.7")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.7")
     debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    testImplementation("org.mockito:mockito-core:3.12.4")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
+
+
+
 
 }
 
