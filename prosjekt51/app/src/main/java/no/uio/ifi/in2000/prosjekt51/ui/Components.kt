@@ -63,7 +63,7 @@ fun BottomNavigation(navController: NavController){
         IconButton(onClick = { navController.navigate("favoritesScreen") }) {
             Icon(Icons.Filled.Star, contentDescription = "Favourites")
         }
-        IconButton(onClick = { /* Placeholder action */ }) {
+        IconButton(onClick = { navController.navigate(("settingsScreen")) }) {
             Icon(Icons.Filled.Settings, contentDescription = "Settings")
         }
     }

@@ -43,6 +43,7 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoritesListScreen
 import no.uio.ifi.in2000.prosjekt51.ui.search.SearchScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreenViewModel
+import no.uio.ifi.in2000.prosjekt51.ui.settings.SettingsScreen
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -171,6 +172,10 @@ fun App(
 
                     composable("favoritesScreen") {
                         FavoritesListScreen(navController)
+                    }
+
+                    composable("settingsScreen") {
+                        SettingsScreen(navController)
                     }
                 }
             }
