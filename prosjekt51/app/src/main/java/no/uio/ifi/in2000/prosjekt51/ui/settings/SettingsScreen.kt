@@ -33,40 +33,31 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteItem
 
 @Composable
 fun SettingsScreen(navController: NavController) {
-    Scaffold(
-        bottomBar = {
-            BottomAppBar {
-                BottomNavigation(navController = navController)
-            }
-        }
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxHeight()) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Settings", style = MaterialTheme.typography.headlineSmall)
+                Spacer(modifier = Modifier.height(10.dp))
 
-    ) { innerPadding ->
-        Column(
-            verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxHeight()) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Settings", style = MaterialTheme.typography.headlineSmall)
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    LazyColumn {
-                        item { SettingsItem(onClick = {}, name = "Appearance" ) }
-                        item { SettingsItem(onClick = {}, name = "Units and boundary values" ) }
-                        item { SettingsItem(onClick = {}, name = "Logging" ) }
-                        item { SettingsItem(onClick = {}, name = "Import/Export" ) }
-                        item { SettingsItem(onClick = {}, name = "Restore defaults" ) }
-                        item { SettingsItem(onClick = {}, name = "About us" ) }
-                    }
+                LazyColumn {
+                    item { SettingsItem(onClick = {}, name = "Appearance" ) }
+                    item { SettingsItem(onClick = {}, name = "Units and boundary values" ) }
+                    item { SettingsItem(onClick = {}, name = "Logging" ) }
+                    item { SettingsItem(onClick = {}, name = "Import/Export" ) }
+                    item { SettingsItem(onClick = {}, name = "Restore defaults" ) }
+                    item { SettingsItem(onClick = {}, name = "About us" ) }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun SettingsItem(onClick: () -> Unit, name: String) {
