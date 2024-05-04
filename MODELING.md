@@ -55,3 +55,13 @@ sequenceDiagram
 <ol>3.2 Returnerer feil</ol>
 <ol>3.2 Viser snackbar til brukeren</ol><br>
 <ol>5.1 Viser et X-merke hvis det ikke er mulig å skyte opp en rakett</ol>
+
+# Aktivitetsdiagram
+``` mermaid
+flowchart TD
+    A[Start] --> B[Skriver inn koordinater og høyde]
+    B -->C[Validerer søkekriterier]
+    C --> D{ }
+    D --> |Info ok| E
+    D --> |Info ikke ok| F --> B
+```
