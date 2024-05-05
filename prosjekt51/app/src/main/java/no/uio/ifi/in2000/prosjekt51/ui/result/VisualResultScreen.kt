@@ -51,20 +51,20 @@ fun VisualResultScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
     onRetryClicked: () -> Unit,
-    errorMessage: String?
+    errorMessage: String?,
+    isLoadingScreenBool: Boolean = true
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
-
-    Log.d("height","In VisualResultScreen, got height $height")
-    visualResultScreenViewModel.fetchData(
-        lat = latitude.toDouble(),
-        lon = longitude.toDouble(),
-        date = date,
-        hour = hour,
-        height = height
-    )
-
+    LaunchedEffect(latitude, longitude, date, hour, height) {
+        visualResultScreenViewModel.fetchData(
+            lat = latitude.toDouble(),
+            lon = longitude.toDouble(),
+            date = date,
+            hour = hour,
+            height = height
+        )
+    }
 
     val scope = rememberCoroutineScope()
 
@@ -76,10 +76,11 @@ fun VisualResultScreen(
                     actionLabel = "Prøv igjen",
                     duration = SnackbarDuration.Indefinite
                 )
-                when(result){
+                when (result) {
                     SnackbarResult.ActionPerformed -> {
                         onRetryClicked()
                     }
+
                     else -> {}
                 }
             }
@@ -87,10 +88,15 @@ fun VisualResultScreen(
     }
 
     var time by rememberSaveable { mutableStateOf("$hour:00") }
-    var dropdownDate by rememberSaveable { mutableStateOf(Instant.ofEpochMilli(date).toString().take(10))}
+    var dropdownDate by rememberSaveable {
+        mutableStateOf(
+            Instant.ofEpochMilli(date).toString().take(10)
+        )
+    }
     var timeexpanded by rememberSaveable { mutableStateOf(false) }
     var dateexpanded by rememberSaveable { mutableStateOf(false) }
-    var displayState by rememberSaveable { mutableStateOf(DisplayStates.TOTAL)}
+    var displayState by rememberSaveable { mutableStateOf(DisplayStates.TOTAL) }
+
 
     Scaffold(
         snackbarHost = {
@@ -216,84 +222,109 @@ fun VisualResultScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxHeight()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+        if (visualResultScreenUiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center
             ) {
-                if (
-                    visualResultScreenUiState.windCondition
-                    && visualResultScreenUiState.sightCondition
-                    && visualResultScreenUiState.precipitationCondition
-                    && visualResultScreenUiState.airCondition
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.checkmark),
-                        contentDescription = "Checkmark",
-                        modifier = Modifier.size(100.dp)
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.weirdx),
-                        contentDescription = "X",
-                        modifier = Modifier.size(100.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text("Wind", color = if (visualResultScreenUiState.windCondition) Color.Green else Color.Red)
-                    Text("Sight", color = if (visualResultScreenUiState.sightCondition) Color.Green else Color.Red)
-                    Text("Precipitation", color = if (visualResultScreenUiState.precipitationCondition) Color.Green else Color.Red)
-                    Text("Air", color = if (visualResultScreenUiState.airCondition) Color.Green else Color.Red)
-                }
+                CircularProgressIndicator()
             }
-            Divider()
-            when (displayState) {
-                DisplayStates.TOTAL -> {
-                    SummaryDisplay(
-                        visualResultScreenViewModel = visualResultScreenViewModel,
-                        visualResultScreenUiState = visualResultScreenUiState,
-                        enterFuncWind = { displayState = DisplayStates.WIND },
-                        enterFuncSight = { displayState = DisplayStates.SIGHT },
-                        enterFuncPrecipitation = { displayState = DisplayStates.PRECIPITATION },
-                        enterFuncAir = { displayState = DisplayStates.AIR },
-                        lat = latitude.toDouble(),
-                        lon = longitude.toDouble()
-                    )
+        } else {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxHeight()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (
+                        visualResultScreenUiState.windCondition
+                        && visualResultScreenUiState.sightCondition
+                        && visualResultScreenUiState.precipitationCondition
+                        && visualResultScreenUiState.airCondition
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.checkmark),
+                            contentDescription = "Checkmark",
+                            modifier = Modifier.size(100.dp)
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.weirdx),
+                            contentDescription = "X",
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            "Wind",
+                            color = if (visualResultScreenUiState.windCondition) Color.Green else Color.Red
+                        )
+                        Text(
+                            "Sight",
+                            color = if (visualResultScreenUiState.sightCondition) Color.Green else Color.Red
+                        )
+                        Text(
+                            "Precipitation",
+                            color = if (visualResultScreenUiState.precipitationCondition) Color.Green else Color.Red
+                        )
+                        Text(
+                            "Air",
+                            color = if (visualResultScreenUiState.airCondition) Color.Green else Color.Red
+                        )
+                    }
                 }
-                DisplayStates.WIND -> {
-                    WindDisplay(
-                        exitFunc = { displayState = DisplayStates.TOTAL },
-                        data = visualResultScreenUiState.currentLocationForecastData,
-                        gribPoints = visualResultScreenUiState.currentGribData,
-                        groundPressure = visualResultScreenUiState.currentLocationForecastData?.data?.air_pressure_at_sea_level,
-                        groundTemp = visualResultScreenUiState.currentLocationForecastData?.data?.air_temperature
-                    )
-                }
-                DisplayStates.SIGHT -> {
-                    SightDisplay(
-                        exitFunc = { displayState = DisplayStates.TOTAL },
-                        data = visualResultScreenUiState.currentLocationForecastData
-                    )
+                Divider()
+                when (displayState) {
+                    DisplayStates.TOTAL -> {
+                        SummaryDisplay(
+                            visualResultScreenViewModel = visualResultScreenViewModel,
+                            visualResultScreenUiState = visualResultScreenUiState,
+                            enterFuncWind = { displayState = DisplayStates.WIND },
+                            enterFuncSight = { displayState = DisplayStates.SIGHT },
+                            enterFuncPrecipitation = { displayState = DisplayStates.PRECIPITATION },
+                            enterFuncAir = { displayState = DisplayStates.AIR },
+                            lat = latitude.toDouble(),
+                            lon = longitude.toDouble()
+                        )
+                    }
 
-                }
-                DisplayStates.PRECIPITATION -> {
-                    PrecipitationDisplay(
-                        exitFunc = { displayState = DisplayStates.TOTAL },
-                        data = visualResultScreenUiState.currentLocationForecastData
-                    )
-                }
-                DisplayStates.AIR -> {
-                    AirDisplay(
-                        exitFunc = { displayState = DisplayStates.TOTAL },
-                        data = visualResultScreenUiState.currentLocationForecastData
-                    )
+                    DisplayStates.WIND -> {
+                        WindDisplay(
+                            exitFunc = { displayState = DisplayStates.TOTAL },
+                            data = visualResultScreenUiState.currentLocationForecastData,
+                            gribPoints = visualResultScreenUiState.currentGribData,
+                            groundPressure = visualResultScreenUiState.currentLocationForecastData?.data?.air_pressure_at_sea_level,
+                            groundTemp = visualResultScreenUiState.currentLocationForecastData?.data?.air_temperature
+                        )
+                    }
+
+                    DisplayStates.SIGHT -> {
+                        SightDisplay(
+                            exitFunc = { displayState = DisplayStates.TOTAL },
+                            data = visualResultScreenUiState.currentLocationForecastData
+                        )
+
+                    }
+
+                    DisplayStates.PRECIPITATION -> {
+                        PrecipitationDisplay(
+                            exitFunc = { displayState = DisplayStates.TOTAL },
+                            data = visualResultScreenUiState.currentLocationForecastData
+                        )
+                    }
+
+                    DisplayStates.AIR -> {
+                        AirDisplay(
+                            exitFunc = { displayState = DisplayStates.TOTAL },
+                            data = visualResultScreenUiState.currentLocationForecastData
+                        )
+                    }
                 }
             }
         }
