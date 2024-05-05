@@ -10,13 +10,14 @@ sequenceDiagram
  
     
     
-    User->>UI: Velger sett med koordinater og høyde
+    Bruker->>UI: Velger sett med koordinater og høyde
+    UI->>UI: Validererer info
    
     UI->>ViewModel: fetchData(lat, lon, alt, date, hour)
     ViewModel->>WeatherDataRepository: fetchData(lat, lon, alt, date, hour)
     WeatherDataRepository->>DataSource: fetchData(lat, lon, alt, date, hour)
 
-    alt Sukksessful
+    alt Sukksessful fetching
         DataSource -->> ViewModel: Data
         ViewModel -->> UI: Data
         
@@ -27,7 +28,7 @@ sequenceDiagram
         end
 
 
-    else Ikke suksessfull 
+    else Ikke suksessfull fetching
         DataSource -->> ViewModel: Feil
         ViewModel -->>UI: ShowSnackbar(Feilmelding)
     end
@@ -42,26 +43,39 @@ sequenceDiagram
 **Postbetingelse**: Brukeren har blitt presentert med den ønskede informasjonen for det valgte stedet, tidspunktet og høyden, sammen med et resultat som indikerer om det er mulig eller ikke å skyte opp en rakett. <br>
 
 **Hovedflyt**:
-<ol>1. User chooses a set of coordinates, time and, if wanted, altitude. Presses search. </ol>
-<ol>2. System validates coordinates</ol>
-<ol>3. System fetches forecast data</ol>
-<ol>4. Returns forecast data for the given informations</ol>
-<ol>5. Shows a checkmark if it is possible to launch a rocket</ol>
+<ol>1. Bruker velger et sett med koordinater, tidspunkt og, hvis ønsket, høyde. Trykker på søk.</ol>
+<ol>2. Systemet validerer koordinatene.</ol>
+<ol>3. Systemet henter værdata.</ol>
+<ol>4. Returnerer værdataene for de angitte opplysningene.</ol>
+<ol>5. Viser et hake-symbol hvis det er mulig å skyte opp en rakett.</ol>
 
 **Alternativ flyt**: <br>
 <ol>2.1: Koordinatene blir ikke validert</ol>
-<ol>2.2: Bruker skriver inn gyldige koordinater på nytt</ol><br>
+<ol>2.2: Bruker skriver inn gyldige koordinater på nytt</ol>
 <ol>3.1 Systemet mislykkes i å hente data</ol>
 <ol>3.2 Returnerer feil</ol>
-<ol>3.2 Viser snackbar til brukeren</ol><br>
+<ol>3.2 Viser snackbar til brukeren</ol>
 <ol>5.1 Viser et X-merke hvis det ikke er mulig å skyte opp en rakett</ol>
 
 # Aktivitetsdiagram
 ``` mermaid
 flowchart TD
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style Å fill:#f9f,stroke:#333,stroke-width:4px
+
     A[Start] --> B[Skriver inn koordinater og høyde]
     B -->C[Validerer søkekriterier]
     C --> D{ }
-    D --> |Info ok| E
-    D --> |Info ikke ok| F --> B
+    D ----> |Søkekriterier ok| E[Henter værdata]
+    D ---> |Søkekriterier ikke ok| F[Bruker får oppgitt at det er ugyldig] 
+    F --> M{ }
+    M --> |Bruker skriver nye koordinater og høyde| B
+    M --> |Bruker velger å ikke prøve på nytt| Å
+    E --> G[Viser data] --> H{ }
+    H --> |Godkjent for utskytning| Å
+    H --> |Ikke godkjent for utskytning| K{ }
+    K --> |Bruker velger ny dato og tidspunkt| E
+    K --> |Velger å ikke velge ny dato og tidspunkt|Å
+
+    Å[SLUTT]
 ```
