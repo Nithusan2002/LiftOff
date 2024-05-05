@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -76,15 +75,18 @@ class VisualResultScreenViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 updateLoading(true)
-                Log.d("Loading", "isLoading: ${visualResultScreenUiState.value.isLoading}")
                 val time: String = Instant.ofEpochMilli(date + hour * 60 * 60 * 1000).toString()
                 // Correct time by forcing time to closest 3-hour-interval value
                 val correctedTime = findClosestGribData(time)
                 fetchLocationForecast(lat, lon, alt, time)
+                Log.d("uistate", "UiStateLFD after fetchLoc: ${visualResultScreenUiState.value.currentLocationForecastData}")
                 getCurrentGribData(lat, lon, correctedTime)
+                Log.d("uistate", "UiStateLFD after fetchGrib: ${visualResultScreenUiState.value.currentLocationForecastData}")
                 if (height != null) {
                     updateHeight(height)
                 }
+                Log.d("uistate", "UiStateLFD afterFetchHeight: ${visualResultScreenUiState.value.currentLocationForecastData}")
+
                 updateLoading(false)
             } catch (e: Exception) {
                 _visualResultScreenUiState.update { currentUiState ->
@@ -113,6 +115,7 @@ class VisualResultScreenViewModel: ViewModel() {
             String to be displayed on resultScreen
          */
 
+        Log.d("uistate", "UiStateLFD i launchconditions: ${visualResultScreenUiState.value.currentLocationForecastData}")
 
         val launchCheckResult: List<Boolean>
 

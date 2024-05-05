@@ -10,6 +10,7 @@ import no.uio.ifi.in2000.prosjekt51.data.isobaricGrib.IsobaricGribAPI
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.ConnectionResult
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.LocationForecastAPI
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
+import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastCache
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeseriesEntry
 
@@ -81,13 +82,26 @@ class WeatherDataRepository(
 
              If the fetch operation encounters InputError or TimeoutError, it returns a Pair with
              the Boolean value false and an empty list of timeAndData instances.*/
-        val jsonarr: ConnectionResult = locationForecastAPI.fetchLocationForecast(lat, lon, alt)
 
-        return if (jsonarr.successfulConnection) {
-            jsonarr.parsedLocationForecastData = parseTimeseriesJsonArray(jsonarr.locationForecastData)
-            jsonarr
+        if (LocationForecastCache.isDataStoredForCoords("$lat;$lon")) {
+            Log.d("LocCache", "Fetched from LocationCache")
+            val data = LocationForecastCache.getData("$lat;$lon") ?: emptyList()
+            return ConnectionResult(
+                successfulConnection = true,
+                parsedLocationForecastData = data
+            )
         } else {
-            jsonarr
+            Log.d("LocCache", "New coords, fetched from api")
+            val jsonarr: ConnectionResult = locationForecastAPI.fetchLocationForecast(lat, lon, alt)
+
+            return if (jsonarr.successfulConnection) {
+                jsonarr.parsedLocationForecastData =
+                    parseTimeseriesJsonArray(jsonarr.locationForecastData)
+                LocationForecastCache.storeData("$lat;$lon", jsonarr.parsedLocationForecastData)
+                jsonarr
+            } else {
+                jsonarr
+            }
         }
     }
 
