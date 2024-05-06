@@ -27,14 +27,17 @@ class VisualResultScreenTest {
                 latitude = "59.91",
                 longitude = "10.75",
                 date = System.currentTimeMillis(),
-                hour = 12,
+                hour = "12",
                 height = 100.0,
                 visualResultScreenViewModel = viewModel,
                 onNavigateToHomeScreen = {},
                 navController = rememberNavController(),
                 snackbarHostState = SnackbarHostState(),
                 onRetryClicked = {},
-                errorMessage = null
+                errorMessage = null,
+                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: String ->
+                    { }
+                }
             )
         }
 

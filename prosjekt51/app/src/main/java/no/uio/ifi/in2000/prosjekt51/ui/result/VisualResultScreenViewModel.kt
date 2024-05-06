@@ -85,7 +85,7 @@ class VisualResultScreenViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 updateLoading(true)
-                val time: String = Instant.ofEpochMilli(date + hour * 60 * 60 * 1000).toString()
+                val time: String = Instant.ofEpochMilli(date + hour.toInt() * 60 * 60 * 1000).toString()
                 // Correct time by forcing time to closest 3-hour-interval value
                 val correctedTime = findClosestGribData(time)
                 fetchLocationForecast(lat, lon, alt, time)

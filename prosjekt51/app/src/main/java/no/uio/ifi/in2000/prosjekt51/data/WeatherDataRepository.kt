@@ -95,11 +95,13 @@ class WeatherDataRepository(
             val jsonarr: ConnectionResult = locationForecastAPI.fetchLocationForecast(lat, lon, alt)
 
             return if (jsonarr.successfulConnection) {
+                Log.d("LocCache", "Successful connection")
                 jsonarr.parsedLocationForecastData =
                     parseTimeseriesJsonArray(jsonarr.locationForecastData)
                 LocationForecastCache.storeData("$lat;$lon", jsonarr.parsedLocationForecastData)
                 jsonarr
             } else {
+                Log.d("LocCache", "Didn't work")
                 jsonarr
             }
         }
