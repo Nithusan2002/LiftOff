@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.room.Room
-import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 
 @Composable
 fun FavoritesListScreen(

@@ -35,7 +35,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 // Function to validate latitude
-private fun isLatitudeValid(lat: String): Boolean {
+fun isLatitudeValid(lat: String): Boolean {
     /* Validates latitude
          arguments:
              lat (String): The latitude of the location.*/
@@ -48,7 +48,7 @@ private fun isLatitudeValid(lat: String): Boolean {
 }
 
 // Function to validate longitude
-private fun isLongitudeValid(lon: String): Boolean {
+fun isLongitudeValid(lon: String): Boolean {
     /* Validates longitude
      arguments:
          lon (String): The longitude of the location.*/

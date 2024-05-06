@@ -1,8 +1,8 @@
-# Sequencediagram 
+# Sekvensdiagram 
 
 ```mermaid
 sequenceDiagram
-    actor User
+    actor Bruker
     participant UI
     participant ViewModel
     participant WeatherDataRepository
@@ -10,53 +10,72 @@ sequenceDiagram
  
     
     
-    User->>UI: Chooses a set of coordinates, time and altitude
-    UI->>UI: Validates coordinates
+    Bruker->>UI: Velger sett med koordinater og høyde
+    UI->>UI: Validererer info
    
     UI->>ViewModel: fetchData(lat, lon, alt, date, hour)
     ViewModel->>WeatherDataRepository: fetchData(lat, lon, alt, date, hour)
     WeatherDataRepository->>DataSource: fetchData(lat, lon, alt, date, hour)
 
-    alt Successful fetching
+    alt Sukksessful fetching
         DataSource -->> ViewModel: Data
         ViewModel -->> UI: Data
         
-        alt Approved for launch
-            UI -->> User: Shows data and checkmark
-
-        else Not approved for launch
-            UI -->> User: Shows data and X mark
-
+        alt Godkjent for oppskytning
+            ViewModel -->> UI: Viser data og hake symbol
+        else Ikke godkjent for oppskytning
+            ViewModel -->> UI: Viser data og X symbol 
         end
 
-    else Unsuccessful fetching
-        DataSource -->> ViewModel: Error
-        ViewModel -->>UI: ShowSnackbar(Message)
-    end
 
+    else Ikke suksessfull fetching
+        DataSource -->> ViewModel: Feil
+        ViewModel -->>UI: ShowSnackbar(Feilmelding)
+    end
 ```
     
 # Use Case 1
 
-## Textual description of the use case
+## Tekstlig beskrivelse av use case
 
-**Primary actor**: User: A person who wants to obtain a weather forecast for a specific location, time, and altitude to check if it is possible to launch a rocket. <br>
-**Precondition**: The user must have access to the application, and the UI must be ready to receive user input. <br>
-**Postcondition**: The user has been presented with the desired information for the selected location, time, and altitude, along with a result indicating whether it is possible or not to launch a rocket. <br>
+**Primæraktør**: Brukeren: En person som ønsker å få en værmelding for et bestemt sted, tidspunkt og høyde for å sjekke om det er mulig å skyte opp en rakett. <br>
+**Prebetingelse**: Brukeren må ha tilgang til applikasjonen, og UI-et må være klart til å motta brukerinput. <br>
+**Postbetingelse**: Brukeren har blitt presentert med den ønskede informasjonen for det valgte stedet, tidspunktet og høyden, sammen med et resultat som indikerer om det er mulig eller ikke å skyte opp en rakett. <br>
 
-**Main flow**:
-<ol>1. User chooses a set of coordinates, time and, if wanted, altitude. Presses search. </ol>
-<ol>2. System validates coordinates</ol>
-<ol>3. System fetches forecast data</ol>
-<ol>4. Returns forecast data for the given informations</ol>
-<ol>5. Shows a checkmark if it is possible to launch a rocket</ol>
+**Hovedflyt**:
+<ol>1. Bruker velger et sett med koordinater, tidspunkt og, hvis ønsket, høyde. Trykker på søk.</ol>
+<ol>2. Systemet validerer koordinatene.</ol>
+<ol>3. Systemet henter værdata.</ol>
+<ol>4. Returnerer værdataene for de angitte opplysningene.</ol>
+<ol>5. Viser et hake-symbol hvis det er mulig å skyte opp en rakett.</ol>
 
-**Alternative flow**: <br>
-<ol>2.1: The coordinates does not get validated<br></ol>
-<ol>2.2: User retypes valid coordinates<br></ol>
-<br>
-<ol>3.1 System fail to fetch data</ol>
-<ol>3.2 Returns error</ol>
-<ol>3.2 Show snackbar to user</ol>
-<br>
-<ol>5.1 Shows an X mark if it is not possible to launch a rocket</ol> <br>
+**Alternativ flyt**: <br>
+<ol>2.1: Koordinatene blir ikke validert</ol>
+<ol>2.2: Bruker skriver inn gyldige koordinater på nytt</ol>
+<ol>3.1 Systemet mislykkes i å hente data</ol>
+<ol>3.2 Returnerer feil</ol>
+<ol>3.2 Viser snackbar til brukeren</ol>
+<ol>5.1 Viser et X-merke hvis det ikke er mulig å skyte opp en rakett</ol>
+
+# Aktivitetsdiagram
+``` mermaid
+flowchart TD
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style Å fill:#f9f,stroke:#333,stroke-width:4px
+
+    A[Start] --> B[Skriver inn koordinater og høyde]
+    B -->C[Validerer søkekriterier]
+    C --> D{ }
+    D ----> |Søkekriterier ok| E[Henter værdata]
+    D ---> |Søkekriterier ikke ok| F[Bruker får oppgitt at det er ugyldig] 
+    F --> M{ }
+    M --> |Bruker skriver nye koordinater og høyde| B
+    M --> |Bruker velger å ikke prøve på nytt| Å
+    E --> G[Viser data] --> H{ }
+    H --> |Godkjent for utskytning| Å
+    H --> |Ikke godkjent for utskytning| K{ }
+    K --> |Bruker velger ny dato og tidspunkt| E
+    K --> |Velger å ikke velge ny dato og tidspunkt|Å
+
+    Å[SLUTT]
+```

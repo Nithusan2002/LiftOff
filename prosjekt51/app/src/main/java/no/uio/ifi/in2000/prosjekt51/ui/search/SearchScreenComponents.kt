@@ -12,7 +12,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.prosjekt51.MAX_HEIGHT
 
@@ -48,7 +52,7 @@ fun CoordinateInput(coord: String, onValueChange: (String) -> Unit, validateFunc
 @Composable
 fun HeightInput(height: Int, onValueChange: (String) -> Unit) {
     OutlinedTextField(
-        value = if (height == MAX_HEIGHT) "" else "$height",
+        value = if (height == MAX_HEIGHT) "" else if (height.toString().length > 7) height.toString().take(7) else "$height",
         onValueChange = onValueChange,
         label = { Text(text = "[meter]") },
         modifier = Modifier

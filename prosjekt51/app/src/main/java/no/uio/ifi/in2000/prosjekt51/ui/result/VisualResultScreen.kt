@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -76,17 +75,15 @@ fun VisualResultScreen(
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
-
-    Log.d("height","In VisualResultScreen, got height $height")
-    visualResultScreenViewModel.fetchData(
-        lat = latitude.toDouble(),
-        lon = longitude.toDouble(),
-        date = date,
-        hour = hour,
-        height = height
-    )
-
-    visualResultScreenViewModel.fetchLaunchWindows()
+    LaunchedEffect(latitude, longitude, date, hour, height) {
+        visualResultScreenViewModel.fetchData(
+            lat = latitude.toDouble(),
+            lon = longitude.toDouble(),
+            date = date,
+            hour = hour,
+            height = height
+        )
+    }
 
     val scope = rememberCoroutineScope()
 
@@ -98,10 +95,11 @@ fun VisualResultScreen(
                     actionLabel = "Prøv igjen",
                     duration = SnackbarDuration.Indefinite
                 )
-                when(result){
+                when (result) {
                     SnackbarResult.ActionPerformed -> {
                         onRetryClicked()
                     }
+
                     else -> {}
                 }
             }
@@ -109,10 +107,15 @@ fun VisualResultScreen(
     }
 
     var time by rememberSaveable { mutableStateOf("$hour:00") }
-    var dropdownDate by rememberSaveable { mutableStateOf(Instant.ofEpochMilli(date).toString().take(10))}
+    var dropdownDate by rememberSaveable {
+        mutableStateOf(
+            Instant.ofEpochMilli(date).toString().take(10)
+        )
+    }
     var timeexpanded by rememberSaveable { mutableStateOf(false) }
     var dateexpanded by rememberSaveable { mutableStateOf(false) }
-    var displayState by rememberSaveable { mutableStateOf(DisplayStates.TOTAL)}
+    var displayState by rememberSaveable { mutableStateOf(DisplayStates.TOTAL) }
+
 
     Scaffold(
         snackbarHost = {
@@ -133,6 +136,14 @@ fun VisualResultScreen(
             )
         }
     ) { innerPadding ->
+      if (visualResultScreenUiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -244,15 +255,14 @@ fun VisualResultScreen(
             }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(innerPadding)
+                    .fillMaxHeight()
             ) {
-                if (
-                    visualResultScreenUiState.windCondition
-                    && visualResultScreenUiState.sightCondition
-                    && visualResultScreenUiState.precipitationCondition
-                    && visualResultScreenUiState.airCondition
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         Icons.Filled.Check,
@@ -299,24 +309,62 @@ fun VisualResultScreen(
                         groundTemp = visualResultScreenUiState.currentLocationForecastData?.data?.air_temperature
                     )
                 }
-                DisplayStates.SIGHT -> {
-                    SightDisplay(
-                        exitFunc = { displayState = DisplayStates.TOTAL },
-                        data = visualResultScreenUiState.currentLocationForecastData
-                    )
+                Divider()
+                when (displayState) {
+                    DisplayStates.TOTAL -> {
+                        SummaryDisplay(
+                            visualResultScreenViewModel = visualResultScreenViewModel,
+                            visualResultScreenUiState = visualResultScreenUiState,
+                            enterFuncWind = { displayState = DisplayStates.WIND },
+                            enterFuncSight = { displayState = DisplayStates.SIGHT },
+                            enterFuncPrecipitation = { displayState = DisplayStates.PRECIPITATION },
+                            enterFuncAir = { displayState = DisplayStates.AIR },
+                            enterFuncLegal = {displayState = DisplayStates.LEGAL},
+                            lat = latitude.toDouble(),
+                            lon = longitude.toDouble()
+                        )
+                    }
 
-                }
-                DisplayStates.PRECIPITATION -> {
-                    PrecipitationDisplay(
-                        exitFunc = { displayState = DisplayStates.TOTAL },
-                        data = visualResultScreenUiState.currentLocationForecastData
-                    )
-                }
-                DisplayStates.AIR -> {
-                    AirDisplay(
-                        exitFunc = { displayState = DisplayStates.TOTAL },
-                        data = visualResultScreenUiState.currentLocationForecastData
-                    )
+                    DisplayStates.WIND -> {
+                        WindDisplay(
+                            exitFunc = { displayState = DisplayStates.TOTAL },
+                            data = visualResultScreenUiState.currentLocationForecastData,
+                            gribPoints = visualResultScreenUiState.currentGribData,
+                            groundPressure = visualResultScreenUiState.currentLocationForecastData?.data?.air_pressure_at_sea_level,
+                            groundTemp = visualResultScreenUiState.currentLocationForecastData?.data?.air_temperature
+                        )
+                    }
+
+                    DisplayStates.SIGHT -> {
+                        SightDisplay(
+                            exitFunc = { displayState = DisplayStates.TOTAL },
+                            data = visualResultScreenUiState.currentLocationForecastData
+                        )
+
+                    }
+
+                    DisplayStates.PRECIPITATION -> {
+                        PrecipitationDisplay(
+                            exitFunc = { displayState = DisplayStates.TOTAL },
+                            data = visualResultScreenUiState.currentLocationForecastData
+                        )
+                    }
+
+                    DisplayStates.AIR -> {
+                        AirDisplay(
+                            exitFunc = { displayState = DisplayStates.TOTAL },
+                            data = visualResultScreenUiState.currentLocationForecastData
+                        )
+                    }
+
+                    DisplayStates.LEGAL -> {
+                        LegalDisplay(
+                            exitFunc = {
+                                displayState = DisplayStates.TOTAL
+                            }, // Provide exit functionality to go back to the summary display
+                            //data = visualResultScreenUiState.currentLocationForecastData // Provide any specific data needed for the Juridisk display
+                        )
+                    }
                 }
             }
 
@@ -345,6 +393,7 @@ enum class DisplayStates {
     WIND,
     SIGHT,
     PRECIPITATION,
-    AIR
+    AIR,
+    LEGAL
 }
 

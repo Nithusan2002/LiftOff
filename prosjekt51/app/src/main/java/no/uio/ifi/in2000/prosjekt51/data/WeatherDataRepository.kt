@@ -10,6 +10,7 @@ import no.uio.ifi.in2000.prosjekt51.data.isobaricGrib.IsobaricGribAPI
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.ConnectionResult
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.LocationForecastAPI
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
+import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastCache
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeseriesEntry
 
@@ -45,8 +46,8 @@ class WeatherDataRepository(
         val timeseriesList = customJson.decodeFromJsonElement<List<TimeseriesEntry>>(jsonArray)
 
         // Map each TimeseriesEntry to a timeAndData object, extracting only the relevant data
-        return timeseriesList.map { timeseriesEntry ->     // TODO: Per nå returneres kun data innenfor "instant".
-            TimeAndData(                                   // TODO: Etter hvert burde vi sjekke om den andre dataen er relevant også.
+        return timeseriesList.map { timeseriesEntry ->
+            TimeAndData(
                 time = timeseriesEntry.time,
                 data = timeseriesEntry.data.instant.details,
                 nexthourdata = timeseriesEntry.data.next_1_hours?.details
@@ -81,13 +82,26 @@ class WeatherDataRepository(
 
              If the fetch operation encounters InputError or TimeoutError, it returns a Pair with
              the Boolean value false and an empty list of timeAndData instances.*/
-        val jsonarr: ConnectionResult = locationForecastAPI.fetchLocationForecast(lat, lon, alt)
 
-        return if (jsonarr.successfulConnection) {
-            jsonarr.parsedLocationForecastData = parseTimeseriesJsonArray(jsonarr.locationForecastData)
-            jsonarr
+        if (LocationForecastCache.isDataStoredForCoords("$lat;$lon")) {
+            Log.d("LocCache", "Fetched from LocationCache")
+            val data = LocationForecastCache.getData("$lat;$lon") ?: emptyList()
+            return ConnectionResult(
+                successfulConnection = true,
+                parsedLocationForecastData = data
+            )
         } else {
-            jsonarr
+            Log.d("LocCache", "New coords, fetched from api")
+            val jsonarr: ConnectionResult = locationForecastAPI.fetchLocationForecast(lat, lon, alt)
+
+            return if (jsonarr.successfulConnection) {
+                jsonarr.parsedLocationForecastData =
+                    parseTimeseriesJsonArray(jsonarr.locationForecastData)
+                LocationForecastCache.storeData("$lat;$lon", jsonarr.parsedLocationForecastData)
+                jsonarr
+            } else {
+                jsonarr
+            }
         }
     }
 

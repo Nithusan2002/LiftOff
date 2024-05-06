@@ -1,6 +1,8 @@
 package no.uio.ifi.in2000.prosjekt51.model.locationForecast
 
+import android.util.Log
 import kotlinx.serialization.Serializable
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
 
 // The following three data classes match the json-structure, and therefore are used in deserialization.
 @Serializable
@@ -101,3 +103,30 @@ data class TimeAndData(
     val data: LocationForecastWeatherData,
     val nexthourdata: LocationForecastWeatherNextHourData?
 )
+
+
+object LocationForecastCache {
+    /*A singleton object serving as a cache for storing and retrieving LocationForecast data.
+    It provides methods to interact with the cache by time keys.
+
+    Functions:
+     * storeData - stores a list of GribJson associated with a specific time key.
+     * getData - retrieves a list of GribJson associated with a specific time key.
+     * isDataStoredForTime - checks if data is stored in the cache for a specific time key.
+
+     properties:
+        gribDataCache A map structure that holds time keys associated with lists of GribJson data.
+     */
+    private var locationForecastCache: Map<String, List<TimeAndData>> = emptyMap()
+
+    fun storeData(coordKey: String, data: List<TimeAndData>) {
+        locationForecastCache = locationForecastCache.plus(coordKey to data)
+    }
+
+    fun getData(coordKey: String): List<TimeAndData>? = locationForecastCache[coordKey]
+
+    fun isDataStoredForCoords(coordKey: String): Boolean {
+        /*Coord is lat;lon, like so: "14.3;67.928" */
+        return locationForecastCache.containsKey(coordKey)
+    }
+}
