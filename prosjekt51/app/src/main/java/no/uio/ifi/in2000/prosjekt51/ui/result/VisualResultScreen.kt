@@ -51,7 +51,6 @@ fun VisualResultScreen(
     snackbarHostState: SnackbarHostState,
     onRetryClicked: () -> Unit,
     errorMessage: String?,
-    isLoadingScreenBool: Boolean = true
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
 
