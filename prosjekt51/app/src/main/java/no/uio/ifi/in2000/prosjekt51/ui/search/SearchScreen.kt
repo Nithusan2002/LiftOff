@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.prosjekt51.ui.search
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -65,7 +66,7 @@ fun isLongitudeValid(lon: String): Boolean {
 fun SearchScreen(
     latitudeInit: String,
     longitudeInit: String,
-    onNavigateToResultScreen: (String, String, Long, Int, Double) -> Unit,
+    onNavigateToResultScreen: (String, String, Long, String, Double) -> Unit,
     ) {
 
     var latitude by rememberSaveable { mutableStateOf(latitudeInit) }
@@ -166,7 +167,7 @@ fun SearchScreen(
                                 trueLatitude,
                                 trueLongitude,
                                 searchdate,
-                                "${LocalDateTime.now().hour}".take(2).toInt(),
+                                "${LocalDateTime.now().hour}".take(2),
                                 height.toDouble()
                             )
                         }
