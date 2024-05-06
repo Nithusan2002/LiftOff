@@ -30,6 +30,7 @@ import no.uio.ifi.in2000.prosjekt51.ui.theme.onGoodConditionsContainerLight
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
@@ -266,7 +267,7 @@ class VisualResultScreenViewModel: ViewModel() {
             checkWindCondition(it.data)&&
             checkPrecipitationCondition(it.nexthourdata)&&
             checkAirCondition(it.data)
-            //&&checkSightCondition(it.data) // not implemented so far
+            &&checkSightCondition(it.data) // not implemented so far
         ) {
                 updatedLaunchWindows.add(
                     LaunchWindow(
@@ -330,10 +331,15 @@ class VisualResultScreenViewModel: ViewModel() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun convertDateToEpochMilli(dateString: String): Long {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        val date = dateFormat.parse(dateString)
-        return date!!.time
+        val newDateString = dateString + "T00:00:00"
+        val correctDateString = LocalDateTime.parse(newDateString)
+        Log.d("LaunchWindows", "Convert: ${correctDateString}")
+        val dateAtMidnight = correctDateString.toLocalDate().atStartOfDay()
+        val searchdate =
+            dateAtMidnight.toInstant(ZoneOffset.UTC).toEpochMilli()
+        return searchdate
     }
 
 

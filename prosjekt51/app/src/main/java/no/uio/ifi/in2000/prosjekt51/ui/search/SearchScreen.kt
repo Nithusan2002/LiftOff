@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.prosjekt51.ui.search
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

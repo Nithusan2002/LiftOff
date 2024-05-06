@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -112,7 +113,7 @@ fun LaunchWindows(
                             .size(50.dp)
                             .background(color = window.color)
                             .clickable {
-                            onWindowClick(window.time.substring(11,13), window.time.substring(0,10))
+                                onWindowClick(window.time.substring(11,13), window.time.substring(0,10))
                         }
                     ) {
                         Text(text = window.time.substring(11,13), modifier = Modifier.align(Alignment.Center), color = window.textColor)
