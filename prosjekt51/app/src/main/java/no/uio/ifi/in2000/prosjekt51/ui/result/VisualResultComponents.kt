@@ -1,5 +1,7 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
@@ -19,7 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
@@ -33,6 +41,7 @@ fun SummaryDisplay(visualResultScreenViewModel: VisualResultScreenViewModel, vis
                    enterFuncSight: () -> Unit,
                    enterFuncPrecipitation: () -> Unit,
                    enterFuncAir: () -> Unit,
+                   enterFuncLegal: () -> Unit,
                    lat: Double,
                    lon: Double
 ) {
@@ -44,7 +53,7 @@ fun SummaryDisplay(visualResultScreenViewModel: VisualResultScreenViewModel, vis
         SightSection(enterFunc = enterFuncSight, data = visualResultScreenUiState.currentLocationForecastData)
         PrecipitationSection(enterFunc = enterFuncPrecipitation, data = visualResultScreenUiState.currentLocationForecastData)
         AirSection(enterFunc = enterFuncAir, data = visualResultScreenUiState.currentLocationForecastData)
-
+        LegalSection(enterFunc=enterFuncLegal)
     }
 }
 
@@ -207,7 +216,58 @@ fun AirDisplay(exitFunc: () -> Unit, data: TimeAndData?){
     }
 }
 
+@Composable
+fun LegalDisplay(exitFunc: () -> Unit) {
+    val context = LocalContext.current
 
+    Box(modifier = Modifier.fillMaxSize()) {
+        IconButton(
+            onClick = { exitFunc() },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Filled.Close, contentDescription = "Close")
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 48.dp)
+        ) {
+            Text(
+                text = "Legal restrictions",
+                fontSize = 20.sp,
+                modifier = Modifier.padding(16.dp)
+            )
+            val annotatedString = buildAnnotatedString {
+                append("Please ensure to coordinate with the local municipality, landowner, Civil Aviation Authority, Avinor, fire department, and police. ")
+                append("Personal arrangements must be made with each of these entities. Prior to this, please verify that you are not within restricted airspace: ")
+
+                pushStringAnnotation(
+                    tag = "URL",
+                    annotation = "https://luftrom.info/viewer.html#4/65.49/16.96/"
+                )
+                withStyle(style = SpanStyle(textDecoration = TextDecoration.Underline)) {
+                    append("https://luftrom.info/viewer.html#4/65.49/16.96/")
+                }
+                pop()
+            }
+
+            ClickableText(
+                text = annotatedString,
+                //style = TextStyle(color = MaterialTheme.colors.primary),
+                onClick = { offset ->
+                    annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                        .firstOrNull()?.let { annotation ->
+                            // Create an intent with the URL to open it in a web browser
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                            context.startActivity(intent) // Start the intent to open the URL
+                        }
+                }
+            )
+        }
+    }
+}
 
 
 @Composable
@@ -278,6 +338,22 @@ fun AirSection(enterFunc: () -> Unit, data: TimeAndData?) {
         }
     }
 }
+
+@Composable
+fun LegalSection(enterFunc: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp),
+        onClick = { enterFunc() }
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "Legal restrictions", style = MaterialTheme.typography.titleMedium)
+            //Text(text = "Please ensure to coordinate with the local municipality, landowner, Civil Aviation Authority, Avinor, fire department, and police. Personal arrangements must be made with each of these entities. Prior to this, please verify that you are not within restricted airspace: [insert link here]...")
+        }
+    }
+}
+
 
 @Composable
 fun GribPointItems(gribPoint: GribPoint, groundPressure: Double?, groundTemp: Double?) {
