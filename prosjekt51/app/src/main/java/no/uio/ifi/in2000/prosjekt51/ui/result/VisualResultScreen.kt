@@ -287,6 +287,7 @@ fun VisualResultScreen(
                             enterFuncSight = { displayState = DisplayStates.SIGHT },
                             enterFuncPrecipitation = { displayState = DisplayStates.PRECIPITATION },
                             enterFuncAir = { displayState = DisplayStates.AIR },
+                            enterFuncLegal = {displayState = DisplayStates.LEGAL},
                             lat = latitude.toDouble(),
                             lon = longitude.toDouble()
                         )
@@ -323,6 +324,15 @@ fun VisualResultScreen(
                             data = visualResultScreenUiState.currentLocationForecastData
                         )
                     }
+
+                    DisplayStates.LEGAL -> {
+                        LegalDisplay(
+                            exitFunc = {
+                                displayState = DisplayStates.TOTAL
+                            }, // Provide exit functionality to go back to the summary display
+                            //data = visualResultScreenUiState.currentLocationForecastData // Provide any specific data needed for the Juridisk display
+                        )
+                    }
                 }
             }
         }
@@ -336,6 +346,7 @@ enum class DisplayStates {
     WIND,
     SIGHT,
     PRECIPITATION,
-    AIR
+    AIR,
+    LEGAL
 }
 
