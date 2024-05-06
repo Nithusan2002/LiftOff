@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,6 +33,7 @@ data class VisualResultScreenUiState(
     val isobaricGribData: List<GribJson>? = null,
     val currentGribData: List<GribPoint>? = null,
     val error: String? = null,
+    val isLoading: Boolean = true,
     val windCondition: Boolean = false,
     val sightCondition: Boolean = false,
     val precipitationCondition: Boolean = false,
@@ -70,12 +72,37 @@ class VisualResultScreenViewModel: ViewModel() {
             height: maximum height of launch
 
          */
-        val time: String = Instant.ofEpochMilli(date + hour*60*60*1000).toString()
-        // Correct time by forcing time to closest 3-hour-interval value
-        val correctedTime = findClosestGribData(time)
-        fetchLocationForecast(lat, lon, alt, time)
-        getCurrentGribData(lat, lon, correctedTime)
-        if (height != null) { updateHeight(height)}
+        viewModelScope.launch {
+            try {
+                updateLoading(true)
+                val time: String = Instant.ofEpochMilli(date + hour * 60 * 60 * 1000).toString()
+                // Correct time by forcing time to closest 3-hour-interval value
+                val correctedTime = findClosestGribData(time)
+                fetchLocationForecast(lat, lon, alt, time)
+                Log.d("uistate", "UiStateLFD after fetchLoc: ${visualResultScreenUiState.value.currentLocationForecastData}")
+                getCurrentGribData(lat, lon, correctedTime)
+                Log.d("uistate", "UiStateLFD after fetchGrib: ${visualResultScreenUiState.value.currentLocationForecastData}")
+                if (height != null) {
+                    updateHeight(height)
+                }
+                Log.d("uistate", "UiStateLFD afterFetchHeight: ${visualResultScreenUiState.value.currentLocationForecastData}")
+
+                updateLoading(false)
+            } catch (e: Exception) {
+                _visualResultScreenUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        error = e.message,
+                        isLoading = false)
+                }
+            }
+        }
+    }
+
+    fun updateLoading(value: Boolean) {
+        _visualResultScreenUiState.update { currentUiState ->
+            currentUiState.copy(
+                isLoading = value)
+        }
     }
 
 
@@ -88,6 +115,7 @@ class VisualResultScreenViewModel: ViewModel() {
             String to be displayed on resultScreen
          */
 
+        Log.d("uistate", "UiStateLFD i launchconditions: ${visualResultScreenUiState.value.currentLocationForecastData}")
 
         val launchCheckResult: List<Boolean>
 
