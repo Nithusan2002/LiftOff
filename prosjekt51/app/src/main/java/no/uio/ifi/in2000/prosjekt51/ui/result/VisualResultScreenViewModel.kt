@@ -187,7 +187,7 @@ class VisualResultScreenViewModel: ViewModel() {
             currentUiState.copy(maxWindSpeed = maxWindSpeed, maxWindShear = maxWindShear)
         }
         val result = when {
-            (lfwData?.wind_speed_of_gust?.compareTo(8.6) ?: 1) > 0 -> false
+            (lfwData?.wind_speed_of_gust?.compareTo(8.6) ?: -1) > 0 -> false  // TODO: Vi har ikke gust-data utenfor norge, eller langt frem i tid
             (maxWindSpeed).compareTo(17.2) > 0 -> false
             (maxWindShear).compareTo(24.5) > 0 -> false
             else -> true
@@ -224,7 +224,7 @@ class VisualResultScreenViewModel: ViewModel() {
               Boolean
         */
         return when {
-            (lfwData?.precipitation_amount?.compareTo(0) ?: 1) > 0 -> false
+            (lfwData?.precipitation_amount?.compareTo(0) ?: -1) > 0 -> false // TODO: Vi har ikke precipitation-data langt frem i tid
             else -> true
         }
     }
@@ -285,6 +285,7 @@ class VisualResultScreenViewModel: ViewModel() {
     }
 
     fun fetchLaunchWindows() {
+        updateLoading(true)
         val updatedLaunchWindows: MutableList<LaunchWindow> = mutableListOf()
         Log.d("Forecast data", "This is the size: ${visualResultScreenUiState.value.locationForecastData?.size}")
         visualResultScreenUiState.value.locationForecastData?.forEach {
@@ -313,7 +314,8 @@ class VisualResultScreenViewModel: ViewModel() {
             it.copy(launchWindowsData = updatedLaunchWindows)
         }
         Log.d("LaunchWindowData fetching","Fetched; ${updatedLaunchWindows.size} , ${visualResultScreenUiState.value.launchWindowsData?.size}")
-   }
+        updateLoading(false)
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentGribData(lat: Double, lon: Double, time: String){

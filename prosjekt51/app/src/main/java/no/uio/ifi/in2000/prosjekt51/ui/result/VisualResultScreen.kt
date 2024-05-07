@@ -71,6 +71,9 @@ fun VisualResultScreen(
         )
     }
 
+    visualResultScreenViewModel.fetchLaunchWindows()
+
+
     val scope = rememberCoroutineScope()
 
     if (visualResultScreenUiState.hasError) {
