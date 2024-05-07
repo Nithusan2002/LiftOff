@@ -8,6 +8,7 @@
 
 
 ## Biblioteker
+- [Kotlin](https://kotlinlang.org/docs/home.html)
 - [Jetpack Compose](https://developer.android.com/jetpack/compose)
 - [Navigation Compose](https://developer.android.com/jetpack/compose/navigation)
 - [Coil](https://github.com/coil-kt/coil#jetpack-compose)
