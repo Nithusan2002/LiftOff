@@ -59,17 +59,22 @@ sequenceDiagram
 # Aktivitetsdiagram
 ``` mermaid
 flowchart TD
-    style A fill:#f9f,stroke:#333,stroke-width:4px
-    style Å fill:#f9f,stroke:#333,stroke-width:4px
-
-    A[Start] --> B[Skriver inn koordinater og høyde]
+    style Start fill:#f9f,stroke:#333,stroke-width:4px
+    style Slutt fill:#f9f,stroke:#333,stroke-width:4px
+    
+    Start((Start)) 
+    Start --> B[Skriver inn koordinater og høyde]
     B --> E[Henter værdata]
-    E --> G[Viser data] --> H{ }
-    H --> |Godkjent for utskytning| Å
+    E --> P{ }
+    P ---> |Suksessful fetching| G[Viser data] --> H{ }
+    P --> |Ikke suksessful fetching| T[Viser feilmelding]
+    T --> Q{ } --> Avslutter --> Slutt
+    Q --> |Prøver igjen| Start
+    H --> |Godkjent for utskytning| Slutt
     H ---> |Ikke godkjent for utskytning| K{ }
     K --> |Bruker velger ny dato og tidspunkt| E
     K --> |Bruker velger nye koordinater og høyde|B 
-    K ----> |Velger å ikke sette nye kriterier|Å
+    K ----> |Velger å ikke sette nye kriterier|Slutt
 
-    Å[SLUTT]
+    Slutt((Slutt))
 ```
