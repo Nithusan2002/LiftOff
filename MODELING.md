@@ -1,3 +1,7 @@
+# Introduksjon til Modelleringsdokumentet
+
+Dette dokumentet gir en detaljert beskrivelse av modellene som er utviklet for appen vår, sammen med tilhørende diagrammer. Modellene og diagrammene er generert ved hjelp av Mermaid, som er et verktøy som lar oss representere modellene på en visuelt tiltalende måte.
+
 # Sekvensdiagram 
 
 ```mermaid
