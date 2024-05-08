@@ -8,9 +8,9 @@ Dette dokumentet gir en oversikt over arkitekturen som er benyttet i appen. Det 
 ## Objektorienterte prinsipper
 Vi har lagt vekt på å følge viktige objektorienterte prinsipper som lav kobling og høy kohesjon i vår løsning.
 
-- **Lav kobling**: Komponentene i systemet er løst koblet fra hverandre, noe som betyr at endringer i en komponent ikke har en uforholdsmessig stor innvirkning på andre komponenter. Dette oppnås gjennom bruk av grensesnitt og avhengighetsinjeksjon.
+- **Lav kobling**: Komponentene i systemet er løst koblet fra hverandre, noe som betyr at endringer i en komponent ikke har en uforholdsmessig stor innvirkning på andre komponenter. Dette oppnås gjennom bruk av grensesnitt og vi tar i bruk et repository for å hente data og presentere det til View. 
   
-- **Høy kohesjon**: Hver komponent eller klasse har et klart definert ansvar og fokuserer på å oppfylle dette ansvaret på en effektiv måte. Dette bidrar til økt forståelse og vedlikeholdbarhet av koden.
+- **Høy kohesjon**: Hver komponent eller klasse har et klart definert ansvar og fokuserer på å oppfylle dette ansvaret på en effektiv måte. Dette bidrar til økt forståelse og vedlikeholdbarhet av koden. Vi har strukturert koden med ulike pakker for å følge MVVM mønsteret. Vi har delt inn i model, data, og ui pakker som der igjen er delt inn i mindre pakker der hver fil har et definert ansvar. 
 
 ## Designmønstre
 Vi har benyttet oss av designmønstre som MVVM (Model-View-ViewModel) og UDF (Unified Data Flow) for å organisere og strukturere koden på en hensiktsmessig måte.
