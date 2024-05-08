@@ -26,4 +26,4 @@ For lesere som skal jobbe med drift, vedlikehold og videreutvikling av løsninge
 
 - **Arkitektur**: Appen følger en MVVM-arkitektur (Model-View-ViewModel) for å separere brukergrensesnittet fra forretningslogikken og data. Den har også en enveis dataflyt gjennom hele applikasjonen i tråd med UDF-mønsteret.
 
-- **API-nivå**: Vi har valgt å målrette appen vår mot et lavt API-nivå, for eksempel API 21 (Android 5.0 Lollipop) eller nyere, for å sikre kompatibilitet med et bredt spekter av enheter og samtidig utnytte funksjonaliteter og forbedringer som er tilgjengelige i nyere versjoner av Android.
+- **API-nivå**: Vi har valgt API-nivå 26 som minimum API-nivå. Dette valgte vi fordi det er det laveste API-nivået som appen kan kjøre med fordi vi bruker klasser fra biblioteker som krever minimum API-nivå 26. Klassene det gjelder er LocalDateTime og LocalDate. Ellers har vi prøvd å holde minimum API-nivå lavt for at appen skal være kompatibel med så mange enheter som mulig.
