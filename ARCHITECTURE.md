@@ -15,9 +15,9 @@ Vi har lagt vekt på å følge viktige objektorienterte prinsipper som lav kobli
 ## Designmønstre
 Vi har benyttet oss av designmønstre som MVVM (Model-View-ViewModel) og UDF (Unified Data Flow) for å organisere og strukturere koden på en hensiktsmessig måte.
 
-- **MVVM**: MVVM-mønsteret er brukt for å separere brukergrensesnittet (View) fra forretningslogikken (ViewModel) og data (Model). Dette gjør det enklere å teste og vedlikeholde koden, samtidig som det gir en mer skalerbar og fleksibel arkitektur.
+**MVVM**: MVVM-mønsteret er brukt for å separere brukergrensesnittet (View) fra forretningslogikken (ViewModel) og data (Model). Dette gjør det enklere å teste og vedlikeholde koden, samtidig som det gir en mer skalerbar og fleksibel arkitektur. Ansvaret til View er å presentere state og muligjøre brukerinteraksjon i tillegg til å observere state i viewmodel. ViewModel sitt ansvar er å presentere state til view, og også oppdatere state. Dette innebærer blant annet å starte henting av data og også reagere på brukerinteraksjon som gjør at vi vil endre state. Model sitt ansvar er å hente og behandle data, og presentere denne dataen til viewmodel.
 
-- **UDF**: UDF (Unified Data Flow) er et mønster som fokuserer på å ha en enveis dataflyt gjennom applikasjonen. Dette bidrar til å redusere kompleksiteten og gjøre det lettere å forstå hvordan data flyter gjennom systemet.
+**UDF**: UDF (Unified Data Flow) er et mønster som fokuserer på å ha en enveis dataflyt gjennom applikasjonen vår. Dette bidrar til å redusere kompleksiteten og gjøre det lettere å forstå hvordan data flyter gjennom systemet. Dette fungerer ved at tilstander flyter ned og hendelser flyter opp. Brukergrensesnittet genererer en hendelse og sender den oppover til state som deretter kan endre den, eller ikke, også sendes tilstanden ned igjen til UI. 
 
 ## Løsningen for drift, vedlikehold og videreutvikling
 For lesere som skal jobbe med drift, vedlikehold og videreutvikling av løsningen, gir vi følgende oversikt over teknologier, arkitektur og API-nivå som er brukt:
