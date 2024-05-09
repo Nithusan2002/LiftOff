@@ -19,7 +19,6 @@
 - [Coroutines](https://developer.android.com/topic/libraries/architecture/coroutines#viewmodelscope)
 - [Jetpack Viewmodel](https://developer.android.com/develop/ui/compose/libraries#viewmodel)
 
-## Kjente problemer
+## Kjente problemer med appen
 
 ## Oppklaringer
-### Universell Utforming??
