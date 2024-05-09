@@ -2,8 +2,11 @@ package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,6 +48,38 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -53,6 +88,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindows
+import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
 import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.edgeConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.goodConditionsContainerLight
@@ -70,7 +106,7 @@ fun VisualResultScreen(
     date: Long,
     hour: String,
     height: Double?,
-    visualResultScreenViewModel: VisualResultScreenViewModel = viewModel(),
+    resultScreenViewModel: ResultScreenViewModel = viewModel(),
     onNavigateToHomeScreen: () -> Unit,
     navController: NavController,
     snackbarHostState: SnackbarHostState,
@@ -78,10 +114,10 @@ fun VisualResultScreen(
     errorMessage: String?,
     onNavigateToResultScreen: (String, String, Long, String) -> Unit
 ) {
-    val visualResultScreenUiState: VisualResultScreenUiState by visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
+    val visualResultScreenUiState: VisualResultScreenUiState by resultScreenViewModel.visualResultScreenUiState.collectAsState()
 
     LaunchedEffect(latitude, longitude, date, hour, height) {
-        visualResultScreenViewModel.fetchData(
+        resultScreenViewModel.fetchData(
             lat = latitude.toDouble(),
             lon = longitude.toDouble(),
             date = date,
@@ -90,7 +126,7 @@ fun VisualResultScreen(
         )
     }
 
-    visualResultScreenViewModel.fetchLaunchWindows()
+    resultScreenViewModel.fetchLaunchWindows()
 
 
     val scope = rememberCoroutineScope()
@@ -146,7 +182,9 @@ fun VisualResultScreen(
     ) { innerPadding ->
         if (visualResultScreenUiState.isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
@@ -158,6 +196,7 @@ fun VisualResultScreen(
                     .fillMaxHeight()
                     .verticalScroll(rememberScrollState())
             ) {
+                LabeledDivider(label = "Time and date")
                 Row {
                     ExposedDropdownMenuBox(
                         expanded = timeexpanded,
@@ -185,8 +224,8 @@ fun VisualResultScreen(
 
                         ExposedDropdownMenu(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
+                                .height(200.dp)  // Set a fixed height to ensure only part of the list is visible
+                                .fillMaxWidth(fraction = 0.65f),
                             expanded = timeexpanded,
                             onDismissRequest = { timeexpanded = false }
                         ) {
@@ -230,8 +269,8 @@ fun VisualResultScreen(
 
                         ExposedDropdownMenu(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(130.dp),  // Set a fixed height to ensure only part of the list is visible
+                                .fillMaxWidth(fraction = 0.65f)
+                                .height(200.dp),  // Set a fixed height to ensure only part of the list is visible
                             expanded = dateexpanded,
                             onDismissRequest = { dateexpanded = false }
                         ) {
@@ -261,11 +300,13 @@ fun VisualResultScreen(
                         }
                     }
                 }
+                LabeledDivider(label = "Reccomendation")
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(start = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     if (
                         (visualResultScreenUiState.windCondition == 2) ||
@@ -311,7 +352,6 @@ fun VisualResultScreen(
                 when (displayState) {
                     DisplayStates.TOTAL -> {
                         SummaryDisplay(
-                            visualResultScreenViewModel = visualResultScreenViewModel,
                             visualResultScreenUiState = visualResultScreenUiState,
                             enterFuncWind = { displayState = DisplayStates.WIND },
                             enterFuncSight = { displayState = DisplayStates.SIGHT },
@@ -370,7 +410,7 @@ fun VisualResultScreen(
                             onNavigateToResultScreen(
                                 latitude,
                                 longitude,
-                                visualResultScreenViewModel.convertDateToEpochMilli(date),
+                                resultScreenViewModel.convertDateToEpochMilli(date),
                                 hour)
                         }
                     )

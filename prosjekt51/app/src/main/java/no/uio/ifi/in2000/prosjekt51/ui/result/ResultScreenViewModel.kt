@@ -71,12 +71,35 @@ data class VisualResultScreenUiState(
         get() = error != null
 }
 
-class VisualResultScreenViewModel: ViewModel() {
+data class VerboseResultScreenUiState(
+    val locationForecastData: List<TimeAndData>? = null,
+    val currentLocationForecastData: TimeAndData? = null,
+    val isobaricGribData: List<GribJson>? = null,
+    val currentGribData: List<GribPoint>? = null,
+    val launchWindowsData: List<LaunchWindow>? = null,
+    val error: String? = null,
+    val isLoading: Boolean = true,
+    val windCondition: Int = 2,
+    val sightCondition: Int = 2,
+    val precipitationCondition: Int = 0,
+    val airCondition: Int = 0,
+    val height: Double = MAX_HEIGHT.toDouble(),
+    val maxWindSpeed: Double? = null,
+    val maxWindShear: Double? = null,
+) {
+    val hasError: Boolean
+        get() = error != null
+}
+
+class ResultScreenViewModel: ViewModel() {
     private val weatherDataRepository = WeatherDataRepository(LocationForecastAPI())
 
 
     private val _visualResultScreenUiState = MutableStateFlow(VisualResultScreenUiState())
     val visualResultScreenUiState: StateFlow<VisualResultScreenUiState> = _visualResultScreenUiState.asStateFlow()
+
+    private val _verboseResultScreenUiState = MutableStateFlow(VerboseResultScreenUiState())
+    val verboseResultScreenUiState: StateFlow<VerboseResultScreenUiState> = _verboseResultScreenUiState.asStateFlow()
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun fetchData(

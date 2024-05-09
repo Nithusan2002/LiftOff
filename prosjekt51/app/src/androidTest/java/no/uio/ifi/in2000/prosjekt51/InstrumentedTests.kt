@@ -12,7 +12,7 @@ import com.google.android.gms.maps.model.LatLng
 import no.uio.ifi.in2000.prosjekt51.ui.map.MapScreen
 import no.uio.ifi.in2000.prosjekt51.ui.map.MapViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreen
-import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreenViewModel
+import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
 import org.junit.Test
 import org.junit.Rule
 
@@ -24,7 +24,7 @@ class VisualResultScreenTest {
     @Test
     fun visualResultScreen_DisplayStateChangesCorrectly() {
         // Mock data and ViewModel setup
-        val viewModel = VisualResultScreenViewModel()
+        val viewModel = ResultScreenViewModel()
 
         composeTestRule.setContent {
             VisualResultScreen(
@@ -33,7 +33,7 @@ class VisualResultScreenTest {
                 date = System.currentTimeMillis(),
                 hour = "12",
                 height = 100.0,
-                visualResultScreenViewModel = viewModel,
+                resultScreenViewModel = viewModel,
                 onNavigateToHomeScreen = {},
                 navController = rememberNavController(),
                 snackbarHostState = SnackbarHostState(),
