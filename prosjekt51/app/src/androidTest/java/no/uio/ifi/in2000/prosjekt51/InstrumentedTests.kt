@@ -16,7 +16,7 @@ import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
 import org.junit.Test
 import org.junit.Rule
 
-class VisualResultScreenTest {
+class VisualResultScreenTest {  // TODO: Doesn't work anymore
 
     @get:Rule
     val composeTestRule = createComposeRule()

@@ -84,8 +84,20 @@ fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribP
         Column(modifier = Modifier
             .padding(top = 48.dp)
             .height(500.dp)) {
+            val gusttext = data?.data?.wind_speed_of_gust
             Text(
-                text = "Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s",
+                buildAnnotatedString {
+                    if (gusttext != null) {
+                        append("Wind speed of gust: $gusttext m/s")
+                    } else {
+                        append("Wind speed of gust: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // 0xFFFFA500 is the ARGB code for orange
+                            append("N/A")
+                        }
+                        append(" m/s")
+                    }
+                },
+                color = Color.Black,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(16.dp)
             )
@@ -172,16 +184,24 @@ fun PrecipitationDisplay(exitFunc: () -> Unit, data: TimeAndData?){
         ) {
             Icon(Icons.Filled.Close, contentDescription = "Close")
         }
+        val precipitationtext = data?.nexthourdata?.precipitation_amount
 
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 48.dp)) {
-            Text(
-                text = "Precipitation: ${data?.nexthourdata?.precipitation_amount} mm",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
+        Text(
+            buildAnnotatedString {
+                if (precipitationtext != null) {
+                    append("Precipitation amount: $precipitationtext mm")
+                } else {
+                    append("Precipitation amount: ")
+                    withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                        append("N/A")
+                    }
+                    append(" mm")
+                }
+            },
+            color = Color.Black,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 
@@ -303,9 +323,53 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
             if (lat > 64.25 || lat < 55.35 || lon > 14.51 || lon < -1.45) {
                 Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = Color.DarkGray)
             }
-            Text("Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s") // TODO: Har plutselig begynt å si "null" utenfor sør-norge?
-            Text("Maximum wind-speed: ${visualResultScreenUiState.maxWindSpeed} m/s") // TODO: Er 0.0 selv når data ikke er tilgjengelig?
-            Text("Maximum wind-shear: ${visualResultScreenUiState.maxWindShear} m/s") // TODO: ---||---
+            val gusttext = data?.data?.wind_speed_of_gust
+            val speedtext = visualResultScreenUiState.maxWindSpeed
+            val sheartext = visualResultScreenUiState.maxWindShear
+            Text(
+                buildAnnotatedString {
+                    if (gusttext != null) {
+                        append("Wind speed of gust: $gusttext m/s")
+                    } else {
+                        append("Wind speed of gust: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // 0xFFFFA500 is the ARGB code for orange
+                            append("N/A")
+                        }
+                        append(" m/s")
+                    }
+                },
+                color = Color.Black
+            )
+
+            Text(
+                buildAnnotatedString {
+                    if (speedtext != null) {
+                        append("Maximum wind-speed: $speedtext m/s")
+                    } else {
+                        append("Maximum wind-speed: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                            append("N/A")
+                        }
+                        append(" m/s")
+                    }
+                },
+                color = Color.Black
+            )
+
+            Text(
+                buildAnnotatedString {
+                    if (sheartext != null) {
+                        append("Maximum wind-shear: $sheartext m/s")
+                    } else {
+                        append("Maximum wind-shear: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                            append("N/A")
+                        }
+                        append(" m/s")
+                    }
+                },
+                color = Color.Black
+            )
         }
         Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
     }
@@ -340,10 +404,24 @@ fun PrecipitationSection(enterFunc: () -> Unit, data: TimeAndData?) {
         shape = RectangleShape,
         onClick = { enterFunc() }
     ) {
+        val precipitationtext = data?.nexthourdata?.precipitation_amount
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Precipitation amount: ${data?.nexthourdata?.precipitation_amount} mm")
+            Text(
+                buildAnnotatedString {
+                    if (precipitationtext != null) {
+                        append("Precipitation amount: $precipitationtext mm")
+                    } else {
+                        append("Precipitation amount: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                            append("N/A")
+                        }
+                        append(" mm")
+                    }
+                },
+                color = Color.Black
+            )
+            Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
         }
-        Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
     }
 }
 
