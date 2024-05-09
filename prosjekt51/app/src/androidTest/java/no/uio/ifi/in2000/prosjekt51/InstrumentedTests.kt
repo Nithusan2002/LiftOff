@@ -45,7 +45,7 @@ class VisualResultScreenTest {  // TODO: Doesn't work anymore
             )
         }
 
-        val nodesWithSight = composeTestRule.onAllNodesWithText("Sight")
+        val nodesWithSight = composeTestRule.onAllNodesWithText("Show more...")
         if (nodesWithSight.fetchSemanticsNodes().size > 1) {
             nodesWithSight[1].performClick()
         } else {

@@ -11,6 +11,9 @@
       <entry key="app">
         <State />
       </entry>
+      <entry key="visualResultScreen_DisplayStateChangesCorrectly()">
+        <State />
+      </entry>
     </value>
   </component>
 </project>
