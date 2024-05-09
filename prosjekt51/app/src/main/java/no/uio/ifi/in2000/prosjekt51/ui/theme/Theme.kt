@@ -1,5 +1,6 @@
 package com.example.compose
 import android.app.Activity
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,12 +10,17 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.preference.PreferenceManager
 import com.example.ui.theme.AppTypography
 import no.uio.ifi.in2000.prosjekt51.ui.theme.backgroundDark
 import no.uio.ifi.in2000.prosjekt51.ui.theme.backgroundDarkHighContrast
@@ -672,8 +678,23 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+
 @Composable
-fun AppTheme(
+fun AppTheme(content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val isDarkTheme = ThemeManager.getThemeState(context)
+
+    val colorScheme = if (isDarkTheme.value) darkScheme else lightScheme
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = AppTypography,
+        content = content
+    )
+}
+
+@Composable
+fun AppThemeDeprecated(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -704,3 +725,22 @@ fun AppTheme(
   )
 }
 
+
+object ThemeManager {
+    private const val THEME_PREF = "theme_preference"
+    private const val THEME_KEY = "theme_key"
+    private var isDarkTheme = mutableStateOf(false)
+
+    fun getThemeState(context: Context): MutableState<Boolean> {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        isDarkTheme.value = preferences.getBoolean(THEME_KEY, false) // false by default, meaning light theme
+        return isDarkTheme
+    }
+
+    fun saveTheme(context: Context, isDark: Boolean) {
+        val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
+        editor.putBoolean(THEME_KEY, isDark)
+        editor.apply()
+        isDarkTheme.value = isDark
+    }
+}

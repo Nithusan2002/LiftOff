@@ -68,6 +68,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:2.3.8")
     implementation("androidx.compose.material3:material3-android:1.2.1")
     implementation("androidx.test.ext:junit-ktx:1.1.5")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     val ktorVersion = "2.3.8"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")

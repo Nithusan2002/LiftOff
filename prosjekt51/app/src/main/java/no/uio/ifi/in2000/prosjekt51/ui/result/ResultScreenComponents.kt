@@ -97,7 +97,6 @@ fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribP
                         append(" m/s")
                     }
                 },
-                color = Color.Black,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(16.dp)
             )
@@ -198,7 +197,6 @@ fun PrecipitationDisplay(exitFunc: () -> Unit, data: TimeAndData?){
                     append(" mm")
                 }
             },
-            color = Color.Black,
             fontSize = 20.sp,
             modifier = Modifier.padding(16.dp)
         )
@@ -337,8 +335,7 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
                         }
                         append(" m/s")
                     }
-                },
-                color = Color.Black
+                }
             )
 
             Text(
@@ -353,7 +350,6 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
                         append(" m/s")
                     }
                 },
-                color = Color.Black
             )
 
             Text(
@@ -368,7 +364,6 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
                         append(" m/s")
                     }
                 },
-                color = Color.Black
             )
         }
         Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
@@ -418,7 +413,6 @@ fun PrecipitationSection(enterFunc: () -> Unit, data: TimeAndData?) {
                         append(" mm")
                     }
                 },
-                color = Color.Black
             )
             Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
         }
