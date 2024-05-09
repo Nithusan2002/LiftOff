@@ -2,40 +2,59 @@ package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Divider
-import androidx.compose.runtime.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import no.uio.ifi.in2000.prosjekt51.R
-import androidx.compose.material3.*
-import androidx.compose.runtime.getValue
-import androidx.navigation.NavController
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindows
 import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.edgeConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.goodConditionsContainerLight
 import java.time.Instant
 import java.time.LocalDateTime
@@ -249,10 +268,22 @@ fun VisualResultScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (
-                        visualResultScreenUiState.windCondition
-                        && visualResultScreenUiState.sightCondition
-                        && visualResultScreenUiState.precipitationCondition
-                        && visualResultScreenUiState.airCondition
+                        (visualResultScreenUiState.windCondition == 2) ||
+                        (visualResultScreenUiState.sightCondition == 2) ||
+                        (visualResultScreenUiState.precipitationCondition == 2) ||
+                        (visualResultScreenUiState.airCondition == 2)
+                    ) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = "X to denote bad conditions",
+                            modifier = Modifier.size(100.dp),
+                            tint = badConditionsContainerLight
+                        )
+                    } else if (
+                        (visualResultScreenUiState.windCondition == 0) &&
+                        (visualResultScreenUiState.sightCondition == 0) &&
+                        (visualResultScreenUiState.precipitationCondition == 0) &&
+                        (visualResultScreenUiState.airCondition == 0)
                     ) {
                         Icon(
                             Icons.Filled.Check,
@@ -262,18 +293,18 @@ fun VisualResultScreen(
                         )
                     } else {
                         Icon(
-                            Icons.Filled.Close,
-                            contentDescription = "Checkmark",
+                            Icons.Filled.Warning,
+                            contentDescription = "Warning to indicate conditions that may require closer inspection",
                             modifier = Modifier.size(100.dp),
-                            tint = badConditionsContainerLight
+                            tint = edgeConditionsContainerLight
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
-                        Text("Wind", color = if (visualResultScreenUiState.windCondition) Color.Green else Color.Red)
-                        Text("Sight", color = if (visualResultScreenUiState.sightCondition) Color.Green else Color.Red)
-                        Text("Precipitation", color = if (visualResultScreenUiState.precipitationCondition) Color.Green else Color.Red)
-                        Text("Air", color = if (visualResultScreenUiState.airCondition) Color.Green else Color.Red)
+                        Text("Wind", color = if (visualResultScreenUiState.windCondition == 0) Color.Green else if (visualResultScreenUiState.windCondition == 1) Color.Yellow else Color.Red)
+                        Text("Sight", color = if (visualResultScreenUiState.sightCondition == 0) Color.Green else if (visualResultScreenUiState.sightCondition == 1) Color.Yellow else Color.Red)
+                        Text("Precipitation", color = if (visualResultScreenUiState.precipitationCondition == 0) Color.Green else if (visualResultScreenUiState.precipitationCondition == 1) Color.Yellow else Color.Red)
+                        Text("Air", color = if (visualResultScreenUiState.airCondition == 0) Color.Green else if (visualResultScreenUiState.airCondition == 1) Color.Yellow else Color.Red)
                     }
                 }
 
