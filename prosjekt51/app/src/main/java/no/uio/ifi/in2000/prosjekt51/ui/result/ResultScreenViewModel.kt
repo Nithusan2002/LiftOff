@@ -20,14 +20,12 @@ import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherData
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherNextHourData
-import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindow
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.goodConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.onBadConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.onGoodConditionsContainerLight
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -54,12 +52,35 @@ data class VisualResultScreenUiState(
         get() = error != null
 }
 
-class VisualResultScreenViewModel: ViewModel() {
+data class VerboseResultScreenUiState(
+    val locationForecastData: List<TimeAndData>? = null,
+    val currentLocationForecastData: TimeAndData? = null,
+    val isobaricGribData: List<GribJson>? = null,
+    val currentGribData: List<GribPoint>? = null,
+    val launchWindowsData: List<LaunchWindow>? = null,
+    val error: String? = null,
+    val isLoading: Boolean = true,
+    val windCondition: Boolean = false,
+    val sightCondition: Boolean = false,
+    val precipitationCondition: Boolean = false,
+    val airCondition: Boolean = false,
+    val height: Double = MAX_HEIGHT.toDouble(),
+    val maxWindSpeed: Double? = null,
+    val maxWindShear: Double? = null,
+) {
+    val hasError: Boolean
+        get() = error != null
+}
+
+class ResultScreenViewModel: ViewModel() {
     private val weatherDataRepository = WeatherDataRepository(LocationForecastAPI())
 
 
     private val _visualResultScreenUiState = MutableStateFlow(VisualResultScreenUiState())
     val visualResultScreenUiState: StateFlow<VisualResultScreenUiState> = _visualResultScreenUiState.asStateFlow()
+
+    private val _verboseResultScreenUiState = MutableStateFlow(VerboseResultScreenUiState())
+    val verboseResultScreenUiState: StateFlow<VerboseResultScreenUiState> = _verboseResultScreenUiState.asStateFlow()
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun fetchData(

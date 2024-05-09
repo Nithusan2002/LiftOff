@@ -42,7 +42,7 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoritesListScreen
 import no.uio.ifi.in2000.prosjekt51.ui.search.SearchScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreen
-import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreenViewModel
+import no.uio.ifi.in2000.prosjekt51.ui.result.ResultScreenViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.settings.SettingsScreen
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -90,12 +90,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App(
     navController: NavHostController = rememberNavController(),
-    visualResultScreenViewModel: VisualResultScreenViewModel = remember { VisualResultScreenViewModel() } // Lagrer ViewModel som et husket verdi
+    resultScreenViewModel: ResultScreenViewModel = remember { ResultScreenViewModel() } // Lagrer ViewModel som et husket verdi
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Observerer endringer i feilmeldingen
-    val errorMessageState = visualResultScreenViewModel.visualResultScreenUiState.collectAsState()
+    val errorMessageState = resultScreenViewModel.visualResultScreenUiState.collectAsState()
 
     Scaffold (
         bottomBar = {
@@ -158,7 +158,7 @@ fun App(
                                 onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: String ->
                                     navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
                                 },
-                                visualResultScreenViewModel = visualResultScreenViewModel,
+                                resultScreenViewModel = resultScreenViewModel,
                                 navController = navController,
                                 snackbarHostState = snackbarHostState,
                                 onRetryClicked = {

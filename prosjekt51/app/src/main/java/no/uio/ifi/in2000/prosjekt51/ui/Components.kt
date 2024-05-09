@@ -1,19 +1,10 @@
 package no.uio.ifi.in2000.prosjekt51.ui
 
-import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
@@ -27,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.prosjekt51.DEFAULT_COORDS
@@ -84,43 +74,3 @@ fun BottomNavigation(navController: NavController){
 
 // Data visualisation
 
-data class LaunchWindow(val time: String, val color: Color, val textColor: Color)
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun LaunchWindows(
-    data: List<LaunchWindow>,
-    onWindowClick: (hour: String, date: String) -> Unit // Callback for navigation
-) {
-    val cells = mutableListOf<MutableList<LaunchWindow>>(ArrayList())
-    var currentDay = 0
-    data.forEach { launchWindow ->
-        val hour = launchWindow.time.substring(11,13)
-        if (hour == "00") {
-            currentDay++
-            cells.add(ArrayList())
-        }
-        cells[currentDay].add(launchWindow)
-    }
-
-    Column {
-        cells.forEach { day ->
-            Text(text = day.first().time.substring(0,10))
-            FlowRow {
-                day.forEach { window ->
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .background(color = window.color)
-                            .clickable {
-                                onWindowClick(window.time.substring(11,13), window.time.substring(0,10))
-                        }
-                    ) {
-                        Text(text = window.time.substring(11,13), modifier = Modifier.align(Alignment.Center), color = window.textColor)
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.size(16.dp)) // Padding between days
-        }
-    }
-}
