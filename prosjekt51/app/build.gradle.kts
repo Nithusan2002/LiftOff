@@ -118,6 +118,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("org.mockito:mockito-core:3.12.4")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
+    testImplementation("org.robolectric:robolectric:4.2.1")
 
 
 

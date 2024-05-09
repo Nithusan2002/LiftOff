@@ -36,15 +36,11 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 
 @Composable
-fun MapScreen(navController: NavController) {
-    var selectedLatLng by remember { mutableStateOf<LatLng?>(null) } // State to hold selected coordinates
-    var showSaveButton by remember { mutableStateOf(false) }  // State to control button visibility
-    var showSaveDialog by remember { mutableStateOf(false) }
+fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel()) {
 
-    if (showSaveDialog) {
-        SaveToFavoritesDialog(selectedLatLng!!)
-    }
-
+    val showSaveButton = viewModel.showSaveButton.collectAsState().value
+    val selectedLatLng = viewModel.selectedLatLng.collectAsState().value
+    val showSaveDialog = viewModel.showSaveDialog.collectAsState().value
 
     Scaffold(
         topBar = {
@@ -54,20 +50,18 @@ fun MapScreen(navController: NavController) {
             ) {
                 if (showSaveButton && selectedLatLng != null) {
                     Button(
-                        onClick = { showSaveDialog = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
+                        onClick = { viewModel.toggleSaveDialog(true) },
+                        modifier = Modifier.fillMaxWidth().padding(8.dp)
                     ) {
                         Text("Save position to favourites")
                     }
-                }
-                if (showSaveButton && selectedLatLng != null) {
                     Button(
-                        onClick = { navController.navigate("searchScreen/${selectedLatLng!!.latitude}/${selectedLatLng!!.longitude}") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
+                        onClick = {
+                            if (selectedLatLng != null) {
+                                navController.navigate("searchScreen/${selectedLatLng.latitude}/${selectedLatLng.longitude}")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(8.dp)
                     ) {
                         Text("Search position")
                     }
@@ -77,19 +71,16 @@ fun MapScreen(navController: NavController) {
     ) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxHeight()
+            modifier = Modifier.padding(innerPadding).fillMaxHeight()
         ) {
-            MapViewWithState { latLng ->
-                selectedLatLng = latLng
-                showSaveButton = true
-
-            }
+            MapViewWithState(viewModel::selectLocation)
         }
     }
-}
 
+    if (showSaveDialog && selectedLatLng != null) {
+        SaveToFavoritesDialog(selectedLatLng)
+    }
+}
 @Composable
 fun MapViewWithState(onLocationSelected: (LatLng) -> Unit) {
     val mapView = rememberMapViewWithLifecycle()
@@ -106,7 +97,6 @@ fun MapViewWithState(onLocationSelected: (LatLng) -> Unit) {
         }
     }
 }
-
 
 @Composable
 fun rememberMapViewWithLifecycle(): MapView {

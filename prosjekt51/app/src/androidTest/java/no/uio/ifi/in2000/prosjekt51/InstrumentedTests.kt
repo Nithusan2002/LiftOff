@@ -5,8 +5,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.maps.model.LatLng
+import no.uio.ifi.in2000.prosjekt51.ui.map.MapScreen
+import no.uio.ifi.in2000.prosjekt51.ui.map.MapViewModel
 import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreen
 import no.uio.ifi.in2000.prosjekt51.ui.result.VisualResultScreenViewModel
 import org.junit.Test
@@ -41,14 +45,57 @@ class VisualResultScreenTest {
             )
         }
 
-        val nodesWithWind = composeTestRule.onAllNodesWithText("Sight")
-        if (nodesWithWind.fetchSemanticsNodes().size > 1) {
-            // Assuming the second node is the correct one to interact with
-            nodesWithWind[1].performClick()
+        val nodesWithSight = composeTestRule.onAllNodesWithText("Sight")
+        if (nodesWithSight.fetchSemanticsNodes().size > 1) {
+            nodesWithSight[1].performClick()
         } else {
-            throw IllegalStateException("Expected more than one node with 'Wind' but found ${nodesWithWind.fetchSemanticsNodes().size}")
+            throw IllegalStateException("Expected more than one node with 'Sight' but found ${nodesWithSight.fetchSemanticsNodes().size}")
         }
 
         composeTestRule.onNodeWithTag("UV").assertIsDisplayed()
+    }
+}
+
+
+class MapScreenTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun mapScreen_ButtonsAppearWhenMapClicked() {
+        val testViewModel = MapViewModel()
+
+        composeTestRule.setContent {
+            MapScreen(navController = rememberNavController(), viewModel = testViewModel)
+        }
+
+        composeTestRule.runOnUiThread {
+            testViewModel.selectLocation(LatLng(59.911491, 10.757933))
+            testViewModel.toggleSaveDialog(true)
+        }
+
+        composeTestRule.onNodeWithText("Save position to favourites").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Search position").assertIsDisplayed()
+    }
+
+    @Test
+    fun mapScreen_SaveToFavouritesDialogueAppears() {
+        val testViewModel = MapViewModel()
+
+        composeTestRule.setContent {
+            MapScreen(navController = rememberNavController(), viewModel = testViewModel)
+        }
+
+        // Simulate map location selection
+        composeTestRule.runOnUiThread {
+            testViewModel.selectLocation(LatLng(59.911491, 10.757933))
+        }
+
+        // Simulate button click to open save dialog
+        composeTestRule.onNodeWithText("Save position to favourites").performClick()
+
+        // Check that the dialog and the input field appear
+        composeTestRule.onNodeWithText("Save to Favorites").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Enter a name for the location").assertIsDisplayed()
     }
 }

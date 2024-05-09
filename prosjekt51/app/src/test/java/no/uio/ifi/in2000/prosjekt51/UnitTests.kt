@@ -1,17 +1,31 @@
 package no.uio.ifi.in2000.prosjekt51
 
 import android.util.Log
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import io.ktor.client.HttpClient
 import org.junit.Test
 import org.junit.Assert.*
 import no.uio.ifi.in2000.prosjekt51.ui.search.*
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.LocationForecastAPI
+import no.uio.ifi.in2000.prosjekt51.ui.map.MapViewScreen
+import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.celsiusToKelvin
+import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.kelvinToCelsius
+import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
 import org.junit.Before
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mockStatic
-
+import kotlin.math.abs
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 
 /**
@@ -58,6 +72,26 @@ class CoordinateValidationTests {
         assertFalse(isLongitudeValid("45.0N"))
     }
 }
+
+
+class ConversionTests {
+
+    @Test
+    fun `test pressure to height conversion`() {
+        assertTrue(abs(pressureToHeight(85000.0, 1024.0, 15.0)  - 1500) < 100)
+        assertTrue(abs(pressureToHeight(50000.0, 1024.0, 15.0)  - 5600) < 100)
+    }
+
+    @Test
+    fun `test temperature conversion`() {
+        val tol = 0.0001
+        assertTrue(abs(celsiusToKelvin(15.0) - 288.15) < tol)
+        assertTrue(abs(kelvinToCelsius(290.0) - 16.85) < tol)
+    }
+
+}
+
+
 
 class ApiTests {
     @Before
