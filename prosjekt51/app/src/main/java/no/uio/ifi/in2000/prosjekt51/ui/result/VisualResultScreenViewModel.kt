@@ -10,24 +10,41 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_AIR_HUMIDITY
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_AIR_HUMIDITY_80
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_CLOUDCOVER_HIGHALT
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_CLOUDCOVER_HIGHALT_80
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_CLOUDCOVER_LOWALT
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_CLOUDCOVER_LOWALT_80
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_DEW_POINT_TEMP
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_DEW_POINT_TEMP_80
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_PRECIPITATION
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_PRECIPITATION_80
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_WIND_ALTITUDE
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_WIND_ALTITUDE_80
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_WIND_GUST
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_WIND_GUST_80
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_WIND_SHEAR
+import no.uio.ifi.in2000.prosjekt51.CRITICAL_WIND_SHEAR_80
 import no.uio.ifi.in2000.prosjekt51.MAX_HEIGHT
 import no.uio.ifi.in2000.prosjekt51.calculateTimesToFetch
 import no.uio.ifi.in2000.prosjekt51.data.WeatherDataRepository
 import no.uio.ifi.in2000.prosjekt51.data.locationForecast.LocationForecastAPI
+import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
-import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
-import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribDataCache
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherData
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherNextHourData
+import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindow
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.edgeConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.goodConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.onBadConditionsContainerLight
+import no.uio.ifi.in2000.prosjekt51.ui.theme.onEdgeConditionsContainerLight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.onGoodConditionsContainerLight
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -42,10 +59,10 @@ data class VisualResultScreenUiState(
     val launchWindowsData: List<LaunchWindow>? = null,
     val error: String? = null,
     val isLoading: Boolean = true,
-    val windCondition: Boolean = false,
-    val sightCondition: Boolean = false,
-    val precipitationCondition: Boolean = false,
-    val airCondition: Boolean = false,
+    val windCondition: Int = 2,
+    val sightCondition: Int = 2,
+    val precipitationCondition: Int = 0,
+    val airCondition: Int = 0,
     val height: Double = MAX_HEIGHT.toDouble(),
     val maxWindSpeed: Double? = null,
     val maxWindShear: Double? = null
@@ -127,7 +144,7 @@ class VisualResultScreenViewModel: ViewModel() {
 
         Log.d("uistate", "UiStateLFD i launchconditions: ${visualResultScreenUiState.value.currentLocationForecastData}")
 
-        val launchCheckResult: List<Boolean>
+        val launchCheckResult: List<Int>
 
         val data = visualResultScreenUiState.value.currentLocationForecastData?.data
         val nexthourdata = visualResultScreenUiState.value.currentLocationForecastData?.nexthourdata
@@ -161,8 +178,7 @@ class VisualResultScreenViewModel: ViewModel() {
         }
     }
 
-
-    private fun checkWindCondition(lfwData: LocationForecastWeatherData?): Boolean{
+    private fun checkWindCondition(lfwData: LocationForecastWeatherData?): Int {
         /*
           Calculates maximum wind speed and maximum wind shear for height,
           and checks whether wind values are within limits
@@ -187,15 +203,18 @@ class VisualResultScreenViewModel: ViewModel() {
             currentUiState.copy(maxWindSpeed = maxWindSpeed, maxWindShear = maxWindShear)
         }
         val result = when {
-            (lfwData?.wind_speed_of_gust?.compareTo(8.6) ?: -1) > 0 -> false  // TODO: Vi har ikke gust-data utenfor norge, eller langt frem i tid
-            (maxWindSpeed).compareTo(17.2) > 0 -> false
-            (maxWindShear).compareTo(24.5) > 0 -> false
-            else -> true
+            (lfwData?.wind_speed_of_gust?.compareTo(CRITICAL_WIND_GUST) ?: -1) > 0 -> 2  // TODO: Vi har ikke gust-data utenfor norge, eller langt frem i tid
+            (maxWindSpeed).compareTo(CRITICAL_WIND_ALTITUDE) > 0 -> 2
+            (maxWindShear).compareTo(CRITICAL_WIND_SHEAR) > 0 -> 2
+            (lfwData?.wind_speed_of_gust?.compareTo(CRITICAL_WIND_GUST_80) ?: -1) > 0 -> 1
+            (maxWindSpeed).compareTo(CRITICAL_WIND_ALTITUDE_80) > 0 -> 1
+            (maxWindShear).compareTo(CRITICAL_WIND_SHEAR_80) > 0 -> 1
+            else -> 0
         }
         return result
     }
 
-    private fun checkSightCondition(lfwData: LocationForecastWeatherData?): Boolean{
+    private fun checkSightCondition(lfwData: LocationForecastWeatherData?): Int {
         /*
           Checks whether wind values are within limits
 
@@ -206,14 +225,17 @@ class VisualResultScreenViewModel: ViewModel() {
               Boolean
         */
         return when {
-            (lfwData?.cloud_area_fraction_high?.compareTo(15.0) ?: 1) > 0 -> false
-            (lfwData?.cloud_area_fraction_medium?.compareTo(15.0) ?: 1) > 0 -> false
-            (lfwData?.cloud_area_fraction_low?.compareTo(5.0) ?: 1) > 0 -> false
-            else -> true
+            (lfwData?.cloud_area_fraction_high?.compareTo(CRITICAL_CLOUDCOVER_HIGHALT) ?: 1) > 0 -> 2
+            (lfwData?.cloud_area_fraction_medium?.compareTo(CRITICAL_CLOUDCOVER_HIGHALT) ?: 1) > 0 -> 2
+            (lfwData?.cloud_area_fraction_low?.compareTo(CRITICAL_CLOUDCOVER_LOWALT) ?: 1) > 0 -> 2
+            (lfwData?.cloud_area_fraction_high?.compareTo(CRITICAL_CLOUDCOVER_HIGHALT_80) ?: 1) > 0 -> 1
+            (lfwData?.cloud_area_fraction_medium?.compareTo(CRITICAL_CLOUDCOVER_HIGHALT_80) ?: 1) > 0 -> 1
+            (lfwData?.cloud_area_fraction_low?.compareTo(CRITICAL_CLOUDCOVER_LOWALT_80) ?: 1) > 0 -> 1
+            else -> 0
         }
     }
 
-    private fun checkPrecipitationCondition(lfwData: LocationForecastWeatherNextHourData?): Boolean{
+    private fun checkPrecipitationCondition(lfwData: LocationForecastWeatherNextHourData?): Int {
         /*
           Checks whether precipitation values are within limits
 
@@ -224,12 +246,13 @@ class VisualResultScreenViewModel: ViewModel() {
               Boolean
         */
         return when {
-            (lfwData?.precipitation_amount?.compareTo(0) ?: -1) > 0 -> false // TODO: Vi har ikke precipitation-data langt frem i tid
-            else -> true
+            (lfwData?.precipitation_amount?.compareTo(CRITICAL_PRECIPITATION) ?: -1) > 0 -> 2 // TODO: Vi har ikke precipitation-data langt frem i tid
+            (lfwData?.precipitation_amount?.compareTo(CRITICAL_PRECIPITATION_80) ?: -1) > 0 -> 1 // TODO: Vi har ikke precipitation-data langt frem i tid
+            else -> 0
         }
     }
 
-    private fun checkAirCondition(lfwData: LocationForecastWeatherData?): Boolean{
+    private fun checkAirCondition(lfwData: LocationForecastWeatherData?): Int {
         /*
           Checks whether humidity- and temperature values are within limits
 
@@ -240,9 +263,11 @@ class VisualResultScreenViewModel: ViewModel() {
               Boolean
         */
         return when {
-            (lfwData?.relative_humidity?.compareTo(75.0) ?: 1) > 0 -> false
-            (lfwData?.dew_point_temperature?.compareTo(15.0) ?: 1) > 0 -> false
-            else -> true
+            (lfwData?.relative_humidity?.compareTo(CRITICAL_AIR_HUMIDITY) ?: 1) > 0 -> 2
+            (lfwData?.dew_point_temperature?.compareTo(CRITICAL_DEW_POINT_TEMP) ?: 1) > 0 -> 2
+            (lfwData?.relative_humidity?.compareTo(CRITICAL_AIR_HUMIDITY_80) ?: 1) > 0 -> 1
+            (lfwData?.dew_point_temperature?.compareTo(CRITICAL_DEW_POINT_TEMP_80) ?: 1) > 0 -> 1
+            else -> 0
         }
     }
 
@@ -290,25 +315,38 @@ class VisualResultScreenViewModel: ViewModel() {
         Log.d("Forecast data", "This is the size: ${visualResultScreenUiState.value.locationForecastData?.size}")
         visualResultScreenUiState.value.locationForecastData?.forEach {
             if (
-            checkWindCondition(it.data)&&
-            checkPrecipitationCondition(it.nexthourdata)&&
-            checkAirCondition(it.data)
-            &&checkSightCondition(it.data) // not implemented so far
-        ) {
+                (checkWindCondition(it.data) == 0)&&
+                (checkPrecipitationCondition(it.nexthourdata) == 0)&&
+                (checkAirCondition(it.data) == 0)
+            &&(checkSightCondition(it.data) == 0))
+            {
                 updatedLaunchWindows.add(
                     LaunchWindow(
                         it.time,
                         goodConditionsContainerLight,
                         onGoodConditionsContainerLight)
-            )
-        } else {
+                )
+            } else if ((checkWindCondition(it.data) == 2)||
+                (checkPrecipitationCondition(it.nexthourdata) == 2)||
+                (checkAirCondition(it.data) == 2)||
+                (checkSightCondition(it.data) == 2))
+            {
                 updatedLaunchWindows.add(
                     LaunchWindow(
                         it.time,
                         badConditionsContainerLight,
-                        onBadConditionsContainerLight)
-            )
-        }
+                        onBadConditionsContainerLight
+                    )
+                )
+            } else {
+                updatedLaunchWindows.add(
+                    LaunchWindow(
+                        it.time,
+                        edgeConditionsContainerLight,
+                        onEdgeConditionsContainerLight
+                    )
+                )
+            }
         }
         _visualResultScreenUiState.update {
             it.copy(launchWindowsData = updatedLaunchWindows)
