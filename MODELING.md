@@ -6,20 +6,20 @@ Dette dokumentet gir en detaljert beskrivelse av modellene som er utviklet for a
 
 ```mermaid
 sequenceDiagram
-    actor Bruker
+    actor User
     participant UI
     participant ViewModel
     participant WeatherDataRepository
-    participant DataSource
+    participant DataSources
     
-    Bruker->>UI: Velger sett med koordinater og høyde
+    User->>UI: Velger sett med koordinater og høyde
    
     UI->>ViewModel: fetchData(lat, lon, alt, date, hour)
     ViewModel->>WeatherDataRepository: fetchData(lat, lon, alt, date, hour)
-    WeatherDataRepository->>DataSource: fetchData(lat, lon, alt, date, hour)
+    WeatherDataRepository->>DataSources: fetchData(lat, lon, alt, date, hour)
 
     alt Sukksessful fetching
-        DataSource -->> WeatherDataRepository: Data
+        DataSources -->> WeatherDataRepository: Data
         WeatherDataRepository -->> ViewModel: Data
         ViewModel -->> UI: Data
         
@@ -30,7 +30,7 @@ sequenceDiagram
         end
 
     else Ikke suksessfull fetching
-        DataSource -->> WeatherDataRepository: Feil
+        DataSources -->> WeatherDataRepository: Feil
         WeatherDataRepository -->> ViewModel: Feil
         ViewModel -->>UI: ShowSnackbar(Feilmelding)
     end
