@@ -36,7 +36,6 @@ import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherData
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.LocationForecastWeatherNextHourData
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
-import no.uio.ifi.in2000.prosjekt51.ui.LaunchWindow
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.getGribDataFromCoordinates
 import no.uio.ifi.in2000.prosjekt51.ui.result.scripts.pressureToHeight
 import no.uio.ifi.in2000.prosjekt51.ui.theme.badConditionsContainerLight
