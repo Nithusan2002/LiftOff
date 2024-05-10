@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result.scripts
 
-import android.util.Log
 import no.uio.ifi.in2000.prosjekt51.INVALID_GRIB
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
@@ -16,8 +15,11 @@ fun findCoordinateCell(lat: Double, lon: Double, gribJson: GribJson): Pair<Int, 
         lat (Double): The latitude coordinate to find the data cell for.
         lon (Double): The longitude coordinate to find the data cell for.
         gribJson (Double): The GribJson object containing header and data which defines the grid spacing and bounds.
+     Returns:
         A Pair of Integers indicating the indices (`n`, `m`) in the data grid corresponding to the coordinates.
      */
+
+    // If latitude or longitude invalid, return pair of predetermined invalid values
     if (lat < gribJson.header.la1 || lat > gribJson.header.la2) {
         return Pair(INVALID_GRIB, INVALID_GRIB)
     }
@@ -44,19 +46,18 @@ fun getValueFromGribjson(n: Int, m: Int, gribJson: GribJson): Double{
     return gribJson.data[n*120 + m]
 }
 
-fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?): MutableList<GribPoint> {
+fun getGribDataFromCoordinates(
+    lat: Double,
+    lon: Double,
+    grib: List<GribJson>?
+): MutableList<GribPoint> {
     if (grib == null) {
-        Log.d("GribFixing","Grib was NULL, sorry :)")
         return mutableListOf()
     }
-
-    Log.d("GribFixing","In GribProcessing: Finding data for coordinates: $lat and $lon, with list of gribJson: $grib")
-
 
     val (n, m) = findCoordinateCell(lat, lon, grib.first())
 
     if (n == INVALID_GRIB && m == INVALID_GRIB) {
-        Log.d("GribFixing","Coordinates were invalid >:(")
         return mutableListOf()
     }
 
@@ -68,16 +69,21 @@ fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?):
         val height = g.header.surface1Value
         val value = getValueFromGribjson(n, m, g)
 
-        val gribData = dataByHeight.getOrPut(height) { GribPoint(height, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0) }
+        val gribData =
+            dataByHeight.getOrPut(height) { GribPoint(height, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0) }
 
         when (g.header.parameterNumberName) {
             "U-component_of_wind" -> gribData.uComponent = String.format("%.1f", value).toDouble()
             "V-component_of_wind" -> gribData.vComponent = String.format("%.1f", value).toDouble()
-            "Temperature" -> gribData.temperature = String.format("%.1f", kelvinToCelsius(value)).toDouble()
+            "Temperature" -> gribData.temperature =
+                String.format("%.1f", kelvinToCelsius(value)).toDouble()
         }
 
-        gribData.wind = String.format("%.1f", windStrength(gribData.uComponent, gribData.vComponent)).toDouble()
-        gribData.winddir = String.format("%.1f", windDirection(gribData.uComponent, gribData.vComponent)).toDouble()
+        gribData.wind =
+            String.format("%.1f", windStrength(gribData.uComponent, gribData.vComponent)).toDouble()
+        gribData.winddir =
+            String.format("%.1f", windDirection(gribData.uComponent, gribData.vComponent))
+                .toDouble()
 
         val result = mutableListOf<GribPoint>()
         var previousGribPoint: GribPoint? = null
@@ -85,10 +91,11 @@ fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?):
         for (gribPoint in dataByHeight.values) {
             if (previousGribPoint != null) {
                 // Calculate the wind shear between the current point and the point just below it
-                gribPoint.windshear = String.format("%.1f", windShear(
-                    previousGribPoint.uComponent, previousGribPoint.vComponent,
-                    gribPoint.uComponent, gribPoint.vComponent
-                )
+                gribPoint.windshear = String.format(
+                    "%.1f", windShear(
+                        previousGribPoint.uComponent, previousGribPoint.vComponent,
+                        gribPoint.uComponent, gribPoint.vComponent
+                    )
                 ).toDouble()
             } else {
                 gribPoint.windshear = 0.0
@@ -101,5 +108,15 @@ fun getGribDataFromCoordinates(lat: Double, lon: Double, grib: List<GribJson>?):
     }
 
     // Convert the map values to a list of GribPoint
-    return dataByHeight.values.map { GribPoint(it.height, it.vComponent, it.uComponent, it.temperature, it.wind, it.winddir, it.windshear) }.toMutableList()
+    return dataByHeight.values.map {
+        GribPoint(
+            it.height,
+            it.vComponent,
+            it.uComponent,
+            it.temperature,
+            it.wind,
+            it.winddir,
+            it.windshear
+        )
+    }.toMutableList()
 }
