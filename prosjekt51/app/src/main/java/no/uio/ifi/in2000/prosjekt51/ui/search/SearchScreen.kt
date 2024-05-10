@@ -1,8 +1,5 @@
 package no.uio.ifi.in2000.prosjekt51.ui.search
 
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +34,11 @@ import java.time.ZoneOffset
 fun isLatitudeValid(lat: String): Boolean {
     /* Validates latitude
          arguments:
-             lat (String): The latitude of the location.*/
+             lat (String): The latitude of the location.
+
+        returns:
+            Boolean
+     */
     return try {
         val value = lat.toDouble()
         value in -90.0..90.0
@@ -51,7 +51,10 @@ fun isLatitudeValid(lat: String): Boolean {
 fun isLongitudeValid(lon: String): Boolean {
     /* Validates longitude
      arguments:
-         lon (String): The longitude of the location.*/
+         lon (String): The longitude of the location.
+     returns:
+         Boolean
+     */
     return try {
         val value = lon.toDouble()
         value in -180.0..180.0
@@ -60,7 +63,6 @@ fun isLongitudeValid(lon: String): Boolean {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterial3Api
 @Composable
 fun SearchScreen(
@@ -138,16 +140,6 @@ fun SearchScreen(
             Column(
                 modifier = Modifier.padding(4.dp)
             ) {
-                OutlinedButton(
-                    onClick = { /*TODO*/ },
-                    shape = RoundedCornerShape(5.dp),
-                    modifier = Modifier
-                        .height(52.dp)
-                        .fillMaxWidth(),
-                    contentPadding = PaddingValues(0.dp),
-                ) {
-                    Text(text = "More options")
-                }
                 Button(
                     onClick = {
                         // Get the current date

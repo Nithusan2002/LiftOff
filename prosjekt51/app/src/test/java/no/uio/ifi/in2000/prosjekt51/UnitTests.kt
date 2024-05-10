@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -28,9 +29,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 
-/**
- * Simple unit-test-example:
- */
 class CoordinateValidationTests {
     @Test
     fun `latitude is valid within range`() {
@@ -94,6 +92,7 @@ class ConversionTests {
 
 
 class ApiTests {
+    @SuppressLint("CheckResult")
     @Before
     fun setup() {
         mockStatic(Log::class.java)

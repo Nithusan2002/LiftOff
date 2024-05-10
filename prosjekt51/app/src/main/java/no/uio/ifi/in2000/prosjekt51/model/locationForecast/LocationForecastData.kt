@@ -1,8 +1,7 @@
 package no.uio.ifi.in2000.prosjekt51.model.locationForecast
 
-import android.util.Log
 import kotlinx.serialization.Serializable
-import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribJson
+
 
 // The following three data classes match the json-structure, and therefore are used in deserialization.
 @Serializable
@@ -25,6 +24,7 @@ data class InstantDataContainer(
 
      properties:
         instant: An instance of InstantDetails representing the detailed weather conditions at a specific time.
+        next_1_hours: An instance of Next_1_Hours, representing data from the next hour, beginning at the given time
      */
     val instant: InstantDetails,
     val next_1_hours: NextHourDetails? = null
@@ -51,7 +51,7 @@ data class NextHourDetails(
 )
 
 
-// The following three data classes are the classes we actually want to store in the uistate. // TODO: Sikkert mye bedre/mer effektive måter å gjøre dette på.
+// The following three data classes are the classes we actually want to store in the uistate.
 @Serializable
 data class LocationForecastWeatherData(
     /* A serializable data class representing the detailed weather condition data at a specific time.
@@ -98,6 +98,7 @@ data class TimeAndData(
      properties:
      time: A String indicating the specific timestamp of the weather data.
      data: An Instance of LocationForecastWeatherData representing the detailed weather conditions at the specified time.
+     nexthourdata: An instance of LocationForecastWeatherNextHourData, representing weather data for the coming hour
      */
     val time: String,
     val data: LocationForecastWeatherData,
@@ -110,8 +111,8 @@ object LocationForecastCache {
     It provides methods to interact with the cache by time keys.
 
     Functions:
-     * storeData - stores a list of GribJson associated with a specific time key.
-     * getData - retrieves a list of GribJson associated with a specific time key.
+     * storeData - stores a list of TimeAndData associated with a specific time key.
+     * getData - retrieves a list of TimeAndData associated with a specific time key.
      * isDataStoredForTime - checks if data is stored in the cache for a specific time key.
 
      properties:

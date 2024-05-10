@@ -58,13 +58,11 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
                             .padding(5.dp),
                         contentPadding = PaddingValues(0.dp),
                     ) {
-                        Text("Save position to favourites")
+                        Text("Save position to favorites")
                     }
                     Button(
                         onClick = {
-                            if (selectedLatLng != null) {
-                                navController.navigate("searchScreen/${selectedLatLng.latitude}/${selectedLatLng.longitude}")
-                            }
+                            navController.navigate("searchScreen/${selectedLatLng.latitude}/${selectedLatLng.longitude}")
                         },
                         shape = RoundedCornerShape(5.dp),
                         modifier = Modifier
@@ -93,6 +91,10 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
 }
 @Composable
 fun MapViewWithState(onLocationSelected: (LatLng) -> Unit) {
+    /*
+    Helper function to display map with added marker at selected location. Also facilitates
+    centering and zooming on the selected location.
+    */
     val mapView = rememberMapViewWithLifecycle()
     AndroidView({ mapView }) { mv ->
         mv.getMapAsync { googleMap ->
@@ -110,6 +112,7 @@ fun MapViewWithState(onLocationSelected: (LatLng) -> Unit) {
 
 @Composable
 fun rememberMapViewWithLifecycle(): MapView {
+    /*Initialize map view within lifecycle*/
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
@@ -131,6 +134,7 @@ fun rememberMapViewWithLifecycle(): MapView {
 
 @Composable
 fun SaveToFavoritesDialog(latlon: LatLng, mapViewModel: MapViewModel) {
+    /*Pop up dialog to allow user to save selected location to favorites*/
     val context = LocalContext.current
     val viewModel: FavoriteViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -145,7 +149,6 @@ fun SaveToFavoritesDialog(latlon: LatLng, mapViewModel: MapViewModel) {
         }
     )
 
-    // Collect the list of favorites from the ViewModel.
     var showDialog by remember { mutableStateOf(true) }
     var text by remember { mutableStateOf("") }
 

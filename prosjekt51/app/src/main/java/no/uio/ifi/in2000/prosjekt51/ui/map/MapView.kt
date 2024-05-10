@@ -10,6 +10,8 @@ import com.google.android.gms.maps.model.MarkerOptions
 import no.uio.ifi.in2000.prosjekt51.R
 
 class MapViewScreen : AppCompatActivity(), OnMapReadyCallback {
+    /*Class to manage declaration of Google Maps interface for user interaction*/
+
     private lateinit var mMap: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {

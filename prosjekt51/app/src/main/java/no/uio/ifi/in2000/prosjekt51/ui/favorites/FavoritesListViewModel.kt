@@ -18,14 +18,14 @@ class FavoriteViewModel(private val repository: FavoriteRepository) : ViewModel(
     fun addFavorite(favorite: Favorite) {
         viewModelScope.launch {
             repository.addFavorite(favorite)
-            loadFavorites() // Reload the favorites after adding
+            loadFavorites()
         }
     }
 
     fun deleteFavorite(favorite: Favorite) {
         viewModelScope.launch {
             repository.deleteFavorite(favorite)
-            loadFavorites() // Reload the favorites after adding
+            loadFavorites()
         }
     }
 
