@@ -1,10 +1,10 @@
-# [Appnavn her]
+# Liftoff
 
 ## Hvordan kjøre appen
 ### Emulering med Android Studio
 1. Åpne prosjektet i Android Studio.
 2. Konfigurer en emulator eller koble til en fysisk enhet. Sørg for at emulatoren eller enheten har API-nivå 26 (Android 8.0) eller høyere for at den skal kunne kjøre. 
-4. Klikk på "Run" for å bygge og kjøre appen på emulatoren eller enheten.
+3. Klikk på "Run" for å bygge og kjøre appen på emulatoren eller enheten.
 
 
 ## Biblioteker
@@ -21,18 +21,5 @@
 - [Mockito](https://site.mockito.org/)
 - [Kotlin Serialization](https://kotlinlang.org/docs/serialization.html)
 - [Material Design 3](https://m3.material.io/)
-
-## Kjente problemer og Oppklaringer
-
-### Appen kan være treg til tider
-Gribdata tar lang tid å hente
-
-### Utskytningsvinduer
-
-### Ikke ferdigstilte funksjonaliteter
-More options? <br>
-Settings?
-
-### Warnings 
 
 
