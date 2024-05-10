@@ -68,6 +68,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:2.3.8")
     implementation("androidx.compose.material3:material3-android:1.2.1")
     implementation("androidx.test.ext:junit-ktx:1.1.5")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     val ktorVersion = "2.3.8"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
@@ -113,6 +114,8 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.7")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.7")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("org.mockito:mockito-core:3.12.4")

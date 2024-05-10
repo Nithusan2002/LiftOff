@@ -22,21 +22,29 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.compose.ThemeManager
 import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteItem
 
 @Composable
 fun SettingsScreen(navController: NavController) {
+    val context = LocalContext.current
+    val isDarkTheme = ThemeManager.getThemeState(context)
+
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxHeight()) {
+        modifier = Modifier.fillMaxHeight()
+    ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -46,7 +54,16 @@ fun SettingsScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(10.dp))
 
                 LazyColumn {
-                    item { SettingsItem(onClick = {}, name = "Appearance" ) }
+                    item {
+                        SettingsItem(
+                            onClick = {
+                                isDarkTheme.value = !isDarkTheme.value
+                                ThemeManager.saveTheme(context, isDarkTheme.value)
+                            },
+                            name = "Appearance: ${if (isDarkTheme.value) "Dark" else "Light"}",
+                            modifier = Modifier.testTag("ThemeToggle")
+                        )
+                    }
                     item { SettingsItem(onClick = {}, name = "Units and boundary values" ) }
                     item { SettingsItem(onClick = {}, name = "Logging" ) }
                     item { SettingsItem(onClick = {}, name = "Import/Export" ) }
@@ -60,10 +77,10 @@ fun SettingsScreen(navController: NavController) {
 
 
 @Composable
-fun SettingsItem(onClick: () -> Unit, name: String) {
+fun SettingsItem(onClick: () -> Unit, name: String, modifier: Modifier = Modifier) {
     Card(
         shape = MaterialTheme.shapes.extraSmall,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
         onClick = onClick

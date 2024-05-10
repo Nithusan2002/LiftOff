@@ -33,11 +33,13 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.compose.ThemeManager
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
@@ -84,8 +86,19 @@ fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribP
         Column(modifier = Modifier
             .padding(top = 48.dp)
             .height(500.dp)) {
+            val gusttext = data?.data?.wind_speed_of_gust
             Text(
-                text = "Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s",
+                buildAnnotatedString {
+                    if (gusttext != null) {
+                        append("Wind speed of gust: $gusttext m/s")
+                    } else {
+                        append("Wind speed of gust: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // 0xFFFFA500 is the ARGB code for orange
+                            append("N/A")
+                        }
+                        append(" m/s")
+                    }
+                },
                 fontSize = 20.sp,
                 modifier = Modifier.padding(16.dp)
             )
@@ -172,16 +185,23 @@ fun PrecipitationDisplay(exitFunc: () -> Unit, data: TimeAndData?){
         ) {
             Icon(Icons.Filled.Close, contentDescription = "Close")
         }
+        val precipitationtext = data?.nexthourdata?.precipitation_amount
 
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 48.dp)) {
-            Text(
-                text = "Precipitation: ${data?.nexthourdata?.precipitation_amount} mm",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
+        Text(
+            buildAnnotatedString {
+                if (precipitationtext != null) {
+                    append("Precipitation amount: $precipitationtext mm")
+                } else {
+                    append("Precipitation amount: ")
+                    withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                        append("N/A")
+                    }
+                    append(" mm")
+                }
+            },
+            fontSize = 20.sp,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 
@@ -256,7 +276,8 @@ fun LegalDisplay(exitFunc: () -> Unit) {
             Text(
                 text = "Legal restrictions",
                 fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.background
             )
             val annotatedString = buildAnnotatedString {
                 append("Please ensure to coordinate with the local municipality, landowner, Civil Aviation Authority, Avinor, fire department, and police. ")
@@ -274,7 +295,7 @@ fun LegalDisplay(exitFunc: () -> Unit) {
 
             ClickableText(
                 text = annotatedString,
-                //style = TextStyle(color = MaterialTheme.colors.primary),
+                style = TextStyle(color = MaterialTheme.colorScheme.tertiary),
                 onClick = { offset ->
                     annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
                         .firstOrNull()?.let { annotation ->
@@ -282,7 +303,7 @@ fun LegalDisplay(exitFunc: () -> Unit) {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
                             context.startActivity(intent) // Start the intent to open the URL
                         }
-                }
+                },
             )
         }
     }
@@ -301,11 +322,52 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             if (lat > 64.25 || lat < 55.35 || lon > 14.51 || lon < -1.45) {
-                Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = Color.DarkGray)
+                Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.tertiary)
             }
-            Text("Wind speed of gust: ${data?.data?.wind_speed_of_gust} m/s") // TODO: Har plutselig begynt å si "null" utenfor sør-norge?
-            Text("Maximum wind-speed: ${visualResultScreenUiState.maxWindSpeed} m/s") // TODO: Er 0.0 selv når data ikke er tilgjengelig?
-            Text("Maximum wind-shear: ${visualResultScreenUiState.maxWindShear} m/s") // TODO: ---||---
+            val gusttext = data?.data?.wind_speed_of_gust
+            val speedtext = visualResultScreenUiState.maxWindSpeed
+            val sheartext = visualResultScreenUiState.maxWindShear
+            Text(
+                buildAnnotatedString {
+                    if (gusttext != null) {
+                        append("Wind speed of gust: $gusttext m/s")
+                    } else {
+                        append("Wind speed of gust: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // 0xFFFFA500 is the ARGB code for orange
+                            append("N/A")
+                        }
+                        append(" m/s")
+                    }
+                }
+            )
+
+            Text(
+                buildAnnotatedString {
+                    if (speedtext != null) {
+                        append("Maximum wind-speed: $speedtext m/s")
+                    } else {
+                        append("Maximum wind-speed: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                            append("N/A")
+                        }
+                        append(" m/s")
+                    }
+                },
+            )
+
+            Text(
+                buildAnnotatedString {
+                    if (sheartext != null) {
+                        append("Maximum wind-shear: $sheartext m/s")
+                    } else {
+                        append("Maximum wind-shear: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                            append("N/A")
+                        }
+                        append(" m/s")
+                    }
+                },
+            )
         }
         Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
     }
@@ -340,10 +402,23 @@ fun PrecipitationSection(enterFunc: () -> Unit, data: TimeAndData?) {
         shape = RectangleShape,
         onClick = { enterFunc() }
     ) {
+        val precipitationtext = data?.nexthourdata?.precipitation_amount
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Precipitation amount: ${data?.nexthourdata?.precipitation_amount} mm")
+            Text(
+                buildAnnotatedString {
+                    if (precipitationtext != null) {
+                        append("Precipitation amount: $precipitationtext mm")
+                    } else {
+                        append("Precipitation amount: ")
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                            append("N/A")
+                        }
+                        append(" mm")
+                    }
+                },
+            )
+            Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
         }
-        Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
     }
 }
 

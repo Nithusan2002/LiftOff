@@ -3,13 +3,14 @@ package no.uio.ifi.in2000.prosjekt51.ui.map
 import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomAppBar
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -33,7 +34,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.DatabaseManager
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.Favorite
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
-import no.uio.ifi.in2000.prosjekt51.ui.BottomNavigation
 
 @Composable
 fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel()) {
@@ -51,7 +51,12 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
                 if (showSaveButton && selectedLatLng != null) {
                     Button(
                         onClick = { viewModel.toggleSaveDialog(true) },
-                        modifier = Modifier.fillMaxWidth().padding(8.dp)
+                        shape = RoundedCornerShape(5.dp),
+                        modifier = Modifier
+                            .height(52.dp)
+                            .fillMaxWidth()
+                            .padding(5.dp),
+                        contentPadding = PaddingValues(0.dp),
                     ) {
                         Text("Save position to favourites")
                     }
@@ -61,7 +66,12 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
                                 navController.navigate("searchScreen/${selectedLatLng.latitude}/${selectedLatLng.longitude}")
                             }
                         },
-                        modifier = Modifier.fillMaxWidth().padding(8.dp)
+                        shape = RoundedCornerShape(5.dp),
+                        modifier = Modifier
+                            .height(52.dp)
+                            .fillMaxWidth()
+                            .padding(5.dp),
+                        contentPadding = PaddingValues(0.dp),
                     ) {
                         Text("Search position")
                     }
@@ -78,7 +88,7 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
     }
 
     if (showSaveDialog && selectedLatLng != null) {
-        SaveToFavoritesDialog(selectedLatLng)
+        SaveToFavoritesDialog(selectedLatLng, viewModel)
     }
 }
 @Composable
@@ -120,7 +130,7 @@ fun rememberMapViewWithLifecycle(): MapView {
 
 
 @Composable
-fun SaveToFavoritesDialog(latlon: LatLng) {
+fun SaveToFavoritesDialog(latlon: LatLng, mapViewModel: MapViewModel) {
     val context = LocalContext.current
     val viewModel: FavoriteViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -156,7 +166,7 @@ fun SaveToFavoritesDialog(latlon: LatLng) {
                 Button(
                     onClick = {
                         viewModel.addFavorite(Favorite(lat = latlon.latitude, lon = latlon.longitude, name = text))
-                        showDialog = false
+                        mapViewModel.toggleSaveDialog(false)
                     }
                 ) {
                     Text("Save")
@@ -165,7 +175,7 @@ fun SaveToFavoritesDialog(latlon: LatLng) {
             dismissButton = {
                 Button(
                     onClick = {
-                        showDialog = false
+                        mapViewModel.toggleSaveDialog(false)
                     }
                 ) {
                     Text("Cancel")

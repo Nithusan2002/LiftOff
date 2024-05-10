@@ -214,23 +214,23 @@ class ResultScreenViewModel: ViewModel() {
         val maxWindSpeed = findMaximumAirWindSpeed(visualResultScreenUiState.value.height,
             visualResultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
             visualResultScreenUiState.value.currentLocationForecastData?.data?.air_temperature ?: 0.0
-        ) ?: 0.0
+        )
 
         val maxWindShear = findMaximumWindShear(visualResultScreenUiState.value.height,
             visualResultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
             visualResultScreenUiState.value.currentLocationForecastData?.data?.air_temperature ?: 0.0
-        ) ?: 0.0
+        )
 
         _visualResultScreenUiState.update { currentUiState ->
             currentUiState.copy(maxWindSpeed = maxWindSpeed, maxWindShear = maxWindShear)
         }
         val result = when {
             (lfwData?.wind_speed_of_gust?.compareTo(CRITICAL_WIND_GUST) ?: -1) > 0 -> 2  // TODO: Vi har ikke gust-data utenfor norge, eller langt frem i tid
-            (maxWindSpeed).compareTo(CRITICAL_WIND_ALTITUDE) > 0 -> 2
-            (maxWindShear).compareTo(CRITICAL_WIND_SHEAR) > 0 -> 2
+            (maxWindSpeed?.compareTo(CRITICAL_WIND_ALTITUDE) ?: -1) > 0 -> 2
+            (maxWindShear?.compareTo(CRITICAL_WIND_SHEAR) ?: -1) > 0 -> 2
             (lfwData?.wind_speed_of_gust?.compareTo(CRITICAL_WIND_GUST_80) ?: -1) > 0 -> 1
-            (maxWindSpeed).compareTo(CRITICAL_WIND_ALTITUDE_80) > 0 -> 1
-            (maxWindShear).compareTo(CRITICAL_WIND_SHEAR_80) > 0 -> 1
+            (maxWindSpeed?.compareTo(CRITICAL_WIND_ALTITUDE_80) ?: -1) > 0 -> 1
+            (maxWindShear?.compareTo(CRITICAL_WIND_SHEAR_80) ?: -1) > 0 -> 1
             else -> 0
         }
         return result

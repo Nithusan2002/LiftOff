@@ -8,6 +8,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.Update
 
 @Entity
 data class Favorite(
@@ -27,6 +28,10 @@ interface FavoriteDao {
 
     @Delete
     suspend fun deleteFavorite(favorite: Favorite)
+
+    @Update
+    suspend fun updateFavorite(favorite: Favorite): Int  // Returns the number of rows updated
+
 }
 
 @Database(entities = [Favorite::class], version = 2)
@@ -44,4 +49,8 @@ class FavoriteRepository(private val dao: FavoriteDao) {
     }
 
     suspend fun getFavorites(): List<Favorite> = dao.getFavorites()
+
+    suspend fun updateFavorite(favorite: Favorite) {
+        dao.updateFavorite(favorite)
+    }
 }
