@@ -452,7 +452,14 @@ fun LegalSection(enterFunc: () -> Unit) {
         onClick = { enterFunc() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Please ensure to coordinate with the local municipality, landowner, Civil Aviation Authority, Avinor, fire department, and police. Personal arrangements must be made with each of these entities. Prior to this, please verify that you are not within restricted airspace: [insert link here]...")
+            Text(text = "Please ensure to coordinate with the local municipality, " +
+                    "landowner, Civil Aviation Authority, Avinor, fire department, " +
+                    "and police. Personal arrangements must be made with each of " +
+                    "these entities. Prior to this, please verify that you are not " +
+                    "within restricted airspace: ...",
+                color = MaterialTheme.colorScheme.tertiary
+                )
+
         }
         Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
     }

@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
+import no.uio.ifi.in2000.prosjekt51.DEFAULT_COORDS
 import no.uio.ifi.in2000.prosjekt51.MAX_HEIGHT
 import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
 import java.time.LocalDateTime
@@ -123,7 +124,7 @@ fun SearchScreen(
                     CoordinateSymbol(
                         coordText = if (east) "E" else "W"
                     ) { east = !east }
-                    CoordinateInput(longitude, { longitude = it}, { isLongitudeValid(latitude) })
+                    CoordinateInput(longitude, { longitude = it}, { isLongitudeValid(longitude) })
 
                 }
 
@@ -150,9 +151,22 @@ fun SearchScreen(
                         val searchdate =
                             dateAtMidnight.toInstant(ZoneOffset.UTC).toEpochMilli()
 
+
+
                         // Convert latitude/longitude based on north/south or east/west coordinate
-                        val trueLatitude = if (north) latitude else (0-latitude.toDouble()).toString()
-                        val trueLongitude = if (east) longitude else (0-longitude.toDouble()).toString()
+                        val trueLatitude = try {
+                            val lat = latitude.toDouble()
+                            if (north) latitude else (-lat).toString()
+                        } catch (e: NumberFormatException) {
+                            DEFAULT_COORDS
+                        }
+
+                        val trueLongitude = try {
+                            val lon = longitude.toDouble()
+                            if (east) longitude else (-lon).toString()
+                        } catch (e: NumberFormatException) {
+                            DEFAULT_COORDS
+                        }
 
                         if (isLatitudeValid(trueLatitude) && isLongitudeValid(trueLongitude)) {
                             onNavigateToResultScreen(
