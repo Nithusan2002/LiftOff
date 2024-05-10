@@ -43,7 +43,7 @@ class VisualResultScreenTest {
                 navController = rememberNavController(),
                 snackbarHostState = SnackbarHostState(),
                 onRetryClicked = {},
-                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: String ->
+                onNavigateToResultScreen = { _: String, _: String, _: Long, _: String ->
                     { }
                 }
             )
@@ -96,7 +96,7 @@ class MapScreenTest {
             testViewModel.toggleSaveDialog(true)
         }
 
-        composeTestRule.onNodeWithText("Save position to favourites").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Save position to favorites").assertIsDisplayed()
         composeTestRule.onNodeWithText("Search position").assertIsDisplayed()
     }
 
@@ -114,7 +114,7 @@ class MapScreenTest {
         }
 
         // Simulate button click to open save dialog
-        composeTestRule.onNodeWithText("Save position to favourites").performClick()
+        composeTestRule.onNodeWithText("Save position to favorites").performClick()
 
         // Check that the dialog and the input field appear
         composeTestRule.onNodeWithText("Save to Favorites").assertIsDisplayed()

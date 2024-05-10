@@ -5,19 +5,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.preference.PreferenceManager
 
-@Immutable
-data class ExtendedColorScheme(
-    val goodConditions: ColorFamily,
-    val edgeConditions: ColorFamily,
-    val badConditions: ColorFamily,
-)
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -94,6 +86,9 @@ private val darkScheme = darkColorScheme(
     surfaceContainerHigh = surfaceContainerHighDark,
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
+
+/* Unused themes, may be used in further development:
+
 
 private val mediumContrastLightColorScheme = lightColorScheme(
     primary = primaryLightMediumContrast,
@@ -373,6 +368,15 @@ val extendedDarkHighContrast = ExtendedColorScheme(
   ),
 )
 
+
+@Immutable
+data class ExtendedColorScheme(
+    val goodConditions: ColorFamily,
+    val edgeConditions: ColorFamily,
+    val badConditions: ColorFamily,
+)
+
+
 @Immutable
 data class ColorFamily(
     val color: Color,
@@ -381,6 +385,8 @@ data class ColorFamily(
     val onColorContainer: Color
 )
 
+
+*/
 
 
 @Composable
