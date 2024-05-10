@@ -28,7 +28,6 @@ import no.uio.ifi.in2000.prosjekt51.DEFAULT_COORDS
 fun LabeledDivider(
     label: String,
     modifier: Modifier = Modifier,
-    /* You can add additional parameters for text style, padding, etc, as needed */
 ) {
     Row(
         modifier = modifier
@@ -70,7 +69,4 @@ fun BottomNavigation(navController: NavController){
         }
     }
 }
-
-
-// Data visualisation
 

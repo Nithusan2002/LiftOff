@@ -1,8 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51
 
-import android.view.View
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -10,14 +8,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.rememberNavController
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.runner.AndroidJUnit4
-import com.example.compose.ThemeManager
+import no.uio.ifi.in2000.prosjekt51.ui.theme.ThemeManager
 import com.google.android.gms.maps.model.LatLng
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoritesListScreen
 import no.uio.ifi.in2000.prosjekt51.ui.map.MapScreen
@@ -52,7 +43,6 @@ class VisualResultScreenTest {
                 navController = rememberNavController(),
                 snackbarHostState = SnackbarHostState(),
                 onRetryClicked = {},
-                errorMessage = null,
                 onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: String ->
                     { }
                 }
@@ -140,7 +130,7 @@ class ThemeSwitchingTest {
     fun toggleTheme_changesThemeAccordingly() {
         // Set the initial content for the test
         composeTestRule.setContent {
-            SettingsScreen(navController = rememberNavController())
+            SettingsScreen()
         }
 
         // Wait until the UI is stable

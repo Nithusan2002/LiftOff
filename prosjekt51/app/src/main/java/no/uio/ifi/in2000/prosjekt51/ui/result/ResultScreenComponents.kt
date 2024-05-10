@@ -39,7 +39,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.compose.ThemeManager
+import no.uio.ifi.in2000.prosjekt51.LAT_NORTH_LIMIT
+import no.uio.ifi.in2000.prosjekt51.LAT_SOUTH_LIMIT
+import no.uio.ifi.in2000.prosjekt51.LON_EAST_LIMIT
+import no.uio.ifi.in2000.prosjekt51.LON_WEST_LIMIT
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
@@ -68,12 +71,16 @@ fun SummaryDisplay(
     }
 }
 
+
+// =========== DISPLAYS ==============
+// Displays all data for a given data type, when clicking the relevant section
+
+
 @Composable
 fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribPoint>?, groundPressure: Double?, groundTemp: Double?){
     val safeGribPoints = gribPoints ?: emptyList()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Positioning the close icon in the top right corner
         IconButton(
             onClick = { exitFunc() },
             modifier = Modifier
@@ -102,17 +109,6 @@ fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribP
                 fontSize = 20.sp,
                 modifier = Modifier.padding(16.dp)
             )
-            /*
-            LazyColumn(modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)) {
-                items(safeGribPoints) { gribPoint ->
-                    GribPointItems(gribPoint, groundPressure, groundTemp)
-                }
-            }
-
-             */
-            Log.d("Gribdata","Size ${safeGribPoints.size}")
             safeGribPoints.forEach {
                 Log.d("Gribdata","Displayed")
                 GribPointItems(it, groundPressure, groundTemp)
@@ -124,7 +120,6 @@ fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribP
 @Composable
 fun SightDisplay(exitFunc: () -> Unit, data: TimeAndData?){
     Box(modifier = Modifier.fillMaxSize()) {
-        // Positioning the close icon in the top right corner
         IconButton(
             onClick = { exitFunc() },
             modifier = Modifier
@@ -176,7 +171,6 @@ fun SightDisplay(exitFunc: () -> Unit, data: TimeAndData?){
 @Composable
 fun PrecipitationDisplay(exitFunc: () -> Unit, data: TimeAndData?){
     Box(modifier = Modifier.fillMaxSize()) {
-        // Positioning the close icon in the top right corner
         IconButton(
             onClick = { exitFunc() },
             modifier = Modifier
@@ -208,7 +202,6 @@ fun PrecipitationDisplay(exitFunc: () -> Unit, data: TimeAndData?){
 @Composable
 fun AirDisplay(exitFunc: () -> Unit, data: TimeAndData?){
     Box(modifier = Modifier.fillMaxSize()) {
-        // Positioning the close icon in the top right corner
         IconButton(
             onClick = { exitFunc() },
             modifier = Modifier
@@ -303,11 +296,18 @@ fun LegalDisplay(exitFunc: () -> Unit) {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
                             context.startActivity(intent) // Start the intent to open the URL
                         }
-                },
+                }
             )
         }
     }
 }
+
+
+
+
+// =========== SECTIONS ==============
+// Small summary of data for each data type
+
 
 
 @Composable
@@ -321,7 +321,7 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
         onClick = { enterFunc() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            if (lat > 64.25 || lat < 55.35 || lon > 14.51 || lon < -1.45) {
+            if (lat > LAT_NORTH_LIMIT || lat < LAT_SOUTH_LIMIT || lon > LON_EAST_LIMIT || lon < LON_WEST_LIMIT) {
                 Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.tertiary)
             }
             val gusttext = data?.data?.wind_speed_of_gust
@@ -483,7 +483,7 @@ fun LaunchWindows(
     data.forEach { launchWindow ->
         val hour = launchWindow.time.substring(11,13)
         if (hour == "00") {
-            if (cells.get(0).size != 0) { // Added to prevent error when first value is 00, so that new day won't be added if previous day is empty
+            if (cells[0].size != 0) { // Added to prevent error when first value is 00, so that new day won't be added if previous day is empty
                 currentDay++
                 cells.add(ArrayList())
             }

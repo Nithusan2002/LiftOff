@@ -1,4 +1,4 @@
-package com.example.ui.theme
+package no.uio.ifi.in2000.prosjekt51.ui.theme
 
 import androidx.compose.material3.Typography
 
