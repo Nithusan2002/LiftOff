@@ -22,9 +22,11 @@ Vi har benyttet oss av designmønstre som MVVM (Model-View-ViewModel) og UDF (Un
 ## Løsningen for drift, vedlikehold og videreutvikling
 For lesere som skal jobbe med drift, vedlikehold og videreutvikling av løsningen, gir vi følgende oversikt over teknologier, arkitektur og API-nivå som er brukt:
 
-- **Teknologier**: Vi har benyttet oss av Kotlin som hovedspråk for utviklingen av Android-appen og Jetpack Compose for å bygge UI-en. //TODO er det noe mer som skal her?
+- **Teknologier**: Vi har benyttet oss av Kotlin som hovedspråk for utviklingen av Android-appen og Jetpack Compose for å bygge UI-en. Vi bruker også en Google Maps SDK for å tilby karttjeneste i appen.
 
 - **Arkitektur**: Appen følger en MVVM-arkitektur (Model-View-ViewModel) for å separere brukergrensesnittet fra forretningslogikken og data. Den har også en enveis dataflyt gjennom hele applikasjonen i tråd med UDF-mønsteret.
+
+- **API**: Vi har brukt API-ene LocationForecast og IsobaricGrib fra MET. Locationforecast går gjennom Ifi-proxyen og IsobaricGrib hentes via en backend-server for å parse data.
 
 - **API-nivå**: Vi har valgt API-nivå 26 som minimum API-nivå. Dette valgte vi fordi det er det laveste API-nivået som appen kan kjøre med fordi vi bruker klasser fra biblioteker som krever minimum API-nivå 26. Klassene det gjelder er LocalDateTime og LocalDate. Ellers har vi prøvd å holde minimum API-nivå lavt for at appen skal være kompatibel med så mange enheter som mulig.
 
