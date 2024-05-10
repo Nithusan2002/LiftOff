@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -59,7 +60,8 @@ fun SettingsScreen(navController: NavController) {
                                 isDarkTheme.value = !isDarkTheme.value
                                 ThemeManager.saveTheme(context, isDarkTheme.value)
                             },
-                            name = "Appearance: ${if (isDarkTheme.value) "Dark" else "Light"}"
+                            name = "Appearance: ${if (isDarkTheme.value) "Dark" else "Light"}",
+                            modifier = Modifier.testTag("ThemeToggle")
                         )
                     }
                     item { SettingsItem(onClick = {}, name = "Units and boundary values" ) }
@@ -75,10 +77,10 @@ fun SettingsScreen(navController: NavController) {
 
 
 @Composable
-fun SettingsItem(onClick: () -> Unit, name: String) {
+fun SettingsItem(onClick: () -> Unit, name: String, modifier: Modifier = Modifier) {
     Card(
         shape = MaterialTheme.shapes.extraSmall,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
         onClick = onClick

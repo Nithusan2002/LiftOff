@@ -33,11 +33,13 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.compose.ThemeManager
 import no.uio.ifi.in2000.prosjekt51.model.isobaricGrib.GribPoint
 import no.uio.ifi.in2000.prosjekt51.model.locationForecast.TimeAndData
 import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
@@ -274,7 +276,8 @@ fun LegalDisplay(exitFunc: () -> Unit) {
             Text(
                 text = "Legal restrictions",
                 fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.background
             )
             val annotatedString = buildAnnotatedString {
                 append("Please ensure to coordinate with the local municipality, landowner, Civil Aviation Authority, Avinor, fire department, and police. ")
@@ -292,7 +295,7 @@ fun LegalDisplay(exitFunc: () -> Unit) {
 
             ClickableText(
                 text = annotatedString,
-                //style = TextStyle(color = MaterialTheme.colors.primary),
+                style = TextStyle(color = MaterialTheme.colorScheme.tertiary),
                 onClick = { offset ->
                     annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
                         .firstOrNull()?.let { annotation ->
@@ -300,7 +303,7 @@ fun LegalDisplay(exitFunc: () -> Unit) {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
                             context.startActivity(intent) // Start the intent to open the URL
                         }
-                }
+                },
             )
         }
     }
@@ -319,7 +322,7 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             if (lat > 64.25 || lat < 55.35 || lon > 14.51 || lon < -1.45) {
-                Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = Color.DarkGray)
+                Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.tertiary)
             }
             val gusttext = data?.data?.wind_speed_of_gust
             val speedtext = visualResultScreenUiState.maxWindSpeed

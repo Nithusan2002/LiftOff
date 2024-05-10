@@ -729,7 +729,7 @@ fun AppThemeDeprecated(
 object ThemeManager {
     private const val THEME_PREF = "theme_preference"
     private const val THEME_KEY = "theme_key"
-    private var isDarkTheme = mutableStateOf(false)
+    var isDarkTheme = mutableStateOf(false)
 
     fun getThemeState(context: Context): MutableState<Boolean> {
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)

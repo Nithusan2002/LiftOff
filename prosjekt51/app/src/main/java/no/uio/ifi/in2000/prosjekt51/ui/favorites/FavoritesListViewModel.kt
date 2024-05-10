@@ -29,9 +29,18 @@ class FavoriteViewModel(private val repository: FavoriteRepository) : ViewModel(
         }
     }
 
+    fun updateFavorite(favorite: Favorite) {
+        viewModelScope.launch {
+            repository.updateFavorite(favorite)
+            loadFavorites()
+        }
+    }
+
     private fun loadFavorites() {
         viewModelScope.launch {
             _favorites.value = repository.getFavorites()
         }
     }
+
+
 }
