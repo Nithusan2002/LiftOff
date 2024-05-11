@@ -37,7 +37,7 @@ fun CoordinateInput(coord: String, onValueChange: (String) -> Unit, validateFunc
     OutlinedTextField(
         value = coord,
         onValueChange = onValueChange,
-        label = { Text("Grader") },
+        label = { Text("Degrees") },
         singleLine = true,
         modifier = Modifier,
         isError = !validateFunc(coord) && coord.isNotEmpty()

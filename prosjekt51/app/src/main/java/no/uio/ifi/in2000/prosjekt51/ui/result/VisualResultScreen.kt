@@ -97,8 +97,8 @@ fun VisualResultScreen(
         LaunchedEffect(snackbarHostState) {
             scope.launch {
                 val result = snackbarHostState.showSnackbar(
-                    message = "En feil oppstod",
-                    actionLabel = "Prøv igjen",
+                    message = "An error occurred",
+                    actionLabel = "Try again",
                     duration = SnackbarDuration.Indefinite
                 )
                 when (result) {
