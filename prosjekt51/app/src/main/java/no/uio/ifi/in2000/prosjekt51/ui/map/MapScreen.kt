@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,8 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +38,7 @@ import no.uio.ifi.in2000.prosjekt51.ui.favorites.DatabaseManager
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.Favorite
 import no.uio.ifi.in2000.prosjekt51.ui.favorites.FavoriteViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel()) {
 
@@ -44,9 +48,10 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
 
     Scaffold(
         topBar = {
-            Column(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
+            CenterAlignedTopAppBar(title = { Text(text = "Choose location") })
+        },
+        bottomBar = {
+            Row(
             ) {
                 if (showSaveButton && selectedLatLng != null) {
                     Button(
@@ -55,6 +60,7 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
                         modifier = Modifier
                             .height(52.dp)
                             .fillMaxWidth()
+                            .weight(1f)
                             .padding(5.dp),
                         contentPadding = PaddingValues(0.dp),
                     ) {
@@ -67,6 +73,7 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
                         shape = RoundedCornerShape(5.dp),
                         modifier = Modifier
                             .height(52.dp)
+                            .weight(1f)
                             .fillMaxWidth()
                             .padding(5.dp),
                         contentPadding = PaddingValues(0.dp),
@@ -79,7 +86,9 @@ fun MapScreen(navController: NavController, viewModel: MapViewModel = viewModel(
     ) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.padding(innerPadding).fillMaxHeight()
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxHeight()
         ) {
             MapViewWithState(viewModel::selectLocation)
         }
