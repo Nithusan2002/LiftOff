@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.room.Room
 
+@ExperimentalMaterial3Api
 @Composable
 fun FavoritesListScreen(navController: NavController) {
     val context = LocalContext.current
@@ -54,33 +55,23 @@ fun FavoritesListScreen(navController: NavController) {
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxHeight()
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+            title = { Text(text = "Favorites") },
+            actions = {
+                IconButton(onClick = { showDialog = true }, Modifier.testTag("addFavoriteButton")) {
+                    Icon(Icons.Default.Add, contentDescription = "Add favorite")
+                }
+            }
+        )
+        }
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Favorites", style = MaterialTheme.typography.headlineSmall)
-                    IconButton(onClick = { showDialog = true }, Modifier.testTag("addFavoriteButton")) {
-                        Icon(Icons.Default.Add, contentDescription = "Add favorite")
-                    }
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                LazyColumn {
-                    items(favorites) { favorite ->
-                        FavoriteItem(favorite, viewModel, navController, onEdit = { selectedFavorite ->
-                            editingFavorite = selectedFavorite
-                        })
-                    }
-                }
+        LazyColumn(modifier = Modifier.padding(it)) {
+            items(favorites) { favorite ->
+                FavoriteItem(favorite, viewModel, navController, onEdit = { selectedFavorite ->
+                    editingFavorite = selectedFavorite
+                })
             }
         }
     }
