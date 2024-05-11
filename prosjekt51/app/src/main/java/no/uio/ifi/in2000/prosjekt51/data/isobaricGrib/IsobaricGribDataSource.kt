@@ -32,7 +32,7 @@ class IsobaricGribAPI {
 
         returns: ConnectionResult object, either success and the associated data is returned,
             or an exception, either inputError og TimeoutError is returned
- */
+         */
 
         // Network call on IO Dispatcher
         return try {
@@ -48,7 +48,8 @@ class IsobaricGribAPI {
 }
 
 interface ApiService {
-    /*interface for rrequesting gribdata from backend server
+    /*
+    Interface for requesting gribdata from backend server
      */
     @GET("/convert")
     suspend fun convertGribFile(@Query("time") time: String): String

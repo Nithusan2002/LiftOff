@@ -25,6 +25,8 @@ import androidx.room.Room
 @ExperimentalMaterial3Api
 @Composable
 fun FavoritesListScreen(navController: NavController) {
+
+    // Get Favorites-database
     val context = LocalContext.current
     val viewModel: FavoriteViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -43,6 +45,8 @@ fun FavoritesListScreen(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
     var editingFavorite by remember { mutableStateOf<Favorite?>(null) }
 
+
+    // Dialogs for adding or editing favorites-elements
     if (showDialog) {
         AddFavoriteDialog(viewModel = viewModel) {
             showDialog = false
@@ -51,7 +55,7 @@ fun FavoritesListScreen(navController: NavController) {
 
     if (editingFavorite != null) {
         EditFavoriteDialog(editingFavorite!!, viewModel = viewModel) {
-            editingFavorite = null  // Reset the editing state upon closing the dialog
+            editingFavorite = null
         }
     }
 
@@ -94,7 +98,7 @@ fun FavoriteItem(favorite: Favorite, viewModel: FavoriteViewModel, navController
         ) {
             Text(
                 text = "Name: ${favorite.name}",
-                modifier = Modifier.weight(1f)  // This will make the Text take all available space pushing the Icon to the end
+                modifier = Modifier.weight(1f)
             )
             IconButton(
                 onClick = { onEdit(favorite) }
@@ -148,7 +152,7 @@ fun AddFavoriteDialog(viewModel: FavoriteViewModel, onDismiss: () -> Unit) {
                     viewModel.addFavorite(Favorite(name = name, lat = lat.toDouble(), lon = lon.toDouble()))
                     onDismiss()
                 },
-                enabled = inputValid  // Button is disabled until all validations are passed
+                enabled = inputValid
             ) {
                 Text("Add")
             }
@@ -161,7 +165,6 @@ fun AddFavoriteDialog(viewModel: FavoriteViewModel, onDismiss: () -> Unit) {
     )
 }
 
-// Helper functions to check if the string can be converted to Double and is within valid ranges
 fun isValidLatitude(s: String): Boolean {
     return s.toDoubleOrNull()?.let {
         it in -90.0..90.0

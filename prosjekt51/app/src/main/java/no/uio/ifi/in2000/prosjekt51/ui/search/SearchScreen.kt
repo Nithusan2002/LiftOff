@@ -1,8 +1,5 @@
 package no.uio.ifi.in2000.prosjekt51.ui.search
 
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
+import no.uio.ifi.in2000.prosjekt51.DEFAULT_COORDS
 import no.uio.ifi.in2000.prosjekt51.MAX_HEIGHT
 import no.uio.ifi.in2000.prosjekt51.ui.LabeledDivider
 import java.time.LocalDateTime
@@ -38,7 +35,11 @@ import java.time.ZoneOffset
 fun isLatitudeValid(lat: String): Boolean {
     /* Validates latitude
          arguments:
-             lat (String): The latitude of the location.*/
+             lat (String): The latitude of the location.
+
+        returns:
+            Boolean
+     */
     return try {
         val value = lat.toDouble()
         value in -90.0..90.0
@@ -51,7 +52,10 @@ fun isLatitudeValid(lat: String): Boolean {
 fun isLongitudeValid(lon: String): Boolean {
     /* Validates longitude
      arguments:
-         lon (String): The longitude of the location.*/
+         lon (String): The longitude of the location.
+     returns:
+         Boolean
+     */
     return try {
         val value = lon.toDouble()
         value in -180.0..180.0
@@ -60,7 +64,6 @@ fun isLongitudeValid(lon: String): Boolean {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterial3Api
 @Composable
 fun SearchScreen(
@@ -121,7 +124,7 @@ fun SearchScreen(
                     CoordinateSymbol(
                         coordText = if (east) "E" else "W"
                     ) { east = !east }
-                    CoordinateInput(longitude, { longitude = it}, { isLongitudeValid(latitude) })
+                    CoordinateInput(longitude, { longitude = it}, { isLongitudeValid(longitude) })
 
                 }
 
@@ -138,16 +141,6 @@ fun SearchScreen(
             Column(
                 modifier = Modifier.padding(4.dp)
             ) {
-                OutlinedButton(
-                    onClick = { /*TODO*/ },
-                    shape = RoundedCornerShape(5.dp),
-                    modifier = Modifier
-                        .height(52.dp)
-                        .fillMaxWidth(),
-                    contentPadding = PaddingValues(0.dp),
-                ) {
-                    Text(text = "More options")
-                }
                 Button(
                     onClick = {
                         // Get the current date
@@ -158,9 +151,22 @@ fun SearchScreen(
                         val searchdate =
                             dateAtMidnight.toInstant(ZoneOffset.UTC).toEpochMilli()
 
+
+
                         // Convert latitude/longitude based on north/south or east/west coordinate
-                        val trueLatitude = if (north) latitude else (0-latitude.toDouble()).toString()
-                        val trueLongitude = if (east) longitude else (0-longitude.toDouble()).toString()
+                        val trueLatitude = try {
+                            val lat = latitude.toDouble()
+                            if (north) latitude else (-lat).toString()
+                        } catch (e: NumberFormatException) {
+                            DEFAULT_COORDS
+                        }
+
+                        val trueLongitude = try {
+                            val lon = longitude.toDouble()
+                            if (east) longitude else (-lon).toString()
+                        } catch (e: NumberFormatException) {
+                            DEFAULT_COORDS
+                        }
 
                         if (isLatitudeValid(trueLatitude) && isLongitudeValid(trueLongitude)) {
                             onNavigateToResultScreen(

@@ -1,9 +1,5 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -52,8 +47,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -68,7 +61,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VisualResultScreen(
@@ -82,7 +74,6 @@ fun VisualResultScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
     onRetryClicked: () -> Unit,
-    errorMessage: String?,
     onNavigateToResultScreen: (String, String, Long, String) -> Unit
 ) {
     val visualResultScreenUiState: VisualResultScreenUiState by resultScreenViewModel.visualResultScreenUiState.collectAsState()
@@ -106,8 +97,8 @@ fun VisualResultScreen(
         LaunchedEffect(snackbarHostState) {
             scope.launch {
                 val result = snackbarHostState.showSnackbar(
-                    message = "En feil oppstod",
-                    actionLabel = "Prøv igjen",
+                    message = "An error occurred",
+                    actionLabel = "Try again",
                     duration = SnackbarDuration.Indefinite
                 )
                 when (result) {
@@ -151,6 +142,7 @@ fun VisualResultScreen(
             )
         }
     ) { innerPadding ->
+        // Display loading wheel if data isn't yet loaded
         if (visualResultScreenUiState.isLoading) {
             Box(
                 modifier = Modifier
@@ -195,7 +187,7 @@ fun VisualResultScreen(
 
                         ExposedDropdownMenu(
                             modifier = Modifier
-                                .height(200.dp)  // Set a fixed height to ensure only part of the list is visible
+                                .height(200.dp)
                                 .fillMaxWidth(fraction = 0.65f),
                             expanded = timeexpanded,
                             onDismissRequest = { timeexpanded = false }
@@ -241,7 +233,7 @@ fun VisualResultScreen(
                         ExposedDropdownMenu(
                             modifier = Modifier
                                 .fillMaxWidth(fraction = 0.65f)
-                                .height(200.dp),  // Set a fixed height to ensure only part of the list is visible
+                                .height(200.dp),
                             expanded = dateexpanded,
                             onDismissRequest = { dateexpanded = false }
                         ) {
@@ -411,8 +403,7 @@ fun VisualResultScreen(
                         LegalDisplay(
                             exitFunc = {
                                 displayState = DisplayStates.TOTAL
-                            }, // Provide exit functionality to go back to the summary display
-                            //data = visualResultScreenUiState.currentLocationForecastData // Provide any specific data needed for the Juridisk display
+                            },
                         )
                     }
                 }

@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.prosjekt51.model.isobaricGrib
 
-import android.util.Log
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -56,6 +55,9 @@ data class GribPoint(
         vComponent(Double): The vertical component of the wind at the point.
         uComponent(Double): The horizontal component of the wind at the point.
         temperature(Double): The temperature at the point.
+        wind (Double): Wind speed
+        winddir (Double): The direction of the wind
+        windshear (Double): The shear of the wind compared to the athmospheric layer below
      */
     val height: Double,
     var vComponent: Double,
@@ -82,7 +84,6 @@ object GribDataCache {
     private var gribDataCache: Map<String, List<GribJson>> = emptyMap()
 
     fun storeData(timeKey: String, data: List<GribJson>) {
-        Log.d("GribFixing", "CURRENTLY STORING TIME $timeKey FOR ${data.take(40)}")
         gribDataCache = gribDataCache.plus(timeKey to data)
     }
 

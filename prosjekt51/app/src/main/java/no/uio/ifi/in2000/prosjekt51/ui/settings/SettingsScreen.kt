@@ -18,11 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.compose.ThemeManager
+import no.uio.ifi.in2000.prosjekt51.ui.theme.ThemeManager
 
 @ExperimentalMaterial3Api
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen() {
     val context = LocalContext.current
     val isDarkTheme = ThemeManager.getThemeState(context)
 
@@ -41,10 +41,7 @@ fun SettingsScreen(navController: NavController) {
                 modifier = Modifier.testTag("ThemeToggle")
             )
             SettingsItem(onClick = {}, name = "Units and boundary values" )
-            SettingsItem(onClick = {}, name = "Logging" )
-            SettingsItem(onClick = {}, name = "Import/Export" )
             SettingsItem(onClick = {}, name = "Restore defaults" )
-            SettingsItem(onClick = {}, name = "About us" )
         }
     }
 }
@@ -73,3 +70,4 @@ fun SettingsItem(onClick: () -> Unit, name: String, modifier: Modifier = Modifie
         }
     }
 }
+

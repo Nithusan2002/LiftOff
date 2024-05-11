@@ -1,8 +1,6 @@
 package no.uio.ifi.in2000.prosjekt51.ui.result
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,26 +68,6 @@ data class VisualResultScreenUiState(
         get() = error != null
 }
 
-data class VerboseResultScreenUiState(
-    val locationForecastData: List<TimeAndData>? = null,
-    val currentLocationForecastData: TimeAndData? = null,
-    val isobaricGribData: List<GribJson>? = null,
-    val currentGribData: List<GribPoint>? = null,
-    val launchWindowsData: List<LaunchWindow>? = null,
-    val error: String? = null,
-    val isLoading: Boolean = true,
-    val windCondition: Int = 2,
-    val sightCondition: Int = 2,
-    val precipitationCondition: Int = 0,
-    val airCondition: Int = 0,
-    val height: Double = MAX_HEIGHT.toDouble(),
-    val maxWindSpeed: Double? = null,
-    val maxWindShear: Double? = null,
-) {
-    val hasError: Boolean
-        get() = error != null
-}
-
 class ResultScreenViewModel: ViewModel() {
     private val weatherDataRepository = WeatherDataRepository(LocationForecastAPI())
 
@@ -97,10 +75,6 @@ class ResultScreenViewModel: ViewModel() {
     private val _visualResultScreenUiState = MutableStateFlow(VisualResultScreenUiState())
     val visualResultScreenUiState: StateFlow<VisualResultScreenUiState> = _visualResultScreenUiState.asStateFlow()
 
-    private val _verboseResultScreenUiState = MutableStateFlow(VerboseResultScreenUiState())
-    val verboseResultScreenUiState: StateFlow<VerboseResultScreenUiState> = _verboseResultScreenUiState.asStateFlow()
-
-    @RequiresApi(Build.VERSION_CODES.O)
     fun fetchData(
         lat: Double,
         lon:Double,
@@ -128,13 +102,10 @@ class ResultScreenViewModel: ViewModel() {
                 // Correct time by forcing time to closest 3-hour-interval value
                 val correctedTime = findClosestGribData(time)
                 fetchLocationForecast(lat, lon, alt, time)
-                Log.d("uistate", "UiStateLFD after fetchLoc: ${visualResultScreenUiState.value.currentLocationForecastData}")
                 getCurrentGribData(lat, lon, correctedTime)
-                Log.d("uistate", "UiStateLFD after fetchGrib: ${visualResultScreenUiState.value.currentLocationForecastData}")
                 if (height != null) {
                     updateHeight(height)
                 }
-                Log.d("uistate", "UiStateLFD afterFetchHeight: ${visualResultScreenUiState.value.currentLocationForecastData}")
 
                 updateLoading(false)
             } catch (e: Exception) {
@@ -147,7 +118,7 @@ class ResultScreenViewModel: ViewModel() {
         }
     }
 
-    fun updateLoading(value: Boolean) {
+    private fun updateLoading(value: Boolean) {
         _visualResultScreenUiState.update { currentUiState ->
             currentUiState.copy(
                 isLoading = value)
@@ -155,16 +126,13 @@ class ResultScreenViewModel: ViewModel() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun checkLaunchConditions() {
+    private fun checkLaunchConditions() {
         /*
         Checks launch conditions against limit values
 
         return:
             String to be displayed on resultScreen
          */
-
-        Log.d("uistate", "UiStateLFD i launchconditions: ${visualResultScreenUiState.value.currentLocationForecastData}")
 
         val launchCheckResult: List<Int>
 
@@ -183,8 +151,8 @@ class ResultScreenViewModel: ViewModel() {
                 windCondition = launchCheckResult[0],
                 sightCondition = launchCheckResult[1],
                 precipitationCondition = launchCheckResult[2],
-                airCondition = launchCheckResult[3]
-                , error = null)
+                airCondition = launchCheckResult[3],
+                error = null)
         }
     }
 
@@ -200,7 +168,7 @@ class ResultScreenViewModel: ViewModel() {
         }
     }
 
-    private fun checkWindCondition(lfwData: LocationForecastWeatherData?): Int {
+    private fun checkWindCondition(lfwData: LocationForecastWeatherData?, launch: Boolean = false): Int {
         /*
           Calculates maximum wind speed and maximum wind shear for height,
           and checks whether wind values are within limits
@@ -209,23 +177,27 @@ class ResultScreenViewModel: ViewModel() {
               lfwData: LocationForecastWeatherData-instance of the given time and coordinates
 
           returns:
-              Boolean
+              Int - 0 means condition is fulfilled; 2 means condition is not fulfilled; 1 means
+              condition is not fulfilled, but within 20% of limit value
        */
-        val maxWindSpeed = findMaximumAirWindSpeed(visualResultScreenUiState.value.height,
+        val maxWindSpeed = if (launch) null else findMaximumAirWindSpeed(visualResultScreenUiState.value.height,
             visualResultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
             visualResultScreenUiState.value.currentLocationForecastData?.data?.air_temperature ?: 0.0
         )
 
-        val maxWindShear = findMaximumWindShear(visualResultScreenUiState.value.height,
+        val maxWindShear = if (launch) null else findMaximumWindShear(visualResultScreenUiState.value.height,
             visualResultScreenUiState.value.currentLocationForecastData?.data?.air_pressure_at_sea_level ?: 0.0,
             visualResultScreenUiState.value.currentLocationForecastData?.data?.air_temperature ?: 0.0
         )
 
-        _visualResultScreenUiState.update { currentUiState ->
-            currentUiState.copy(maxWindSpeed = maxWindSpeed, maxWindShear = maxWindShear)
+        if (!launch) {
+            _visualResultScreenUiState.update { currentUiState ->
+                currentUiState.copy(maxWindSpeed = maxWindSpeed, maxWindShear = maxWindShear)
+            }
         }
+
         val result = when {
-            (lfwData?.wind_speed_of_gust?.compareTo(CRITICAL_WIND_GUST) ?: -1) > 0 -> 2  // TODO: Vi har ikke gust-data utenfor norge, eller langt frem i tid
+            (lfwData?.wind_speed_of_gust?.compareTo(CRITICAL_WIND_GUST) ?: -1) > 0 -> 2
             (maxWindSpeed?.compareTo(CRITICAL_WIND_ALTITUDE) ?: -1) > 0 -> 2
             (maxWindShear?.compareTo(CRITICAL_WIND_SHEAR) ?: -1) > 0 -> 2
             (lfwData?.wind_speed_of_gust?.compareTo(CRITICAL_WIND_GUST_80) ?: -1) > 0 -> 1
@@ -238,13 +210,14 @@ class ResultScreenViewModel: ViewModel() {
 
     private fun checkSightCondition(lfwData: LocationForecastWeatherData?): Int {
         /*
-          Checks whether wind values are within limits
+          Checks whether sight values are within limits
 
           arguments:
               lfwData: LocationForecastWeatherData-instance of the given time and coordinates
 
           returns:
-              Boolean
+              Int - 0 means condition is fulfilled; 2 means condition is not fulfilled; 1 means
+              condition is not fulfilled, but within 20% of limit value
         */
         return when {
             (lfwData?.cloud_area_fraction_high?.compareTo(CRITICAL_CLOUDCOVER_HIGHALT) ?: 1) > 0 -> 2
@@ -265,11 +238,12 @@ class ResultScreenViewModel: ViewModel() {
               lfwData: LocationForecastWeatherData-instance of the given time and coordinates
 
           returns:
-              Boolean
+              Int - 0 means condition is fulfilled; 2 means condition is not fulfilled; 1 means
+              condition is not fulfilled, but within 20% of limit value
         */
         return when {
-            (lfwData?.precipitation_amount?.compareTo(CRITICAL_PRECIPITATION) ?: -1) > 0 -> 2 // TODO: Vi har ikke precipitation-data langt frem i tid
-            (lfwData?.precipitation_amount?.compareTo(CRITICAL_PRECIPITATION_80) ?: -1) > 0 -> 1 // TODO: Vi har ikke precipitation-data langt frem i tid
+            (lfwData?.precipitation_amount?.compareTo(CRITICAL_PRECIPITATION) ?: -1) > 0 -> 2
+            (lfwData?.precipitation_amount?.compareTo(CRITICAL_PRECIPITATION_80) ?: -1) > 0 -> 1
             else -> 0
         }
     }
@@ -282,7 +256,8 @@ class ResultScreenViewModel: ViewModel() {
               lfwData: LocationForecastWeatherData-instance of the given time and coordinates
 
           returns:
-              Boolean
+              Int - 0 means condition is fulfilled; 2 means condition is not fulfilled; 1 means
+              condition is not fulfilled, but within 20% of limit value
         */
         return when {
             (lfwData?.relative_humidity?.compareTo(CRITICAL_AIR_HUMIDITY) ?: 1) > 0 -> 2
@@ -293,7 +268,7 @@ class ResultScreenViewModel: ViewModel() {
         }
     }
 
-    fun findMaximumAirWindSpeed(height: Double, P_b: Double, t_b: Double): Double? {
+    private fun findMaximumAirWindSpeed(height: Double, P_b: Double, t_b: Double): Double? {
         /*
          Finds the maximum wind speed value below a given height value.
 
@@ -310,7 +285,7 @@ class ResultScreenViewModel: ViewModel() {
             ?.maxOfOrNull { it.wind }
     }
 
-    fun findMaximumWindShear(height: Double, P_b: Double, t_b: Double): Double? {/*
+    private fun findMaximumWindShear(height: Double, P_b: Double, t_b: Double): Double? {/*
          Finds the maximum wind shear value below a given height value.
 
          arguments:
@@ -334,10 +309,12 @@ class ResultScreenViewModel: ViewModel() {
     fun fetchLaunchWindows() {
         updateLoading(true)
         val updatedLaunchWindows: MutableList<LaunchWindow> = mutableListOf()
-        Log.d("Forecast data", "This is the size: ${visualResultScreenUiState.value.locationForecastData?.size}")
         visualResultScreenUiState.value.locationForecastData?.forEach {
             if (
-                (checkWindCondition(it.data) == 0)&&
+                (checkWindCondition(it.data, // NOTE: Currently does not check windspeed and -shear
+                                             // values
+                    launch = true
+                    ) == 0)&&
                 (checkPrecipitationCondition(it.nexthourdata) == 0)&&
                 (checkAirCondition(it.data) == 0)
             &&(checkSightCondition(it.data) == 0))
@@ -348,7 +325,8 @@ class ResultScreenViewModel: ViewModel() {
                         goodConditionsContainerLight,
                         onGoodConditionsContainerLight)
                 )
-            } else if ((checkWindCondition(it.data) == 2)||
+            } else if ((checkWindCondition(it.data,
+                launch = true) == 2)||
                 (checkPrecipitationCondition(it.nexthourdata) == 2)||
                 (checkAirCondition(it.data) == 2)||
                 (checkSightCondition(it.data) == 2))
@@ -373,12 +351,10 @@ class ResultScreenViewModel: ViewModel() {
         _visualResultScreenUiState.update {
             it.copy(launchWindowsData = updatedLaunchWindows)
         }
-        Log.d("LaunchWindowData fetching","Fetched; ${updatedLaunchWindows.size} , ${visualResultScreenUiState.value.launchWindowsData?.size}")
         updateLoading(false)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun getCurrentGribData(lat: Double, lon: Double, time: String){
+    private fun getCurrentGribData(lat: Double, lon: Double, time: String){
         _visualResultScreenUiState.update { currentUiState ->
             val gribPoints = getGribDataFromCoordinates(lat, lon, getGribData(time))
             currentUiState.copy(isobaricGribData = getGribData(time), currentGribData = gribPoints)
@@ -386,8 +362,7 @@ class ResultScreenViewModel: ViewModel() {
         checkLaunchConditions()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun fetchLocationForecast(lat: Double, lon: Double, alt: Int, time: String) {
+    private fun fetchLocationForecast(lat: Double, lon: Double, alt: Int, time: String) {
         /*
         Fetch LocationForecast-data through repository, and update uistate accordingly.
         arguments:
@@ -399,7 +374,6 @@ class ResultScreenViewModel: ViewModel() {
 
         viewModelScope.launch {
             try {
-                Log.d("Result size", "DDDDDDDDDD ${lat}")
                 val result = weatherDataRepository.fetchDataFromLocationForecastAPI(lat, lon, alt)
                 var first = result.parsedLocationForecastData.first()
                 for (element in result.parsedLocationForecastData) {
@@ -418,31 +392,31 @@ class ResultScreenViewModel: ViewModel() {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun convertDateToEpochMilli(dateString: String): Long {
+        /*
+        Converts string of date to milliseconds passed between 1. Jan 1970 to that date
+        */
         val newDateString = dateString + "T00:00:00"
         val correctDateString = LocalDateTime.parse(newDateString)
-        Log.d("LaunchWindows", "Convert: ${correctDateString}")
+        Log.d("LaunchWindows", "Convert: $correctDateString")
         val dateAtMidnight = correctDateString.toLocalDate().atStartOfDay()
-        val searchdate =
-            dateAtMidnight.toInstant(ZoneOffset.UTC).toEpochMilli()
-        return searchdate
+        return dateAtMidnight.toInstant(ZoneOffset.UTC).toEpochMilli()
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun findClosestGribData(target: String): String {
+    private fun findClosestGribData(target: String): String {
+        /*
+        Finds the nearest time for the given target of the following: 00, 03, 06, 09, 12, 15, 18, 21
+        */
         val possTimes = calculateTimesToFetch()
         val formatter = DateTimeFormatter.ISO_DATE_TIME
         val targetDateTime = LocalDateTime.parse(target, formatter)
 
-        // Placeholder for the best match
         var closestTime: LocalDateTime? = null
         var minDifference = Int.MAX_VALUE
 
         for (time in possTimes) {
             val possibleTime = LocalDateTime.parse(time, formatter)
-            // Ensure comparison happens on the same date
             if (possibleTime.toLocalDate() == targetDateTime.toLocalDate()) {
                 val difference = abs(possibleTime.toLocalTime().toSecondOfDay() - targetDateTime.toLocalTime().toSecondOfDay())
                 if (difference < minDifference) {

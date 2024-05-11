@@ -1,9 +1,9 @@
-# [Appnavn her]
+# Liftoff
 
 ## Hvordan kjøre appen
 ### Emulering med Android Studio
 1. Åpne prosjektet i Android Studio.
-2. Konfigurer en emulator eller koble til en fysisk enhet.
+2. Konfigurer en emulator eller koble til en fysisk enhet. Sørg for at emulatoren eller enheten har API-nivå 26 (Android 8.0) eller høyere for at den skal kunne kjøre. 
 3. Klikk på "Run" for å bygge og kjøre appen på emulatoren eller enheten.
 
 
@@ -18,7 +18,8 @@
 - [Google Play Services Maps](https://developers.google.com/maps/documentation/android-sdk/start)
 - [Coroutines](https://developer.android.com/topic/libraries/architecture/coroutines#viewmodelscope)
 - [Jetpack Viewmodel](https://developer.android.com/develop/ui/compose/libraries#viewmodel)
+- [Mockito](https://site.mockito.org/)
+- [Kotlin Serialization](https://kotlinlang.org/docs/serialization.html)
+- [Material Design 3](https://m3.material.io/)
 
-## Kjente problemer med appen
 
-## Oppklaringer

@@ -1,12 +1,10 @@
 package no.uio.ifi.in2000.prosjekt51
 
 import no.uio.ifi.in2000.prosjekt51.ui.map.MapScreen
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
@@ -29,7 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
-import com.example.compose.AppTheme
+import no.uio.ifi.in2000.prosjekt51.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,7 +47,6 @@ import java.time.LocalDateTime
 class MainActivity : ComponentActivity() {
     private lateinit var favoriteViewModel: FavoriteViewModel
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preloadGribData()
@@ -86,16 +82,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App(
     navController: NavHostController = rememberNavController(),
-    resultScreenViewModel: ResultScreenViewModel = remember { ResultScreenViewModel() } // Lagrer ViewModel som et husket verdi
+    resultScreenViewModel: ResultScreenViewModel = remember { ResultScreenViewModel() }
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // Observerer endringer i feilmeldingen
-    val errorMessageState = resultScreenViewModel.visualResultScreenUiState.collectAsState()
 
     Scaffold (
         bottomBar = {
@@ -155,16 +147,15 @@ fun App(
                                 onNavigateToHomeScreen = {
                                     navController.navigate("searchScreen/$DEFAULT_COORDS/$DEFAULT_COORDS")
                                 },
-                                onNavigateToResultScreen = { latitude: String, longitude: String, date: Long, hour: String ->
-                                    navController.navigate("resultScreen/$latitude/$longitude/$date/$hour/$height")
+                                onNavigateToResultScreen = { funcLatitude: String, funcLongitude: String, funcDate: Long, funcHour: String ->
+                                    navController.navigate("resultScreen/$funcLatitude/$funcLongitude/$funcDate/$funcHour/$height")
                                 },
                                 resultScreenViewModel = resultScreenViewModel,
                                 navController = navController,
                                 snackbarHostState = snackbarHostState,
                                 onRetryClicked = {
                                     navController.popBackStack()
-                                },
-                                errorMessage = errorMessageState.value.error
+                                }
                             )
                         }
                     }
@@ -178,7 +169,7 @@ fun App(
                     }
 
                     composable("settingsScreen") {
-                        SettingsScreen(navController)
+                        SettingsScreen()
                     }
                 }
             }
@@ -186,7 +177,6 @@ fun App(
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 private fun preloadGribData() {
     val timesToFetch = calculateTimesToFetch()
 
@@ -217,7 +207,6 @@ private fun preloadGribData() {
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun calculateTimesToFetch(): List<String> {
     val possibleTimes = listOf("00", "03", "06", "09", "12", "15", "18", "21")
     val currentHour = LocalDateTime.now().hour - 3
