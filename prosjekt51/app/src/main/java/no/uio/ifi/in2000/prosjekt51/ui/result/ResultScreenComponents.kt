@@ -2,8 +2,8 @@ package no.uio.ifi.in2000.prosjekt51.ui.result
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +26,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -77,8 +81,17 @@ fun SummaryDisplay(
 
 
 @Composable
-fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribPoint>?, groundPressure: Double?, groundTemp: Double?){
+fun WindDisplay(
+    exitFunc: () -> Unit,
+    data: TimeAndData?,
+    gribPoints: List<GribPoint>?,
+    groundPressure: Double?,
+    groundTemp: Double?
+) {
     val safeGribPoints = gribPoints ?: emptyList()
+    var expanded by rememberSaveable { mutableStateOf(false) }
+
+    val dynamicHeight = if (expanded) (safeGribPoints.size * 160 + 20).dp else 420.dp
 
     Box(modifier = Modifier.fillMaxSize()) {
         IconButton(
@@ -92,30 +105,38 @@ fun WindDisplay(exitFunc: () -> Unit, data: TimeAndData?, gribPoints: List<GribP
 
         Column(modifier = Modifier
             .padding(top = 48.dp)
-            .height(500.dp)) {
-            val gusttext = data?.data?.wind_speed_of_gust
-            Text(
-                buildAnnotatedString {
-                    if (gusttext != null) {
-                        append("Wind speed of gust: $gusttext m/s")
-                    } else {
-                        append("Wind speed of gust: ")
-                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // 0xFFFFA500 is the ARGB code for orange
-                            append("N/A")
+            .padding(horizontal = 4.dp)
+            .height(dynamicHeight)) {
+
+            NullableText(value = data?.data?.wind_speed_of_gust, text = "Wind speed of gust:", unit = "m/s")
+
+            if (safeGribPoints.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .clickable { expanded = !expanded }
+                        .border(2.dp, color = MaterialTheme.colorScheme.secondary)
+                        .padding(8.dp)
+                ) {
+                    Column {
+                        safeGribPoints.take(if (expanded) safeGribPoints.size else 2).forEach {
+                            GribPointItems(it, groundPressure, groundTemp)
                         }
-                        append(" m/s")
+                        Text(
+                            text = if (expanded) "Show less..." else "Show more...",
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 4.dp),
+                        )
                     }
-                },
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            safeGribPoints.forEach {
-                Log.d("Gribdata","Displayed")
-                GribPointItems(it, groundPressure, groundTemp)
+                }
             }
         }
     }
 }
+
+
+
+
 
 @Composable
 fun SightDisplay(exitFunc: () -> Unit, data: TimeAndData?){
@@ -132,38 +153,12 @@ fun SightDisplay(exitFunc: () -> Unit, data: TimeAndData?){
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(top = 48.dp)) {
-            Text(
-                text = "Cloud area fraction (high): ${data?.data?.cloud_area_fraction_high} %",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Cloud area fraction (medium): ${data?.data?.cloud_area_fraction_medium} %",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Cloud area fraction (low): ${data?.data?.cloud_area_fraction_low} %",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Fog area fraction: ${data?.data?.fog_area_fraction} %",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Cloud area fraction: ${data?.data?.cloud_area_fraction} %",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "UV-index (clear sky): ${data?.data?.ultraviolet_index_clear_sky} ",
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .testTag("UV")
-            )
+            NullableText(value = data?.data?.cloud_area_fraction_high, text = "Cloud area fraction (high):", unit = "%")
+            NullableText(value = data?.data?.cloud_area_fraction_medium, text = "Cloud area fraction (medium):", unit = "%")
+            NullableText(value = data?.data?.cloud_area_fraction_low, text = "Cloud area fraction (low):", unit = "%")
+            NullableText(value = data?.data?.cloud_area_fraction, text = "Cloud area fraction:", unit = "%")
+            NullableText(value = data?.data?.fog_area_fraction, text = "Fog area fraction:", unit="%")
+            NullableText(value = data?.data?.ultraviolet_index_clear_sky, text = "UV index (Clear sky):", testTag = "UV")
         }
     }
 }
@@ -179,23 +174,7 @@ fun PrecipitationDisplay(exitFunc: () -> Unit, data: TimeAndData?){
         ) {
             Icon(Icons.Filled.Close, contentDescription = "Close")
         }
-        val precipitationtext = data?.nexthourdata?.precipitation_amount
-
-        Text(
-            buildAnnotatedString {
-                if (precipitationtext != null) {
-                    append("Precipitation amount: $precipitationtext mm")
-                } else {
-                    append("Precipitation amount: ")
-                    withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
-                        append("N/A")
-                    }
-                    append(" mm")
-                }
-            },
-            fontSize = 20.sp,
-            modifier = Modifier.padding(16.dp)
-        )
+        NullableText(value = data?.nexthourdata?.precipitation_amount, text = "Precipitation amount:", unit = "mm")
     }
 }
 
@@ -214,36 +193,12 @@ fun AirDisplay(exitFunc: () -> Unit, data: TimeAndData?){
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(top = 48.dp)) {
-            Text(
-                text = "Dew point temperature: ${data?.data?.dew_point_temperature} °C",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Relative humidity: ${data?.data?.relative_humidity} %",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Air temperature: ${data?.data?.air_temperature} °C",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Air temperature (10th percentile): ${data?.data?.air_temperature_percentile_10} °C",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Air temperature (90th percentile): ${data?.data?.air_temperature_percentile_90} °C",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Air pressure: ${data?.data?.air_pressure_at_sea_level} hPa",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(16.dp)
-            )
+            NullableText(value = data?.data?.dew_point_temperature, text = "Dew point temperature:", unit = "°C")
+            NullableText(value = data?.data?.relative_humidity, text = "Relative humidity:", unit = "%")
+            NullableText(value = data?.data?.air_temperature, text = "Air temperature:", unit = "°C")
+            NullableText(value = data?.data?.air_temperature_percentile_10, text = "Air temperature (10th percentile):", unit = "°C")
+            NullableText(value = data?.data?.air_temperature_percentile_90, text = "Air temperature (90th percentile):", unit = "°C")
+            NullableText(value = data?.data?.air_pressure_at_sea_level, text = "Air pressure:", unit = "hPa")
         }
     }
 }
@@ -324,50 +279,10 @@ fun WindSection(enterFunc: () -> Unit, data: TimeAndData?, visualResultScreenUiS
             if (lat > LAT_NORTH_LIMIT || lat < LAT_SOUTH_LIMIT || lon > LON_EAST_LIMIT || lon < LON_WEST_LIMIT) {
                 Text(text = "Note: Wind data may not be available for coordinates outside southern Norway", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.tertiary)
             }
-            val gusttext = data?.data?.wind_speed_of_gust
-            val speedtext = visualResultScreenUiState.maxWindSpeed
-            val sheartext = visualResultScreenUiState.maxWindShear
-            Text(
-                buildAnnotatedString {
-                    if (gusttext != null) {
-                        append("Wind speed of gust: $gusttext m/s")
-                    } else {
-                        append("Wind speed of gust: ")
-                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // 0xFFFFA500 is the ARGB code for orange
-                            append("N/A")
-                        }
-                        append(" m/s")
-                    }
-                }
-            )
+            NullableText(value = data?.data?.wind_speed_of_gust, text = "Wind speed of gust:", unit = "m/s", small = true)
+            NullableText(value = visualResultScreenUiState.maxWindSpeed, text = "Maximum wind-speed:", unit = "m/s", small = true)
+            NullableText(value = visualResultScreenUiState.maxWindShear, text = "Maximum wind-shear:", unit = "m/s", small = true)
 
-            Text(
-                buildAnnotatedString {
-                    if (speedtext != null) {
-                        append("Maximum wind-speed: $speedtext m/s")
-                    } else {
-                        append("Maximum wind-speed: ")
-                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
-                            append("N/A")
-                        }
-                        append(" m/s")
-                    }
-                },
-            )
-
-            Text(
-                buildAnnotatedString {
-                    if (sheartext != null) {
-                        append("Maximum wind-shear: $sheartext m/s")
-                    } else {
-                        append("Maximum wind-shear: ")
-                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
-                            append("N/A")
-                        }
-                        append(" m/s")
-                    }
-                },
-            )
         }
         Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
     }
@@ -384,9 +299,9 @@ fun SightSection(enterFunc: () -> Unit, data: TimeAndData?) {
         onClick = { enterFunc() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Cloud area fraction (high): ${data?.data?.cloud_area_fraction_high} %")
-            Text("Cloud area fraction (medium): ${data?.data?.cloud_area_fraction_medium} %")
-            Text("Cloud area fraction (low): ${data?.data?.cloud_area_fraction_low} %")
+            NullableText(value = data?.data?.cloud_area_fraction_high, text = "Cloud area fraction (high):", unit = "%", small = true)
+            NullableText(value = data?.data?.cloud_area_fraction_medium, text = "Cloud area fraction (medium):", unit = "%", small = true)
+            NullableText(value = data?.data?.cloud_area_fraction_low, text = "Cloud area fraction (low):", unit = "%", small = true)
         }
         Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
     }
@@ -402,21 +317,8 @@ fun PrecipitationSection(enterFunc: () -> Unit, data: TimeAndData?) {
         shape = RectangleShape,
         onClick = { enterFunc() }
     ) {
-        val precipitationtext = data?.nexthourdata?.precipitation_amount
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                buildAnnotatedString {
-                    if (precipitationtext != null) {
-                        append("Precipitation amount: $precipitationtext mm")
-                    } else {
-                        append("Precipitation amount: ")
-                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
-                            append("N/A")
-                        }
-                        append(" mm")
-                    }
-                },
-            )
+            NullableText(value = data?.nexthourdata?.precipitation_amount, text = "Precipitation amount:", unit = "mm", small = true)
             Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
         }
     }
@@ -432,10 +334,11 @@ fun AirSection(enterFunc: () -> Unit, data: TimeAndData?) {
         shape = RectangleShape,
         onClick = { enterFunc() }
     ) {
-        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-            Text("Dew point temperature: ${data?.data?.dew_point_temperature} °C")
-            Text("Relative humidity: ${data?.data?.relative_humidity} %")
-
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()) {
+            NullableText(value = data?.data?.dew_point_temperature, text = "Dew point temperature:", unit = "°C", small = true)
+            NullableText(value = data?.data?.relative_humidity, text = "Relative humidity:", unit = "%", small = true)
         }
         Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Show more...")
     }
@@ -525,4 +428,27 @@ fun LaunchWindows(
             Spacer(modifier = Modifier.size(16.dp)) // Padding between days
         }
     }
+}
+
+
+@Composable
+fun NullableText(value: Double?, text: String, unit: String? = null, small: Boolean = false, testTag: String = "") {
+    val fontSize = if (!small) 20.sp else 16.sp
+    val modifier = if (!small) Modifier.padding(16.dp).testTag(testTag) else Modifier.padding(0.dp).testTag(testTag)
+
+    Text(
+        buildAnnotatedString {
+            if (value != null) {
+                append("$text $value ${unit ?: ""}")
+            } else {
+                append("$text ")
+                withStyle(style = SpanStyle(color = Color(0xFFFFA500))) {
+                    append("N/A")
+                }
+                append(" ${unit ?: ""}")
+            }
+        },
+        fontSize = fontSize,
+        modifier = modifier
+    )
 }
