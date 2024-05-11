@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import no.uio.ifi.in2000.prosjekt51.ui.theme.ThemeManager
 
 @ExperimentalMaterial3Api
@@ -70,4 +69,3 @@ fun SettingsItem(onClick: () -> Unit, name: String, modifier: Modifier = Modifie
         }
     }
 }
-
