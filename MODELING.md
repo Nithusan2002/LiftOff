@@ -45,16 +45,18 @@ sequenceDiagram
 **Postbetingelse**: Brukeren har blitt presentert med den ønskede informasjonen for det valgte stedet, tidspunktet og høyden, sammen med et resultat som indikerer om det er mulig eller ikke å skyte opp en rakett. <br>
 
 **Hovedflyt**:
-<ol>1. Bruker velger et sett med koordinater og høyde. Trykker på søk.</ol>
-<ol>3. Systemet henter værdata.</ol>
-<ol>4. Returnerer værdataene for de angitte søkekriteriene.</ol>
-<ol>5. Viser et hake-symbol hvis det er mulig å skyte opp en rakett.</ol>
+<ol>1. Bruker velger et sett med koordinater og høyde hvis ønsket. Trykker på søk.</ol>
+<ol>2. Systemet henter værprognose.</ol>
+<ol>3. Returnerer værdataene for de angitte søkekriteriene og presenterer dem for bruker.</ol>
+<ol>4. Viser et hake-ikon for å vise at værforholdet er egnet for oppskyting.</ol>
 
 **Alternativ flyt**: <br>
-<ol>3.1 Systemet mislykkes i å hente data</ol>
-<ol>3.2 Returnerer feilmelding</ol>
-<ol>3.3 Viser snackbar til brukeren</ol>
-<ol>5.1 Viser et X-merke hvis det ikke er mulig å skyte opp en rakett</ol>
+<ol>2.1 Systemet mislykkes i å hente data</ol>
+<ol>2.2 Returnerer feilmelding</ol>
+<ol>2.3 Viser snackbar til brukeren</ol>
+<ol>4.1 Viser et X-ikon hvis en eller flere verdier er mer enn 20% over grenseverdiene.</ol>
+<ol>4.1.1 Viser en gul varseltrekant hvis en eller flere verdier er mindre enn 20% over grenseverdiene.</ol>
+
 
 # Aktivitetsdiagram
 ``` mermaid
