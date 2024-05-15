@@ -1,5 +1,3 @@
-Må endres
-
 # Arkitekturbeskrivelse
 
 ## Introduksjon
