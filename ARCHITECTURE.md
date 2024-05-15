@@ -3,28 +3,28 @@ Må endres
 # Arkitekturbeskrivelse
 
 ## Introduksjon
-Dette dokumentet gir en oversikt over arkitekturen som er benyttet i appen. Det inkluderer beskrivelser av viktige objektorienterte prinsipper, designmønstre og teknologier som er brukt i løsningen.
+Denne filen gir en oversikt over arkitekturen som vi har benyttet i Liftoff. Det inkluderer forklaringer av viktige objektorienterte prinsipper, designmønstre og teknologier som er brukt i appen vår.
 
 ## Objektorienterte prinsipper
-Vi har lagt vekt på å følge viktige objektorienterte prinsipper som lav kobling og høy kohesjon i vår løsning.
+Vi har som beskrevet i oppgaven, lagt vekt på å følge viktige objektorienterte prinsipper som lav kobling og høy kohesjon.
 
-- **Lav kobling**: Komponentene i systemet er løst koblet fra hverandre, noe som betyr at endringer i en komponent ikke har en uforholdsmessig stor innvirkning på andre komponenter. Dette oppnås gjennom bruk av grensesnitt og vi tar i bruk et repository for å hente data og presentere det til View. 
+- **Lav kobling**: Komponentene vi har i systemet er løst koblet fra hverandre. Dette betyr at endringer i en komponent ikke har en stor innvirkning på andre komponenter i systemet. Dette oppnås gjennom bruk av grensesnitt og når vi tar i bruk et repository for å hente data og presentere det til View. 
   
-- **Høy kohesjon**: Hver komponent eller klasse har et klart definert ansvar og fokuserer på å oppfylle dette ansvaret på en effektiv måte. Dette bidrar til økt forståelse og vedlikeholdbarhet av koden. Vi har strukturert koden med ulike pakker for å følge MVVM mønsteret. Vi har delt inn i model, data, og ui pakker som der igjen er delt inn i mindre pakker der hver fil har et definert ansvar. 
+- **Høy kohesjon**: Hvert komponent eller klasse har et klart definert ansvar og fokuserer kun på å oppfylle dette på best mulig måte. Dette sørger for økt forståelse og vedlikeholdbarhet av koden. Vi har organisert koden med ulike pakker for å følge Model-View-ViewModel mønsteret. Vi har delt inn i model, data, og ui pakker som der igjen er delt inn i mindre pakker der hver fil har et klart definert ansvar. 
 
 ## Designmønstre
-Vi har benyttet oss av designmønstre som MVVM (Model-View-ViewModel) og UDF (Unified Data Flow) for å organisere og strukturere koden på en hensiktsmessig måte.
+Vi har benyttet oss av designmønstre som MVVM (Model-View-ViewModel) og UDF (Unified Data Flow) for å strukturere koden.
 
 - **MVVM**: MVVM-mønsteret er brukt for å separere brukergrensesnittet (View) fra forretningslogikken (ViewModel) og data (Model). Dette gjør det enklere å teste og vedlikeholde koden, samtidig som det gir en mer skalerbar og fleksibel arkitektur. Ansvaret til View er å presentere state og muligjøre brukerinteraksjon i tillegg til å observere state i viewmodel. ViewModel sitt ansvar er å presentere state til view, og også oppdatere state. Dette innebærer blant annet å starte henting av data og også reagere på brukerinteraksjon som gjør at vi vil endre state. Model sitt ansvar er å hente og behandle data, og presentere denne dataen til viewmodel.
 
 - **UDF**: UDF (Unified Data Flow) er et mønster som fokuserer på å ha en enveis dataflyt gjennom applikasjonen vår. Dette bidrar til å redusere kompleksiteten og gjøre det lettere å forstå hvordan data flyter gjennom systemet. Dette fungerer ved at tilstander flyter ned og hendelser flyter opp. Brukergrensesnittet genererer en hendelse og sender den oppover til state som deretter kan endre den, eller ikke, også sendes tilstanden ned igjen til UI. 
 
 ## Løsningen for drift, vedlikehold og videreutvikling
-For lesere som skal jobbe med drift, vedlikehold og videreutvikling av løsningen, gir vi følgende oversikt over teknologier, arkitektur og API-nivå som er brukt:
+For brukere som skal jobbe med drift, vedlikehold og videreutvikling av løsningen, gir vi følgende oversikt over teknologier, arkitektur og API-nivå som er brukt:
 
-- **Teknologier**: Vi har benyttet oss av Kotlin som hovedspråk for utviklingen av Android-appen og Jetpack Compose for å bygge UI-en. Vi bruker også en Google Maps SDK for å tilby karttjeneste i appen.
+- **Teknologier**: Vi har hovedsaklig benyttet oss av Kotlin som hovedspråk i appen og Jetpack Compose for å bygge UI-et. Vi bruker også en Google Maps SDK for å tilby brukerne bruk av kart i appen.
 
-- **Arkitektur**: Appen følger en MVVM-arkitektur (Model-View-ViewModel) for å separere brukergrensesnittet fra forretningslogikken og data. Den har også en enveis dataflyt gjennom hele applikasjonen i tråd med UDF-mønsteret.
+- **Arkitektur**: Appen følger en MVVM-arkitektur (Model-View-ViewModel) for å separere brukergrensesnittet fra forretningslogikken og data. Den har også en enveis dataflyt gjennom hele applikasjonen for å oppfylle kravet om UDF. 
 
 - **API**: Vi har brukt API-ene LocationForecast og IsobaricGrib fra MET. Locationforecast går gjennom Ifi-proxyen og IsobaricGrib hentes via en backend-server for å parse data.
 
