@@ -36,7 +36,9 @@ sequenceDiagram
     end
 ```
     
-# Use Case 1
+# Use Case
+
+<img width="422" alt="image" src="https://media.github.uio.no/user/10213/files/928d49ee-d4e4-45f6-a573-9f6d303ac8e1">
 
 ## Tekstlig beskrivelse av use case
 
