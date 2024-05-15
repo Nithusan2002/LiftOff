@@ -1,6 +1,6 @@
 # Introduksjon
 
-Dette dokumentet gir en detaljert beskrivelse av modellene som er utviklet for appen vår, sammen med tilhørende diagrammer. Modellene og diagrammene er generert ved hjelp av Mermaid, som er et verktøy som lar oss representere modellene på en visuelt tiltalende måte.
+Denne filen gir en god oversikt og beskrivelse av modellene vi har utviklet for appen vår Liftoff. Modellene og diagrammene er laget ved hjelp av Mermaid, som er et verktøy som lar oss visualisere modellene på en god måte. 
 
 # Sekvensdiagram 
 
@@ -18,7 +18,7 @@ sequenceDiagram
     ViewModel->>WeatherDataRepository: fetchData(lat, lon, alt, date, hour)
     WeatherDataRepository->>DataSources: fetchData(lat, lon, alt, date, hour)
 
-    alt Sukksessful fetching
+    alt Suksessrik fetching
         DataSources -->> WeatherDataRepository: Data
         WeatherDataRepository -->> ViewModel: Data
         ViewModel -->> UI: Data
@@ -29,7 +29,7 @@ sequenceDiagram
             ViewModel -->> UI: Viser data og X symbol 
         end
 
-    else Ikke suksessfull fetching
+    else Ikke suksessrik fetching
         DataSources -->> WeatherDataRepository: Feil
         WeatherDataRepository -->> ViewModel: Feil
         ViewModel -->>UI: ShowSnackbar(Feilmelding)
@@ -66,8 +66,8 @@ flowchart TD
     Start --> B[Skriver inn koordinater og høyde]
     B --> E[Henter værdata]
     E --> P{ }
-    P ---> |Suksessful fetching| G[Viser data] --> H{ }
-    P --> |Ikke suksessful fetching| T[Viser feilmelding]
+    P ---> |Suksessrik fetching| G[Viser data] --> H{ }
+    P --> |Ikke suksessrik fetching| T[Viser feilmelding]
     T --> Q{ } --> Avslutter --> Slutt
     Q --> |Prøver igjen| Start
     H --> |Godkjent for utskytning| Slutt
