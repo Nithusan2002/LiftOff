@@ -1,5 +1,6 @@
-# Liftoff
-
+# LIFTOFF
+Liftoff skal gi full oversikt over værforhold på en brukerbestemt posisjon og tid. Appen skal presentere værdata som er relevant for å
+avgjøre om det er forsvarlig å gjennomføre en rakettoppskytning eller ei.
 ## Hvordan kjøre appen
 ### Emulering med Android Studio
 1. Åpne prosjektet i Android Studio.
